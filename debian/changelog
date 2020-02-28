@@ -1,0 +1,11 @@
+ucaresystem-core (4.4.0) trusty; urgency=high
+
+  * Added pkexec, check if reboot is required, fixed Debian Jessie issue
+  
+ -- Salih Emin <salih-emin@ubuntu.com>  Wed, 25 Jan 2018 14:45:44 +0200
+
+ucaresystem-core (4.5.0) trusty; urgency=high
+
+  * Rename exceutable to ucaresystem, proper policy, use x-teminal-emulator  
+  
+ -- Giannis Tsgakatakis <jtsagata@gmail.com>  Sat, 29 Feb 2020 00:01:54 +0200

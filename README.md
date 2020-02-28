@@ -16,7 +16,7 @@
 	Author : Salih Emin
 	Email  : salihemin (at) about.me
 	Date   : 25-01-2018
-	Version: 4.4.0
+	Version: 4.5.0
 	System : Ubuntu or Debian derivatives (Not tested every flavor)
 	WebSite: http://utappia.org
 
@@ -39,21 +39,21 @@ In summary, ucaresystem Core automatically performs the following maintenance pr
 
 Default system updates and maintenace for Ubuntu / debian / Linux Mint (and derivatives) :
 
-	sudo ucaresystem-core
+	sudo ucaresystem
 
 When the next available release is availabe for Ubuntu (and official flavors) you can upgrade with '-u':
 	
-	sudo ucaresystem-core -u
+	sudo ucaresystem -u
 
 If you are a tester, developer, or simply an enthusiast, you can upgrade to the next development cycle of Ubuntu (and official flavors) with '-d':
 
-	sudo ucaresystem-core -d
+	sudo ucaresystem -d
 
 If your Ubuntu (and official flavors) has reached the EOL support you can upgrade to the next supported release with '-eol':
 	
-	sudo ucaresystem-core -eol
+	sudo ucaresystem -eol
 
 For information about the availabe parameters, start ucaresystem-core with '-h' parameter :
 
-	sudo ucaresystem-core -h
+	sudo ucaresystem -h
 

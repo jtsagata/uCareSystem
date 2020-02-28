@@ -1,0 +1,26 @@
+#!/usr/bin/make -f
+
+clean:
+	@# Do nothing
+
+build:
+	@# Do nothing
+
+binary:
+	rm -r debian/ucaresystem-core
+	mkdir -p debian/ucaresystem-core
+	mkdir -p debian/ucaresystem-core/usr/bin
+	mkdir -p debian/ucaresystem-core/usr/share/applications
+	mkdir -p debian/ucaresystem-core/usr/share/doc/ucaresystem-core
+	mkdir -p debian/ucaresystem-core/usr/share/icons
+	mkdir -p debian/ucaresystem-core/usr/share/polkit-1/actions
+	cp scripts/*        debian/ucaresystem-core/usr/bin/
+	cp assets/*.desktop debian/ucaresystem-core/usr/share/applications
+	cp assets/*.png     debian/ucaresystem-core/usr/share/icons
+	cp assets/*.policy  debian/ucaresystem-core/usr/share/polkit-1/actions
+	cp LICENSE          debian/ucaresystem-core/usr/share/doc/ucaresystem-core
+	cp README.md        debian/ucaresystem-core/usr/share/doc/ucaresystem-core
+	cp debian/changelog debian/ucaresystem-core/usr/share/doc/ucaresystem-core
+	gzip debian/ucaresystem-core/usr/share/doc/ucaresystem-core/changelog
+	dh_gencontrol
+	dh_builddeb

@@ -1,8 +1,9 @@
 [Desktop Entry]
+Name=uCareSystem
 Type=Application
-Name=uCareSystem Core
 Comment=All in one system maintenance
-Icon=ucaresystemicon
-Exec=launch-ucaresystemcore
+Comment[el]=Αναβάθμιση όλα σε ένα
+Icon=ucaresystem
+Exec=launch-ucaresystem
 Terminal=false
-Categories=PackageManager;
+Categories=GNOME;GTK;System;

@@ -1,6 +1,0 @@
-#!/bin/sh
-# uCareSystem Core Launcher
-# Copyright (c) 2017 Salih Emin. All rights reserved.
-# Use of this source code is governed by GPLv3 license that can be
-# found in the LICENSE file.
-uxterm -title 'uCareSystem Core' -hold -e ucaresystem-core

@@ -1,0 +1,5 @@
+debian/ucaresystem-core
+debian/ucaresystem-core.debhelper.log
+debian/ucaresystem-core.substvars
+packages
+TODO

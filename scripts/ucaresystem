@@ -1,4 +1,5 @@
-#!/usr/bin/pkexec /bin/bash
+#!/bin/bash
+
 set -e
 #
 #
@@ -25,15 +26,18 @@ DIST_CODENAME=$(lsb_release --codename | cut -f2)
 DATE=(date +%F_%T)
 UCARE_VERSION=(4.4.0)
 
-# Checking if the user has run the script with "sudo" or not
-if [[ $EUID -ne 0 ]] ; then
-    clear
-    echo ""
-    echo "uCareSystem Core must be run as root or with sudo. Now I will just exit..." 1>&2
-    echo ""
-    sleep 2
-    exit 1
-fi
+function CHECK_SUDO {
+	# Checking if the user has run the script with "sudo" or not
+	if [[ $EUID -ne 0 ]] ; then
+	    clear
+	    echo ""
+	    echo "uCareSystem Core must be run as root or with sudo. Now I will just exit..." 1>&2
+	    echo ""
+	    sleep 2
+	    exit 1
+	fi
+}
+
 function WELCOME_SCREEN {
 	clear
 	echo "_______________________________________________________"
@@ -277,21 +281,24 @@ function GOODBYE {
 # The main process starts
 while [ "$1" != "" ]; do
     case $1 in
-        -u | --upgrade )     WELCOME_SCREEN && MAINTENACE && UPGRADE_TO_NEXT_RELEASE
+        -u | --upgrade )     CHECK_SUDO && WELCOME_SCREEN && MAINTENACE && UPGRADE_TO_NEXT_RELEASE
                              exit
                                 ;;
-        -d | --development ) WELCOME_SCREEN && MAINTENACE && UPGRADE_TO_DEVEL_RELEASE
+        -d | --development ) CHECK_SUDO && WELCOME_SCREEN && MAINTENACE && UPGRADE_TO_DEVEL_RELEASE
                              exit
                                 ;;
         -h | --help )        SHOW_HELP
                              exit
                                 ;;
-        -eol | --end-of-life-upgrade ) UPGRADE_EOL_TO_NEXT
+        -eol | --end-of-life-upgrade ) CHECK_SUDO && UPGRADE_EOL_TO_NEXT
                              exit
                                 ;;
         * )                  SHOW_HELP
                              exit 1
     esac
 done
+
+
+
 ## If no parameter is given just do the regular maintenance
-WELCOME_SCREEN && MAINTENACE && GOODBYE
+CHECK_SUDO && WELCOME_SCREEN && MAINTENACE && GOODBYE
