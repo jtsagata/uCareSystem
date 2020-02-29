@@ -35,31 +35,37 @@ In summary, ucaresystem Core automatically performs the following maintenance pr
 - Deletes package configuration files from packages that have been uninstalled by you.
                                           
 ## Usage
-    sudo ucaresystem
-       -h, --help
-       Display help text and exit.  No other output is generated.
+```bash
+sudo ucaresystem
+```
+Comand line options
 
-       -n, --dyrun
-       Show only the commands, but do not modify the system
+```bash
+-h, --help
+Display help text and exit.  No other output is generated.
 
-       -s, --skip
-       Do not show the welcome banner, and do not pause.
+-n, --dyrun
+Show only the commands, but do not modify the system
 
-       -k, --nokernel
-       Do not remove old kernels.
+-s, --skip
+Do not show the welcome banner, and do not pause.
 
-       -u, --upgrade
-       Upgrade to next available release
+-k, --nokernel
+Do not remove old kernels.
 
-       -d, --development
-       Upgrade to a development release. For testers and developers only
+-u, --upgrade
+Upgrade to next available release
 
-       -e, --eol
-       If your Ubuntu (and official flavors) has reached the EOL support you can upgrade to the next supported  release.   This  option  is  for  Ubuntu
-       releases that have reached their EOL and the user wants to upgrade it to the next supported version.
+-d, --development
+Upgrade to a development release. For testers and developers only
 
-       -w, --wait
-       Press ENTER to end the program. For the "gui" version
-  
-       -m, --maintenance
-              Do normal maintenance jobs. The default action id no option is given.
+-e, --eol
+If your Ubuntu (and official flavors) has reached the EOL support you can upgrade to the next supported  release.   This  option  is  for  Ubuntu
+releases that have reached their EOL and the user wants to upgrade it to the next supported version.
+
+-w, --wait
+Press ENTER to end the program. For the "gui" version
+
+-m, --maintenance
+      Do normal maintenance jobs. The default action id no option is given.
+```
