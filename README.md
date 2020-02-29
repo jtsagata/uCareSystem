@@ -37,23 +37,27 @@ In summary, ucaresystem Core automatically performs the following maintenance pr
                                           
 ## Usage
 
-Default system updates and maintenace for Ubuntu / debian / Linux Mint (and derivatives) :
+       -h, --help
+       Display help text and exit.  No other output is generated.
 
-	sudo ucaresystem
+       -n, --dyrun
+       Show only the commands, but do not modify the system
 
-When the next available release is availabe for Ubuntu (and official flavors) you can upgrade with '-u':
-	
-	sudo ucaresystem -u
+       -s, --skip
+       Do not show the welcome banner, and do not pause.
 
-If you are a tester, developer, or simply an enthusiast, you can upgrade to the next development cycle of Ubuntu (and official flavors) with '-d':
+       -k, --nokernel
+       Do not remove old kernels.
 
-	sudo ucaresystem -d
+       -u, --upgrade
+       Upgrade to next available release
 
-If your Ubuntu (and official flavors) has reached the EOL support you can upgrade to the next supported release with '-eol':
-	
-	sudo ucaresystem -eol
+       -d, --development
+       Upgrade to a development release. For testers and developers only
 
-For information about the availabe parameters, start ucaresystem-core with '-h' parameter :
+       -e, --eol
+       If your Ubuntu (and official flavors) has reached the EOL support you can upgrade to the next supported  release.   This  option  is  for  Ubuntu
+       releases that have reached their EOL and the user wants to upgrade it to the next supported version.
 
-	sudo ucaresystem -h
-
+       -w, --wait
+       Press ENTER to end the program. For the "gui" version
