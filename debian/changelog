@@ -6,6 +6,19 @@ ucaresystem-core (4.4.0) trusty; urgency=high
 
 ucaresystem-core (4.5.0) trusty; urgency=high
 
-  * Rename exceutable to ucaresystem, proper policy, use x-teminal-emulator  
-  
+  * Major rewrite
+  * Rename exceutable to ucaresystem from ucaresystem-core
+  * Proper integration with polikit
+  * Use x-teminal-emulator
+  * Add remove-old-kernels tool
+  * Add color output
+  * Better debian packaging
+  * Use getopt, add many options
+  * Add  man pages
+  * Compatible with WSL, dont use pkgexec on ucaresystem script
+  * Fix desktop menu file
+  * Allow to skip kernel removal
+  * More secure bash script
+  * Remove obsolete files
+
  -- Giannis Tsgakatakis <jtsagata@gmail.com>  Sat, 29 Feb 2020 00:01:54 +0200

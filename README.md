@@ -11,9 +11,11 @@
 
 # uCareSystem
 
-	Name   : uCareSystem
-	License: GPL3 (http://www.gnu.org/licenses/gpl.html)
-	Author : Salih Emin
+**Name**   : uCareSystem
+
+**License**: GPL3 (http://www.gnu.org/licenses/gpl.html)
+
+**Author : Salih Emin
 	Email  : salihemin (at) about.me
 	Date   : 25-01-2018
 	Version: 4.5.0
