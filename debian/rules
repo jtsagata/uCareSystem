@@ -14,6 +14,7 @@ binary:
 	mkdir -p debian/ucaresystem-core/usr/share/doc/ucaresystem-core
 	mkdir -p debian/ucaresystem-core/usr/share/icons
 	mkdir -p debian/ucaresystem-core/usr/share/polkit-1/actions
+	mkdir -p debian/ucaresystem-core/usr/share/man/man8/
 	cp scripts/*        debian/ucaresystem-core/usr/bin/
 	cp assets/*.desktop debian/ucaresystem-core/usr/share/applications
 	cp assets/*.png     debian/ucaresystem-core/usr/share/icons
@@ -21,6 +22,8 @@ binary:
 	cp LICENSE          debian/ucaresystem-core/usr/share/doc/ucaresystem-core
 	cp README.md        debian/ucaresystem-core/usr/share/doc/ucaresystem-core
 	cp debian/changelog debian/ucaresystem-core/usr/share/doc/ucaresystem-core
+	cp assets/*.8       debian/ucaresystem-core/usr/share/man/man8/
 	gzip debian/ucaresystem-core/usr/share/doc/ucaresystem-core/changelog
+	gzip debian/ucaresystem-core/usr/share/man/man8/*.8
 	dh_gencontrol
 	dh_builddeb
