@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -u
 #
 #
 #_______________________________________________
@@ -11,8 +12,8 @@ set -e
 # Author : Salih Emin
 # WebSite: http://utappia.org
 # Email  : salih-(at)-utappia.org
-# Date   : 25-01-2018 (first release 19-02-2009)
-# Version: 4.4.0
+# Date   : 29-02-2020 (first release 19-02-2009)
+# Version: 4.5.0
 # System : Debian Linux and Ubuntu Linux
 # Description:
 #This simple script will automatically refresh your package list, download and install
@@ -23,17 +24,31 @@ set -e
 
 #Variables
 DIST_CODENAME=$(lsb_release --codename | cut -f2)
-DATE=(date +%F_%T)
-UCARE_VERSION=(4.4.0)
+DATE=$(date +%F_%T)
+UCARE_VERSION="4.5.0"
+SLEEP=10
+SLEEP_AFTER_ACTION=0
+KEEP_REMOVE_OLD_KERNELS=2
+
+#EXEC=""
+
+if test -n "$TERM" && test "$TERM" != "dumb"; then
+#    BLACK=$(tput setaf 0)
+    RED=$(tput setaf 1)
+    GREEN=$(tput setaf 2)
+#    YELLOW=$(tput setaf 3)
+#    BLUE=$(tput setaf 4)
+#    MAGENTA=$(tput setaf 5)
+#    CYAN=$(tput setaf 6)
+    NORMAL=$(tput setaf 7)
+    BOLD=$(tput bold)
+    BOLDOFF=$(tput sgr0)
+fi
 
 function CHECK_SUDO {
 	# Checking if the user has run the script with "sudo" or not
 	if [[ $EUID -ne 0 ]] ; then
-	    clear
-	    echo ""
-	    echo "uCareSystem Core must be run as root or with sudo. Now I will just exit..." 1>&2
-	    echo ""
-	    sleep 2
+	    echo "${RED}${BOLD}uCareSystem Core must be run as root or with sudo.${BOLDOFF}${NORMAL}" 1>&2
 	    exit 1
 	fi
 }
@@ -42,8 +57,8 @@ function WELCOME_SCREEN {
 	clear
 	echo "_______________________________________________________"
 	echo "                                                       "
-	echo "            uCareSystem Core $UCARE_VERSION            "
-	echo "            ~~~~~~~~~~~~~~~~~~~~~                      "
+	echo "            ${GREEN}uCareSystem Core ${UCARE_VERSION}${NORMAL}            "
+	echo "            ${GREEN}~~~~~~~~~~~~~~~~~~~~~~~${NORMAL}                      "
 	echo "                                                       "
 	echo " Welcome to all-in-one System Update and maintenance   "
 	echo " assistant app.                                        "
@@ -60,169 +75,166 @@ function WELCOME_SCREEN {
 	echo " think it is worth of your support, you can make a     "
 	echo " donation via PayPal by clicking on the following:     "
 	echo "                                                       "
-	echo "           https://www.paypal.me/cerebrux              "
+	echo "           ${GREEN}https://www.paypal.me/cerebrux${NORMAL}              "
 	echo "_______________________________________________________"
 	echo
-	echo " uCareSystem Core will start in 5 seconds... "
 
-	sleep 6
+  echo "${GREEN}Actions:${NORMAL}"
+  if [ "$DO_MAINTENACE" == true ] ; then
+    echo "** Update packages and reclaim space"
+  fi
+
+  if [ "$DO_UPGRADE_TO_NEXT_RELEASE" == true ] ; then
+    echo "** Update next release"
+  fi
+
+  if [ "$DO_UPGRADE_TO_DEVEL_RELEASE" == true ] ; then
+    echo "** Update to development release"
+  fi
+
+  if [ "$DO_UPGRADE_TO_NEXT_RELEASE" == true ] ; then
+    echo "** Update to next release"
+  fi
+
+  if [ "$DO_UPGRADE_EOL_TO_NEXT" == true ] ; then
+    echo "** Update to eol release"
+  fi
+
+  if [ "$DO_REMOVE_KERNELS" == true ] ; then
+    echo "** Remove old kernels"
+  fi
+
+	echo
+	echo " uCareSystem Core will start in $SLEEP seconds... "
+
+
+	sleep $SLEEP
 }
 
-function MAINTENACE {
-	echo
-	echo
-	echo "#########################"
-	echo "          Started"
-	echo "#########################"
-	echo
+function BANNER {
+	title=$1
+#  echo
+#	echo "${GREEN}##################################################"
+#	printf "%*s\n" $(((${#title}+50)/2)) "$title"
+#	echo "##################################################${NORMAL}"
+#	echo
+  echo -e "${GREEN}${BOLD}***${BOLDOFF} ${title}${NORMAL}"
+}
 
-	## Updates package lists
-	sudo apt update;
-	echo
-	echo "###############################"
-	echo "Finished updating package lists"
-	echo "###############################"
-	sleep 1
-
-	## Updates packages and libraries
-	sudo apt full-upgrade -y;
-	echo
-	echo "###############################################"
-	echo "Finished updating packages and system libraries"
-	echo "###############################################"
-	sleep 1
-	echo
-
-	## Removes unneeded packages
-	sudo apt-get -y --purge autoremove; # Debian Jessie uses old apt. So
-	echo					# for the time being I use old implementation
-	echo "###################################"
-	echo "Finished removing unneeded packages"
-	echo "###################################"
-	sleep 1
-	echo
-
-	# purge-old-kernels - remove old kernel packages
+function REMOVE_OLD_KERNELS {
+  CHECK_SUDO
+  BANNER "Remove old kernels"
+  # purge-old-kernels - remove old kernel packages
 	#    Copyright (C) 2012 Dustin Kirkland <kirkland -(at)- ubuntu.com>
 	#
 	#    Authors: Dustin Kirkland <kirkland-(at)-ubuntu.com>
 	#             Kees Cook <kees-(at)-ubuntu.com>
 	#
 	# NOTE: This script will ALWAYS keep the currently running kernel
-	# NOTE: Default is to keep 2 more, user overrides with --keep N
-	KEEP=2
-	# NOTE: Any unrecognized option will be passed straight through to apt
-	APT_OPTS=
-	while [ ! -z "$1" ]; do
-		case "$1" in
-			--keep)
-				# User specified the number of kernels to keep
-				KEEP="$2"
-				shift 2
-			;;
-			*)
-				APT_OPTS="$APT_OPTS $1"
-				shift 1
-			;;
-		esac
-	done
 
 	# Build our list of kernel packages to purge
-	CANDIDATES=$(ls -tr /boot/vmlinuz-* | head -n -${KEEP} | grep -v "$(uname -r)$" | cut -d- -f2- | awk '{print "linux-image-" $0 " linux-headers-" $0}' )
+	CANDIDATES=$(ls -tr /boot/vmlinuz-* | head -n -${KEEP_REMOVE_OLD_KERNELS} | grep -v "$(uname -r)$" | cut -d- -f2- | awk '{print "linux-image-" $0 " linux-headers-" $0}' )
 	for c in $CANDIDATES; do
 		dpkg-query -s "$c" >/dev/null 2>&1 && PURGE="$PURGE $c"
 	done
 
 	if [ -z "$PURGE" ]; then
-		echo "No kernels are eligible for removal"
+		BANNER "No kernels are eligible for removal"
+	else
+	  sudo apt "$APT_OPTS" remove -y --purge "$PURGE";
+	  BANNER "Finished Remove old kernels"
 	fi
+}
 
-	sudo apt $APT_OPTS remove -y --purge $PURGE;
+function MAINTENACE {
+  CHECK_SUDO
+	BANNER "Started"
 
-	echo
-	echo "###################################"
-	echo "Finished removing old kernels"
-	echo "###################################"
-	sleep 1
-	echo
+	## Updates package lists
+	BANNER "Updating package lists"
+	${EXEC} sudo apt update;
+	BANNER "Finished updating package lists"
+	sleep ${SLEEP_AFTER_ACTION}
+
+	## Updates packages and libraries
+	BANNER "Updating packages and system libraries"
+	${EXEC} sudo apt full-upgrade -y;
+	BANNER "Finished updating packages and system libraries"
+  sleep ${SLEEP_AFTER_ACTION}
+
+	## Removes unneeded packages
+	BANNER "Removing unneeded packages"
+	${EXEC} sudo apt-get -y --purge autoremove; # Debian Jessie uses old apt. So
+	BANNER "Finished removing unneeded packages"
+  sleep ${SLEEP_AFTER_ACTION}
+
 	## Removes unused config files
-	sudo deborphan -n --find-config | xargs sudo apt-get -y --purge autoremove;
-	echo
-	echo "#####################################"
-	echo "Finished removing unused config files"
-	echo "#####################################"
-	sleep 1
-	echo
+	BANNER "Removing unused config files"
+	set +e
+	${EXEC} sudo deborphan -n --find-config | xargs sudo apt-get -y --purge autoremove;
+	set -e
+	BANNER "Finished removing unused config files"
+  sleep ${SLEEP_AFTER_ACTION}
 
 	## Removes package files that can no longer be downloaded and everything except
 	# the lock file in /var/cache/apt/archives, including directories.
-	sudo apt-get -y autoclean; sudo apt-get -y clean;
-	echo
-	echo "######################################"
-	echo " Cleaned downloaded temporary packages"
-	echo "######################################"
-	echo
-	sleep 1
+	BANNER "Cleaned downloaded temporary packages"
+	${EXEC} sudo apt-get -y autoclean; sudo apt-get -y clean;
+	BANNER "Finish cleaned downloaded temporary packages"
+  sleep ${SLEEP_AFTER_ACTION}
 
-	echo
-	echo "#########################################"
-	echo " Checking to see if a reboot is required "
-	echo "#########################################"
-	echo
+	BANNER "Checking to see if a reboot is required "
 	## Check to see if a reboot is required
 	if [ -f /var/run/reboot-required ]; then
  		echo
-  		echo "* * * * * * * * * * * * * * * * * *"
+  	echo "${BOLD}${RED}* * * * * * * * * * * * * * * * * *"
  		echo "*                                 *"
  		echo "* Consider rebooting your system  *"
-  		echo "* to finish applying updates      *"
-  		echo "*                                 *"
-  		echo "* * * * * * * * * * * * * * * * * *"
-  		echo
+  	echo "* to finish applying updates      *"
+  	echo "*                                 *"
+  	echo "* * * * * * * * * * * * * * * * * *${BOLDOFF}${NORMAL}"
+  	echo
 	fi
 
 
 }
 
 function UPGRADE_EOL_TO_NEXT {
-
-cp "/etc/apt/sources.list" "/etc/apt/sources.eol_${DATE}"
+  CHECK_SUDO
+  BANNER "Upgrade to EOL"
+  ${EXEC} "/etc/apt/sources.list" "/etc/apt/sources.eol_${DATE}"
+  if [ "$EXEC" == "echo" ] ; then
+    echo "...skiping updating /etc/apt/sources.list"
+  else
+    BANNER "Updating /etc/apt/sources.list"
 cat <<EOT > /etc/apt/sources.list
 deb http://old-releases.ubuntu.com/ubuntu/ $DIST_CODENAME main restricted universe multiverse
 deb http://old-releases.ubuntu.com/ubuntu/ $DIST_CODENAME-updates main restricted universe multiverse
 deb http://old-releases.ubuntu.com/ubuntu/ $DIST_CODENAME-security main restricted universe multiverse
 
 EOT
+  fi
 
-sudo apt-get install update-manager-core
-sudo apt-get -y dist-upgrade
-sudo do-release-upgrade
+  ${EXEC} sudo apt-get install update-manager-core
+  ${EXEC} sudo apt-get -y dist-upgrade
+  ${EXEC} sudo do-release-upgrade
+  BANNER "Done upgrade to EOL"
+	sleep ${SLEEP_AFTER_ACTION}
 }
 
 function UPGRADE_TO_NEXT_RELEASE {
-	sleep 1
-	echo "##########################################"
-	echo "uCareSystem will now check for the        "
-	echo "availabillity of the next version         "
-	echo "and it will start the upgrade             "
-	echo "##########################################"
-	echo ""
-	sleep 1
-	do-release-upgrade
-	sleep 2
+  CHECK_SUDO
+	BANNER "Upgrade to next Release"
+	${EXEC} do-release-upgrade
+	BANNER "Done upgrade to next Release"
+	sleep ${SLEEP_AFTER_ACTION}
 }
 
 function UPGRADE_TO_DEVEL_RELEASE {
-	sleep 1
-	echo "##########################################"
-	echo "uCareSystem will now check for the        "
-	echo "availabillity of the next development     "
-	echo "version and it will start the upgrade     "
-	echo "##########################################"
-	echo ""
-	sleep 1
-	do-release-upgrade -d
-	sleep 2
+  CHECK_SUDO
+	${EXEC} do-release-upgrade -d
+	BANNER "Done upgrade to next Release"
+	sleep ${SLEEP_AFTER_ACTION}
 }
 
 function SHOW_HELP {
@@ -269,36 +281,73 @@ EOF
 }
 
 function GOODBYE {
-	sleep 2
-	echo
-	echo
-	echo "#########################"
-	echo "          Done"
-	echo "#########################"
 	## End of script
+	BANNER "Done"
 }
 
-# The main process starts
-while [ "$1" != "" ]; do
-    case $1 in
-        -u | --upgrade )     CHECK_SUDO && WELCOME_SCREEN && MAINTENACE && UPGRADE_TO_NEXT_RELEASE
-                             exit
-                                ;;
-        -d | --development ) CHECK_SUDO && WELCOME_SCREEN && MAINTENACE && UPGRADE_TO_DEVEL_RELEASE
-                             exit
-                                ;;
-        -h | --help )        SHOW_HELP
-                             exit
-                                ;;
-        -eol | --end-of-life-upgrade ) CHECK_SUDO && UPGRADE_EOL_TO_NEXT
-                             exit
-                                ;;
-        * )                  SHOW_HELP
-                             exit 1
-    esac
+##
+## The main process starts here
+##
+
+DO_WELCOME_SCREEN=true
+DO_REMOVE_KERNELS=true
+DO_SHOW_HELP=false
+DO_MAINTENACE=true
+DO_UPGRADE_TO_NEXT_RELEASE=false
+DO_UPGRADE_TO_DEVEL_RELEASE=false
+DO_UPGRADE_EOL_TO_NEXT=false
+DO_WAIT=false
+
+ARGS=$(getopt -o hnskudew --long help,dryrun,skip,nokernel,upgrade,development,eol,wait -- "$@")
+eval set -- "$ARGS"
+
+while true; do
+  case "$1" in
+    -h | --help )        DO_SHOW_HELP=true; shift ;;
+    -n | --dryrun )      EXEC="echo"; shift ;;
+    -s | --skip )        DO_WELCOME_SCREEN=false; shift ;;
+    -k | --nokernel )    DO_REMOVE_KERNELS=false; shift ;;
+    -u | --upgrade )     DO_UPGRADE_TO_NEXT_RELEASE=true; shift ;;
+    -d | --development ) DO_UPGRADE_TO_DEVEL_RELEASE=true; shift ;;
+    -e | --eol )         DO_UPGRADE_EOL_TO_NEXT=true; shift ;;
+    -w | --wait )        DO_WAIT=true; shift ;;
+    -- ) shift; break ;;
+    * ) break ;;
+  esac
 done
 
+if [ "$DO_SHOW_HELP" == true ] ; then
+  SHOW_HELP
+  exit
+fi
 
+if [ "$DO_WELCOME_SCREEN" == true ] ; then
+  WELCOME_SCREEN
+fi
 
-## If no parameter is given just do the regular maintenance
-CHECK_SUDO && WELCOME_SCREEN && MAINTENACE && GOODBYE
+if [ "$DO_MAINTENACE" == true ] ; then
+  MAINTENACE
+fi
+
+if [ "$DO_REMOVE_KERNELS" == true ] ; then
+  REMOVE_OLD_KERNELS
+fi
+
+if [ "$DO_UPGRADE_TO_NEXT_RELEASE" == true ] ; then
+  UPGRADE_TO_NEXT_RELEASE
+fi
+
+if [ "$DO_UPGRADE_TO_DEVEL_RELEASE" == true ] ; then
+  UPGRADE_TO_DEVEL_RELEASE
+fi
+
+if [ "$DO_UPGRADE_EOL_TO_NEXT" == true ] ; then
+  UPGRADE_EOL_TO_NEXT
+fi
+
+GOODBYE
+
+if [ "$DO_WAIT" == true ] ; then
+  echo
+  read -r -p "Press enter to close the window" response
+fi
