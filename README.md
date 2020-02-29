@@ -22,9 +22,6 @@
 
 ## Description:
 
-	Note: please use only **ucaresystem-core**. uCareSystem is the GUI version and currently it is not maintained and
-	not up to date with the features that are integrated in ucaresystem-core.
-
 In summary, ucaresystem Core automatically performs the following maintenance processes without any need of user interference :
 
 - Updates the list of available packages
@@ -36,7 +33,7 @@ In summary, ucaresystem Core automatically performs the following maintenance pr
 - Deletes package configuration files from packages that have been uninstalled by you.
                                           
 ## Usage
-
+    sudo ucaresystem
        -h, --help
        Display help text and exit.  No other output is generated.
 
