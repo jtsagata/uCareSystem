@@ -268,6 +268,8 @@ OPTIONS
        -w, --wait
               Press ENTER to end the program. For the "gui" version
 
+       -m, --maintenance
+              Do normal maintenance jobs. The default action id no option is given.
 
 EOF
 }
@@ -290,7 +292,7 @@ DO_UPGRADE_TO_DEVEL_RELEASE=false
 DO_UPGRADE_EOL_TO_NEXT=false
 DO_WAIT=false
 
-ARGS=$(getopt -o hnskudew --long help,dryrun,skip,nokernel,upgrade,development,eol,wait -- "$@")
+ARGS=$(getopt -o hnskudewm --long help,dryrun,skip,nokernel,upgrade,development,eol,wait,maintenance -- "$@")
 eval set -- "$ARGS"
 
 while true; do
@@ -303,6 +305,7 @@ while true; do
     -d | --development ) DO_UPGRADE_TO_DEVEL_RELEASE=true; shift ;;
     -e | --eol )         DO_UPGRADE_EOL_TO_NEXT=true; shift ;;
     -w | --wait )        DO_WAIT=true; shift ;;
+    -m | --maintenance ) DO_MAINTENACE=true; shift ;;
     -- ) shift; break ;;
     * ) break ;;
   esac

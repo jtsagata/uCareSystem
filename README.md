@@ -61,3 +61,6 @@ In summary, ucaresystem Core automatically performs the following maintenance pr
 
        -w, --wait
        Press ENTER to end the program. For the "gui" version
+  
+       -m, --maintenance
+              Do normal maintenance jobs. The default action id no option is given.
