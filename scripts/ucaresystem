@@ -33,18 +33,25 @@ SHOW_BANNER=${SHOWBANNER:=true}
 DEFAULT_MODE=${DEFAULT_MODE:=maintain}
 EXEC=""
 
-if test -n "$TERM" && test "$TERM" != "dumb"; then
-  #    BLACK=$(tput setaf 0)
-  RED=$(tput setaf 1)
-  GREEN=$(tput setaf 2)
-  #    YELLOW=$(tput setaf 3)
-  #    BLUE=$(tput setaf 4)
-  #    MAGENTA=$(tput setaf 5)
-  #    CYAN=$(tput setaf 6)
-  NORMAL=$(tput setaf 7)
-  BOLD=$(tput bold)
-  BOLDOFF=$(tput sgr0)
+## Colors
+RED=""
+GREEN=""
+NORMAL=""
+BOLD=""
+BOLDOFF=""
+
+set +u
+if [[ -z "${NO_COLOR}" ]]; then
+  if test -n "$TERM" && test "$TERM" != "dumb"; then
+    RED=$(tput setaf 1)
+    GREEN=$(tput setaf 2)
+    NORMAL=$(tput setaf 7)
+    BOLD=$(tput bold)
+    BOLDOFF=$(tput sgr0)
+  fi
 fi
+set -u
+
 
 # Programs used
 SUDO="/usr/bin/sudo"
@@ -55,13 +62,7 @@ REMOVE_KERNEL_TOOL="/usr/bin/remove-old-kernels"
 LSB_RELEASE="/usr/bin/lsb_release"
 
 function banner() {
-  title=$1
-  #  echo
-  #	echo "${GREEN}##################################################"
-  #	printf "%*s\n" $(((${#title}+50)/2)) "$title"
-  #	echo "##################################################${NORMAL}"
-  #	echo
-  echo -e "${GREEN}${BOLD}***${BOLDOFF} ${title}${NORMAL}"
+  echo -e "${GREEN}${BOLD}***${BOLDOFF} ${1}${NORMAL}"
 }
 
 function check_eol {

@@ -21,3 +21,5 @@
 #X_TERMINAL="gnome-terminal"
 #X_TERMINAL_OPTS=""
 
+# Disable colors
+#NO_COLOR=true

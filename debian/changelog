@@ -1,18 +1,18 @@
 ucaresystem (4.5.0) trusty; urgency=high
 
-  * Major rewrite
+  * Complete rewrite
+  * Package rename to ucaresystem
   * Rename exceutable to ucaresystem from ucaresystem-core
   * Proper integration with polikit
   * Use x-teminal-emulator
   * Add remove-old-kernels tool
-  * Add color output
+  * Add color output, Honor NO_COLOR (https://no-color.org/)
   * Better debian packaging
   * Use getopt, add many options
   * Add  man pages
   * Compatible with WSL, don't use pkgexec on ucaresystem script
   * Fix desktop menu file
-  * Allow one to skip kernel removal
-  * More secure bash script
+  * Secure bash scripting
   * Remove obsolete files
 
  -- Giannis Tsgakatakis <jtsagata@gmail.com>  Sat, 29 Feb 2020 00:01:54 +0200
