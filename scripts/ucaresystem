@@ -33,6 +33,8 @@ WAIT_ACTION=${WAIT_ACTION:=0}
 KEEP_KERNELS=${KEEP_KERNELS:=2}
 SHOW_BANNER=${SHOWBANNER:=true}
 DEFAULT_MODE=${DEFAULT_MODE:=maintain}
+AUTO_REBOOT=${AUTO_REBOOT:=false}
+AUTO_REBOOT_TIMEOUT=${AUTO_REBOOT_TIMEOUT:=10}
 EXEC=""
 
 ## Colors
@@ -59,6 +61,7 @@ SUDO="/usr/bin/sudo"
 DEBORPHAN="/usr/bin/deborphan"
 UPDATE_TOOL="/usr/bin/do-release-upgrade"
 LSB_RELEASE="/usr/bin/lsb_release"
+REBOOT="/sbin/reboot"
 # use apt or apt-get
 if [ -x "/usr/bin/apt" ]; then
   APT="/usr/bin/apt"
@@ -220,6 +223,13 @@ function check_reboot() {
     echo "*                                 *"
     echo "* * * * * * * * * * * * * * * * * *${BOLDOFF}${NORMAL}"
     echo
+  fi
+
+  if [ "$AUTO_REBOOT" == true ]; then
+    banner "Rebooting system"
+    echo " ucaresystem will reboot the system in ${AUTO_REBOOT_TIMEOUT} seconds... "
+    sleep ${AUTO_REBOOT_TIMEOUT}
+    ${REBOOT}
   fi
 }
 

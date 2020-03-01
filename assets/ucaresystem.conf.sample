@@ -7,6 +7,10 @@
 # valid values are: "maintain", "upgrade","cleanup"
 # DEFAULT_MODE="maintain"
 
+# Do reboot if neccessry
+# AUTO_REBOOT=true
+# AUTO_REBOOT_TIMEOUT=10
+
 # Kernels to keep. Default is 2
 # KEEP_KERNELS=2
 
