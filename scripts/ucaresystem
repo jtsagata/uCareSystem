@@ -17,22 +17,21 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-set -e
-set -u
 
+set -eu
 DIST_CODENAME=$(lsb_release --codename | cut -f2)
 UCARE_VERSION="4.5.0"
 #Config file
-if ! [ -x "/etc/ucaresystem.conf" ]; then
+if [ -x "/etc/ucaresystem.conf" ]; then
   source /etc/ucaresystem.conf
 fi
 #Variables
 WAIT_START=${WAIT_START:=10}
-WAIT_ACTION=${WAIT_ACTION:=1}
+WAIT_ACTION=${WAIT_ACTION:=0}
 KEEP_KERNELS=${KEEP_KERNELS:=2}
 SHOW_BANNER=${SHOWBANNER:=true}
 DEFAULT_MODE=${DEFAULT_MODE:=maintain}
-
+EXEC=""
 
 if test -n "$TERM" && test "$TERM" != "dumb"; then
   #    BLACK=$(tput setaf 0)
@@ -50,7 +49,10 @@ fi
 function check_root_priv() {
   # Checking if the user has run the script with "sudo" or not
   if [[ $EUID -ne 0 ]]; then
-    echo "${RED}${BOLD}uCareSystem Core must be run as root or with sudo.${BOLDOFF}${NORMAL}" 1>&2
+    echo -ne "${RED}${BOLD}Error: ${BOLDOFF} '$0'" 1>&2
+    echo -ne " ${BOLD}must run with root user privileges.${BOLDOFF}" 1>&2
+    echo -ne " ${BOLD}consider running it with 'sudo' ${BOLDOFF}" 1>&2
+    printf "\n\n"
     exit 1
   fi
 }
@@ -125,46 +127,51 @@ function banner() {
 function action_kernels() {
   check_root_priv
   banner "Remove old kernels"
+  set -x
   ${EXEC} remove-old-kernels --keep ${KEEP_KERNELS}
-  banner "Finished Remove old kernels"
+  { set +x; } 2>/dev/null
 }
 
 function action_maintain() {
   check_root_priv
-  banner "Started"
+  banner "Start Maintain actions"
 
   ## Updates package lists
   banner "Updating package lists"
+  set -x
   ${EXEC} sudo apt update
-  banner "Finished updating package lists"
+  { set +x; } 2>/dev/null
   sleep ${WAIT_ACTION}
 
   ## Updates packages and libraries
   banner "Updating packages and system libraries"
+  set -x
   ${EXEC} sudo apt full-upgrade -y
-  banner "Finished updating packages and system libraries"
+  { set +x; } 2>/dev/null
   sleep ${WAIT_ACTION}
 
   ## Removes unneeded packages
   banner "Removing unneeded packages"
+  set -x
   ${EXEC} sudo apt-get -y --purge autoremove # Debian Jessie uses old apt. So
-  banner "Finished removing unneeded packages"
+  { set +x; } 2>/dev/null
   sleep ${WAIT_ACTION}
 
   ## Removes unused config files
   banner "Removing unused config files"
-  set +e
-  ${EXEC} sudo deborphan -n --find-config | xargs sudo apt-get -y --purge autoremove
-  set -e
-  banner "Finished removing unused config files"
+  set -x
+  ${EXEC} sudo deborphan -n --find-config |  ${EXEC}  xargs sudo apt-get -y --purge autoremove
+  { set +x; } 2>/dev/null
   sleep ${WAIT_ACTION}
 
   ## Removes package files that can no longer be downloaded and everything except
   # the lock file in /var/cache/apt/archives, including directories.
   banner "Cleaned downloaded temporary packages"
+  set -x
   ${EXEC} sudo apt-get -y autoclean
-  sudo apt-get -y clean
-  banner "Finish cleaned downloaded temporary packages"
+  ${EXEC} sudo apt-get -y clean
+  { set +x; } 2>/dev/null
+  banner "Finish cleaned Maintain actions"
   sleep ${WAIT_ACTION}
 }
 
