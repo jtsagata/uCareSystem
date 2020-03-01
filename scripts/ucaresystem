@@ -20,7 +20,7 @@
 
 set -eu
 
-codename=$(lsb_release --codename | cut -f2)
+new_codename=$(lsb_release --new_codename | cut -f2)
 UCARE_VERSION="4.5.0"
 #Config file
 if [ -x "/etc/ucaresystem.conf" ]; then
@@ -64,6 +64,7 @@ UPDATE_TOOL="/usr/bin/do-release-upgrade"
 LSB_RELEASE="/usr/bin/lsb_release"
 REBOOT="/sbin/reboot"
 LOCALE="/usr/bin/locale"
+SED="/bin/sed"
 # use apt or apt-get
 if [ -x "/usr/bin/apt" ]; then
   APT="/usr/bin/apt"
@@ -110,13 +111,13 @@ function ask_yesno() {
 
 function check_eol() {
   distribution_id=$(${LSB_RELEASE} --id | cut -f2)
-  codename=$(${LSB_RELEASE} --codename | cut -f2)
+  new_codename=$(${LSB_RELEASE} --new_codename | cut -f2)
 
-  # distribution_id="Ubuntu" && codename="focal"
+  # distribution_id="Ubuntu" && new_codename="focal"
 
   valid_ids=("Debian" "Ubuntu")
   if [[ ! "${valid_ids[*]}" == *"${distribution_id}"* ]]; then
-    banner "Your distribution is '${distribution_id}', codename:'${codename}'."
+    banner "Your distribution is '${distribution_id}', new_codename:'${new_codename}'."
     return
   fi
 
@@ -126,10 +127,10 @@ function check_eol() {
   esac
 
   supported_distro=$(${DISTRO_INFO} --supported)
-  days=$(${DISTRO_INFO} --series="${codename}" --days)
+  days=$(${DISTRO_INFO} --series="${new_codename}" --days)
 
-  if [[ "${supported_distro[*]}" == *"${codename}"* ]]; then
-    banner "Your distribution '${GREEN}${distribution_id}${NORMAL}', codename:'${GREEN}${codename}${NORMAL}' is not at eol."
+  if [[ "${supported_distro[*]}" == *"${new_codename}"* ]]; then
+    banner "Your distribution '${GREEN}${distribution_id}${NORMAL}', new_codename:'${GREEN}${new_codename}${NORMAL}' is not at eol."
     if [ ! "${days}" == "(unknown)" ]; then
       if [[ "${days}" == *"-"* ]]; then
         banner "The was a new distribution version before ${days//-/} days. Consider an upgrade."
@@ -139,7 +140,7 @@ function check_eol() {
     fi
     return
   else
-    banner "Your distribution '${distribution_id}', codename:'${codename}' is reach the end of support"
+    banner "Your distribution '${distribution_id}', new_codename:'${new_codename}' is reach the end of support"
     echo "  The end of support was before ${days//-/} days."
     echo "  Please upgrade your distribution to a latest release!"
     echo "  Try run: $(basename "${0}") --upgrade"
@@ -271,6 +272,9 @@ function check_reboot() {
 function action_upgrade_EOL() {
   check_root_priv
   curr_date=$(date +%F_%T)
+
+  new_codename=$(ubuntu-distro-info --supported | tail -1)
+
   banner "Upgrade to EOL"
   ${EXEC} "/etc/apt/sources.list" "/etc/apt/sources.eol_${curr_date}"
   if [ "$EXEC" == "echo" ]; then
@@ -278,9 +282,9 @@ function action_upgrade_EOL() {
   else
     banner "Updating /etc/apt/sources.list"
     cat <<EOT >/etc/apt/sources.list
-deb http://old-releases.ubuntu.com/ubuntu/ $codename main restricted universe multiverse
-deb http://old-releases.ubuntu.com/ubuntu/ $codename-updates main restricted universe multiverse
-deb http://old-releases.ubuntu.com/ubuntu/ $codename-security main restricted universe multiverse
+deb http://old-releases.ubuntu.com/ubuntu/ $new_codename main restricted universe multiverse
+deb http://old-releases.ubuntu.com/ubuntu/ $new_codename-updates main restricted universe multiverse
+deb http://old-releases.ubuntu.com/ubuntu/ $new_codename-security main restricted universe multiverse
 
 EOT
   fi
@@ -289,12 +293,11 @@ EOT
   ${EXEC} ${SUDO} ${APT} -y dist-upgrade
   ${EXEC} ${SUDO} ${UPDATE_TOOL}
   banner "Done upgrade to EOL"
-  sleep ${WAIT_ACTION}
 }
 
 function action_upgrade() {
   distribution_id=$(${LSB_RELEASE} --id | cut -f2)
-  codename=$(${LSB_RELEASE} --codename | cut -f2)
+  new_codename=$(${LSB_RELEASE} --new_codename | cut -f2)
 
   case "${distribution_id}" in
   "Debian") do_debian_upgade "$1" ;;
@@ -336,7 +339,38 @@ function do_ubuntu_upgrade() {
 }
 
 function do_debian_upgrade() {
-  echo "TODO"
+  # TODO: Allow to set codename, test if given is newest
+  # TODO: Check if it is safe? (try to see if repo exist for PPAs etc.."
+
+  check_root_priv
+  curr_date=$(date +%F_%T)
+
+  codename=$(${LSB_RELEASE} --codename | cut -f2)
+  new_codename=$(debian-distro-info --supported | tail -1)
+
+  action_maintain
+
+  banner "Upgrade to $new_codename from $codename"
+
+if [ "$EXEC" == "echo" ]; then
+    echo "...skiping updating /etc/apt/sources.list"
+  else
+    banner "Backup /etc/apt/sources.list"
+    ${EXEC} cp "/etc/apt/sources.list" "/etc/apt/sources.${codename}_${curr_date}"
+    for file in /etc/apt/sources.list.d/*
+    do
+      ${EXEC} cp "$file" "${file}.${codename}_${curr_date}"
+    done
+
+    banner "Updating /etc/apt/sources.list"
+     ${EXEC} ${SUDO} ${SED} -i "s/${codename}/${new_codename}/g" /etc/apt/sources.list
+     ${EXEC} ${SUDO} ${SED} -i "s/${codename}/${new_codename}/g" /etc/apt/sources.list.d/*.list
+  fi
+
+  action_maintain
+  ${EXEC} ${SUDO} apt dist-upgrade -y
+
+  banner "Done upgrade to $new_codename from $codename"
 }
 
 function action_upgrade_next() {
@@ -349,18 +383,17 @@ function action_upgrade_next() {
   banner "Upgrade to next Release"
   ${EXEC} ${UPDATE_TOOL}
   banner "Done upgrade to next Release"
-  sleep ${WAIT_ACTION}
-}
+  }
 
 function action_upgrade_devel() {
   if [ -x ${UPDATE_TOOL} ]; then
     echo "Error missing ${UPDATE_TOOL}"
     exit 1
   fi
+
   check_root_priv
   ${EXEC} ${UPDATE_TOOL} -d
   banner "Done upgrade to next Release"
-  sleep ${WAIT_ACTION}
 }
 
 function action_help() {

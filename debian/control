@@ -14,7 +14,8 @@ Depends: apt,
          lsb-release,
          policykit-1,
          util-linux (>= 2.0),
-         distro-info
+         distro-info,
+         sed (>= 1.0)
 Description: All-in-one System Update and maintenance app
  This simple script will automatically refresh your packagelist,
  download and install software updates (if there are any), remove old
