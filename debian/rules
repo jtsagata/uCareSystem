@@ -3,5 +3,8 @@
 %:
 	dh $@
 
-override_dh_auto_install:
-	env DESTDIR=debian/ucaresystem-core ./build.sh
+override_dh_prep:
+	env DESTDIR=debian/ucaresystem ./build.sh
+
+override_dh_install:
+	dh_install --list-missing

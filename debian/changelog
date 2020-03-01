@@ -1,4 +1,4 @@
-ucaresystem-core (4.5.0) trusty; urgency=high
+ucaresystem (4.5.0) trusty; urgency=high
 
   * Major rewrite
   * Rename exceutable to ucaresystem from ucaresystem-core
@@ -17,7 +17,7 @@ ucaresystem-core (4.5.0) trusty; urgency=high
 
  -- Giannis Tsgakatakis <jtsagata@gmail.com>  Sat, 29 Feb 2020 00:01:54 +0200
 
-ucaresystem-core (4.4.0) trusty; urgency=high
+ucaresystem (4.4.0) trusty; urgency=high
 
   * Added pkexec, check if reboot is required, fixed Debian Jessie issue
   

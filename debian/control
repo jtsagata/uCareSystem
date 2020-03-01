@@ -1,17 +1,25 @@
-Source: ucaresystem-core
+Source: ucaresystem
 Section: utils
 Priority: optional
 Maintainer: Salih Emin <salih-emin@ubuntu.com>
 Build-Depends: debhelper (>= 9)
 Standards-Version: 4.5.0
 Homepage: http://utappia.org
-Vcs-Browser: https://github.com/Utappia/uCareSystem.git
+Vcs-Git: https://github.com/Utappia/uCareSystem.git
 
-Package: ucaresystem-core
+Package: ucaresystem
 Architecture: all
 Depends: apt, deborphan, lsb-release, policykit-1, util-linux (>= 2.0)
 Description: All-in-one System Update and maintenance app
- This simple script will automatically refresh your packagelist, 
+ This simple script will automatically refresh your packagelist,
  download and install software updates (if there are any), remove old
- kernels, obsolete packages and configuration files and free up disk space 
+ kernels, obsolete packages and configuration files and free up disk space
  without any user intervention
+
+Package: ucaresystem-core
+Depends: ucaresystem, ${misc:Depends}
+Architecture: all
+Priority: optional
+Section: oldlibs
+Description: transitional package
+ This is a transitional package. It can safely be removed.

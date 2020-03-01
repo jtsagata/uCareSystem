@@ -1,9 +1,9 @@
-debian/ucaresystem-core
+debian/ucaresystem/
+debian/ucaresystem-core/
 debian/.debhelper
-debian/ucaresystem-core.debhelper.log
-debian/ucaresystem-core.substvars
-debian/ucaresystem-core.postinst.debhelper
-debian/ucaresystem-core.postrm.debhelper
+debian/*.log
+debian/*.substvars
+debian/*.debhelper
 debian/files
 packages
 TODO

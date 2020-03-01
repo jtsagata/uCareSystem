@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -ex
-DESTDIR=${DESTDIR:=debian/ucaresystem-core}
+DESTDIR=${DESTDIR:=debian/ucaresystem}
 
 ## Scripts
 mkdir -p "$DESTDIR/usr/bin"
@@ -24,8 +24,8 @@ cp assets/*.png "$DESTDIR/usr/share/icons"
 (cd man && make)
 
 ## Misc Files
-mkdir -p "$DESTDIR/usr/share/doc/ucaresystem-core"
-cp assets/ucaresystem.conf.sample "$DESTDIR/usr/share/doc/ucaresystem-core"
+mkdir -p "$DESTDIR/usr/share/doc/ucaresystem"
+cp assets/ucaresystem.conf.sample "$DESTDIR/usr/share/doc/ucaresystem"
 
 
 
