@@ -3,6 +3,8 @@ ucaresystem (4.5.0) trusty; urgency=high
   * Complete rewrite
   * Package rename to ucaresystem
   * Rename exceutable to ucaresystem from ucaresystem-core
+  * Automatically reboot system (configurable default is false)
+  * Ask for confirmationm no wait (configurable and --yes flag)
   * Proper integration with polikit
   * Use x-teminal-emulator
   * Add remove-old-kernels tool

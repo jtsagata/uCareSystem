@@ -7,6 +7,9 @@
 # valid values are: "maintain", "upgrade","cleanup"
 # DEFAULT_MODE="maintain"
 
+# Do not ask for confirmation
+# ASK_CONFIRM=false
+
 # Do reboot if neccessry
 # AUTO_REBOOT=true
 # AUTO_REBOOT_TIMEOUT=10
@@ -17,8 +20,7 @@
 # Show welcome banner
 # SHOW_BANNER=true
 
-# Time to wait before action starts
-# WAIT_START=0
+# Time to wait after each action
 # WAIT_ACTION=0
 
 # GUI options

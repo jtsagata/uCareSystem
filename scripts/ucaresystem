@@ -20,21 +20,21 @@
 
 set -eu
 
-
 codename=$(lsb_release --codename | cut -f2)
 UCARE_VERSION="4.5.0"
 #Config file
 if [ -x "/etc/ucaresystem.conf" ]; then
   source /etc/ucaresystem.conf
 fi
-#Variables
-WAIT_START=${WAIT_START:=10}
+
+# Configuration variables and default values
 WAIT_ACTION=${WAIT_ACTION:=0}
 KEEP_KERNELS=${KEEP_KERNELS:=2}
 SHOW_BANNER=${SHOWBANNER:=true}
 DEFAULT_MODE=${DEFAULT_MODE:=maintain}
 AUTO_REBOOT=${AUTO_REBOOT:=false}
 AUTO_REBOOT_TIMEOUT=${AUTO_REBOOT_TIMEOUT:=10}
+ASK_CONFIRM=${ASK_CONFIRM:=true}
 EXEC=""
 
 ## Colors
@@ -62,6 +62,7 @@ DEBORPHAN="/usr/bin/deborphan"
 UPDATE_TOOL="/usr/bin/do-release-upgrade"
 LSB_RELEASE="/usr/bin/lsb_release"
 REBOOT="/sbin/reboot"
+LOCALE="/usr/bin/locale"
 # use apt or apt-get
 if [ -x "/usr/bin/apt" ]; then
   APT="/usr/bin/apt"
@@ -71,10 +72,11 @@ fi
 
 trap trap_handler 1 2 3 6
 function trap_handler {
+  { set +x; } 2>/dev/null
   banner "Program interrupt."
   echo "  The program have stop before finished. Your system maybe in an incomplete state."
   echo "  You may need to do:"
-  echo "     sudo ap update && sudo apt install -f"
+  echo "     sudo apt update && sudo apt install -f"
   exit 1
 }
 
@@ -82,9 +84,23 @@ function banner() {
   echo -e "${GREEN}${BOLD}***${BOLDOFF} ${1}${NORMAL}"
 }
 
+function ask_yesno {
+  prompt=$1
+  set -- $(${LOCALE} LC_MESSAGES)
+  yesptrn="$1"; noptrn="$2"; yesword="$3"; noword="$4"
+  while true; do
+    read -rp "${prompt} (${yesword} / ${noword})? " yn
+    case $yn in
+        ${yesptrn##^} ) response="yes"; break ;;
+        ${noptrn##^} ) response="no"; break ;;
+        * ) echo "${prompt} ${yesword} / ${noword}.";;
+    esac
+done
+}
+
 function check_eol {
-  distribution_id=$(lsb_release --id | cut -f2)
-  codename=$(lsb_release --codename | cut -f2)
+  distribution_id=$(${LSB_RELEASE} --id | cut -f2)
+  codename=$(${LSB_RELEASE} --codename | cut -f2)
 
 #  distribution_id="Ubuntu" && codename="focal"
 
@@ -157,9 +173,13 @@ function welcome_screen() {
   echo "           ${GREEN}https://www.paypal.me/cerebrux${NORMAL}              "
   echo "_______________________________________________________"
   echo
-  echo " uCareSystem Core will start in $WAIT_START seconds... "
 
-  sleep $WAIT_START
+  if [ "${ASK_CONFIRM}" == "true" ]; then
+    ask_yesno "Are you sure ?"
+    if [[ "${response}" == "no" ]]; then
+        exit 1
+    fi
+  fi
 }
 
 function action_maintain {
@@ -291,6 +311,9 @@ OPTIONS
   -n, --dyrun
     Show only the commands, but do not modify the system
 
+  -y, --yes
+    Don't ask for confirmation
+
   -h, --help
     Display this help text
 
@@ -335,7 +358,7 @@ DO_UPGRADE_TO_DEVEL_RELEASE=false
 DO_UPGRADE_EOL_TO_NEXT=false
 DO_WAIT=false
 
-ARGS=$(getopt -o hnsudewm --long help,dryrun,skip,upgrade,development,eol,wait,maintenance -- "$@")
+ARGS=$(getopt -o hnsudewmy --long help,dryrun,skip,upgrade,development,eol,wait,maintenance,yes -- "$@")
 eval set -- "$ARGS"
 
 while true; do
@@ -346,6 +369,10 @@ while true; do
     ;;
   -n | --dryrun)
     EXEC="echo"
+    shift
+    ;;
+  -y | --yes )
+    ASK_CONFIRM=false
     shift
     ;;
   -s | --skip)
