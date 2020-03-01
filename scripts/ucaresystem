@@ -19,6 +19,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 set -eu
+
+
 codename=$(lsb_release --codename | cut -f2)
 UCARE_VERSION="4.5.0"
 #Config file
@@ -60,6 +62,16 @@ DEBORPHAN="/usr/bin/deborphan"
 UPDATE_TOOL="/usr/bin/do-release-upgrade"
 REMOVE_KERNEL_TOOL="/usr/bin/remove-old-kernels"
 LSB_RELEASE="/usr/bin/lsb_release"
+
+trap trap_handler 1 2 3 6
+
+function trap_handler {
+  banner "Program interrupt."
+  echo "  The program have stop before finished. Your system maybe in an incomplete state."
+  echo "  You may need to do:"
+  echo "     sudo ap update && sudo apt install -f"
+  exit 1
+}
 
 function banner() {
   echo -e "${GREEN}${BOLD}***${BOLDOFF} ${1}${NORMAL}"
@@ -139,33 +151,6 @@ function welcome_screen() {
   echo "                                                       "
   echo "           ${GREEN}https://www.paypal.me/cerebrux${NORMAL}              "
   echo "_______________________________________________________"
-  echo
-
-  echo "${GREEN}Actions:${NORMAL}"
-  if [ "$DO_MAINTENACE" == true ]; then
-    echo "** Update packages and reclaim space"
-  fi
-
-  if [ "$DO_UPGRADE_TO_NEXT_RELEASE" == true ]; then
-    echo "** Update next release"
-  fi
-
-  if [ "$DO_UPGRADE_TO_DEVEL_RELEASE" == true ]; then
-    echo "** Update to development release"
-  fi
-
-  if [ "$DO_UPGRADE_TO_NEXT_RELEASE" == true ]; then
-    echo "** Update to next release"
-  fi
-
-  if [ "$DO_UPGRADE_EOL_TO_NEXT" == true ]; then
-    echo "** Update to eol release"
-  fi
-
-  if [ "$DO_REMOVE_KERNELS" == true ]; then
-    echo "** Remove old kernels"
-  fi
-
   echo
   echo " uCareSystem Core will start in $WAIT_START seconds... "
 
