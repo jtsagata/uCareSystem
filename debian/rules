@@ -21,9 +21,9 @@ binary:
 	cp assets/*.policy  debian/ucaresystem-core/usr/share/polkit-1/actions
 	cp LICENSE          debian/ucaresystem-core/usr/share/doc/ucaresystem-core
 	cp README.md        debian/ucaresystem-core/usr/share/doc/ucaresystem-core
+	cp assets/ucaresystem.conf debian/ucaresystem-core/usr/share/doc/ucaresystem-core
 	cp debian/changelog debian/ucaresystem-core/usr/share/doc/ucaresystem-core
-	cp assets/*.8       debian/ucaresystem-core/usr/share/man/man8/
+	cp man/*.8.gz       debian/ucaresystem-core/usr/share/man/man8/
 	gzip debian/ucaresystem-core/usr/share/doc/ucaresystem-core/changelog
-	gzip debian/ucaresystem-core/usr/share/man/man8/*.8
 	dh_gencontrol
 	dh_builddeb

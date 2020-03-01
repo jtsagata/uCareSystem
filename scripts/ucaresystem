@@ -23,11 +23,13 @@ set -u
 #Variables
 DIST_CODENAME=$(lsb_release --codename | cut -f2)
 UCARE_VERSION="4.5.0"
-WAIT=10
-SLEEP_AFTER_ACTION=0
-KEEP_REMOVE_OLD_KERNELS=2
+WAIT_START=10
+WAIT_ACTION=0
+KEEP_KERNELS=2
 
 #EXEC=""
+
+exit 1
 
 if test -n "$TERM" && test "$TERM" != "dumb"; then
   #    BLACK=$(tput setaf 0)
@@ -102,9 +104,9 @@ function welcome_screen {
   fi
 
   echo
-  echo " uCareSystem Core will start in $WAIT seconds... "
+  echo " uCareSystem Core will start in $WAIT_START seconds... "
 
-  sleep $WAIT
+  sleep $WAIT_START
 }
 
 function banner() {
@@ -120,7 +122,7 @@ function banner() {
 function action_kernels {
   check_root_priv
   banner "Remove old kernels"
-  ${EXEC} remove-old-kernels --keep ${KEEP_REMOVE_OLD_KERNELS}
+  ${EXEC} remove-old-kernels --keep ${KEEP_KERNELS}
   banner "Finished Remove old kernels"
 }
 
@@ -132,19 +134,19 @@ function action_maintain {
   banner "Updating package lists"
   ${EXEC} sudo apt update
   banner "Finished updating package lists"
-  sleep ${SLEEP_AFTER_ACTION}
+  sleep ${WAIT_ACTION}
 
   ## Updates packages and libraries
   banner "Updating packages and system libraries"
   ${EXEC} sudo apt full-upgrade -y
   banner "Finished updating packages and system libraries"
-  sleep ${SLEEP_AFTER_ACTION}
+  sleep ${WAIT_ACTION}
 
   ## Removes unneeded packages
   banner "Removing unneeded packages"
   ${EXEC} sudo apt-get -y --purge autoremove # Debian Jessie uses old apt. So
   banner "Finished removing unneeded packages"
-  sleep ${SLEEP_AFTER_ACTION}
+  sleep ${WAIT_ACTION}
 
   ## Removes unused config files
   banner "Removing unused config files"
@@ -152,7 +154,7 @@ function action_maintain {
   ${EXEC} sudo deborphan -n --find-config | xargs sudo apt-get -y --purge autoremove
   set -e
   banner "Finished removing unused config files"
-  sleep ${SLEEP_AFTER_ACTION}
+  sleep ${WAIT_ACTION}
 
   ## Removes package files that can no longer be downloaded and everything except
   # the lock file in /var/cache/apt/archives, including directories.
@@ -160,7 +162,7 @@ function action_maintain {
   ${EXEC} sudo apt-get -y autoclean
   sudo apt-get -y clean
   banner "Finish cleaned downloaded temporary packages"
-  sleep ${SLEEP_AFTER_ACTION}
+  sleep ${WAIT_ACTION}
 }
 
 function check_reboot {
@@ -199,7 +201,7 @@ EOT
   ${EXEC} sudo apt-get -y dist-upgrade
   ${EXEC} sudo do-release-upgrade
   banner "Done upgrade to EOL"
-  sleep ${SLEEP_AFTER_ACTION}
+  sleep ${WAIT_ACTION}
 }
 
 function action_upgrade_next {
@@ -207,14 +209,14 @@ function action_upgrade_next {
   banner "Upgrade to next Release"
   ${EXEC} do-release-upgrade
   banner "Done upgrade to next Release"
-  sleep ${SLEEP_AFTER_ACTION}
+  sleep ${WAIT_ACTION}
 }
 
 function action_upgrade_devel {
   check_root_priv
   ${EXEC} do-release-upgrade -d
   banner "Done upgrade to next Release"
-  sleep ${SLEEP_AFTER_ACTION}
+  sleep ${WAIT_ACTION}
 }
 
 function action_help {
