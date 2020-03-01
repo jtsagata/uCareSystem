@@ -56,11 +56,15 @@ set -u
 
 # Programs used
 SUDO="/usr/bin/sudo"
-APT_GET="/usr/bin/apt-get"
 DEBORPHAN="/usr/bin/deborphan"
 UPDATE_TOOL="/usr/bin/do-release-upgrade"
-REMOVE_KERNEL_TOOL="/usr/bin/remove-old-kernels"
 LSB_RELEASE="/usr/bin/lsb_release"
+# use apt or apt-get
+if [ -x "/usr/bin/apt" ]; then
+  APT="/usr/bin/apt"
+else
+  APT="/usr/bin/apt-get"
+fi
 
 trap trap_handler 1 2 3 6
 function trap_handler {
@@ -155,35 +159,41 @@ function welcome_screen() {
   sleep $WAIT_START
 }
 
-function action_maintain() {
+function action_maintain {
   check_root_priv
-  banner "Start Maintain actions"
+  banner "Start System update actions"
 
   ## Updates package lists
   banner "Updating package lists"
   set -x
-  ${EXEC} ${SUDO} ${APT_GET} update
+  ${EXEC} ${SUDO} ${APT} update
   { set +x; } 2>/dev/null
   sleep ${WAIT_ACTION}
 
   ## Updates packages and libraries
   banner "Updating packages and system libraries"
   set -x
-  ${EXEC} ${SUDO} ${APT_GET} full-upgrade -y
+  ${EXEC} ${SUDO} ${APT} full-upgrade -y
   { set +x; } 2>/dev/null
   sleep ${WAIT_ACTION}
+  banner "Finish System update actions"
+  sleep ${WAIT_ACTION}
+}
 
+function action_clenaup {
+  check_root_priv
+  banner "Start Cleanup actions"
   ## Removes unneeded packages
   banner "Removing unneeded packages"
   set -x
-  ${EXEC} ${SUDO} ${APT_GET} -y --purge autoremove # Debian Jessie uses old apt. So
+  ${EXEC} ${SUDO} ${APT} -y --purge autoremove
   { set +x; } 2>/dev/null
   sleep ${WAIT_ACTION}
 
   ## Removes unused config files
   banner "Removing unused config files"
   set -x
-  ${EXEC} ${SUDO} ${DEBORPHAN} -n --find-config |  ${EXEC}  xargs ${SUDO} ${APT_GET} -y --purge autoremove
+  ${EXEC} ${SUDO} ${DEBORPHAN} -n --find-config |  ${EXEC}  xargs ${SUDO} ${APT} -y --purge autoremove
   { set +x; } 2>/dev/null
   sleep ${WAIT_ACTION}
 
@@ -191,10 +201,10 @@ function action_maintain() {
   # the lock file in /var/cache/apt/archives, including directories.
   banner "Cleaned downloaded temporary packages"
   set -x
-  ${EXEC} ${SUDO} ${APT_GET} -y autoclean
-  ${EXEC} ${SUDO} ${APT_GET} -y clean
+  ${EXEC} ${SUDO} ${APT} -y autoclean
+  ${EXEC} ${SUDO} ${APT} -y clean
   { set +x; } 2>/dev/null
-  banner "Finish cleaned Maintain actions"
+  banner "Finish Cleanup actions"
   sleep ${WAIT_ACTION}
 }
 
@@ -230,8 +240,8 @@ deb http://old-releases.ubuntu.com/ubuntu/ $codename-security main restricted un
 EOT
   fi
 
-  ${EXEC} ${SUDO} ${APT_GET} install update-manager-core
-  ${EXEC} ${SUDO} ${APT_GET} -y dist-upgrade
+  ${EXEC} ${SUDO} ${APT} install update-manager-core
+  ${EXEC} ${SUDO} ${APT} -y dist-upgrade
   ${EXEC} ${SUDO} ${UPDATE_TOOL}
   banner "Done upgrade to EOL"
   sleep ${WAIT_ACTION}
