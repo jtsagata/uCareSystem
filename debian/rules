@@ -4,4 +4,4 @@
 	dh $@
 
 override_dh_auto_install:
-	env DESTDIR=debian/ucaresystem-core ./install.sh
+	env DESTDIR=debian/ucaresystem-core ./build.sh
