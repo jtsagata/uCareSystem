@@ -2,14 +2,15 @@
 # Remember to make the troff sources
 #
 
-all: ucaresystem.8
+all: ucaresystem.8 launch-ucaresystem.1
 
-ucaresystem.8: ucaresystem.sgml
+%.1: %.sgml
 	@echo "** Create troff sources " $<
 	docbook-to-man $< > $@
 
-%.8.gz: %.8
-	@echo "** Gziping sources " $<
+%.8: %.sgml
+	@echo "** Create troff sources " $<
+	docbook-to-man $< > $@
 
 .PHONY: man_ucare
 man_ucare: ucaresystem.8.gz

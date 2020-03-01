@@ -17,4 +17,7 @@
 # WAIT_START=0
 # WAIT_ACTION=0
 
+# GUI options
+#X_TERMINAL="gnome-terminal"
+#X_TERMINAL_OPTS=""
 
