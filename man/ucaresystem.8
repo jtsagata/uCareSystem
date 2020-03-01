@@ -1,0 +1,90 @@
+.TH "ucaresystem" "8" 
+.SH "NAME" 
+ucaresystem \(em All-in-one system update and maintenance tool 
+.SH "SYNOPSIS" 
+.PP 
+\fBucaresystem\fR [options ]  
+.SH "DESCRIPTION" 
+.PP 
+\fBucaresystem\fR. 
+is All-in-one system update and maintenance tool. It is written as an augmented tool to the distro specifics tools, and it doesn't try to replace them. 
+It will automate the following: 
+.SS "Basic Maintenance Tasks" 
+.PP 
+Update the list of available packages. 
+Download and install all the available updates. 
+Removes obsolete packages 
+Removes orphan packets. 
+Deletes package configuration files from packages that have been uninstalled by you. 
+Checks if there are older Linux kernels on the system and removes them. Check kernel removal for details. 
+ 
+.PP 
+This is the default task is no options is given. 
+ 
+.SS "Distribution upgrade paths " 
+.PP 
+References to the 
+\fBfoo\fP\fB(SECTION)\fP (or other) manual page should use the 
+\f(CW<citerefentry>\fP element as here. 
+ 
+.PP 
+Each paragraph within a section is contained within a 
+\f(CW<para>\fP tag. 
+.SH "OPTIONS" 
+.PP 
+Some people make this separate from the description. 
+.IP "\fBthis\fP|\fBthat\fP" 10 
+The user MUST specify either \fBthis\fP or 
+\fBthat\fP to run the program. The { and } braces 
+mean one of the enclosed is required. The bar (|) separates 
+exclusive options (i.e. you cannot have both at once.) 
+.IP "\fB-o\fP" 10 
+Pass the user-supplied \fIoption\fR to 
+\fBfoo\fR to change its behaviour. The fact that 
+\fIoption\fR is underlined or in italics 
+means that the user replaces it with a valid value for this 
+option. The [ and ] brackets mean it isn't required. 
+.IP "\fBargument\fP" 10 
+The last \fBargument\fP is required, because it 
+is not in brackets. 
+.IP "\fBmore\fP" 10 
+means that the user can optionally specify additional 
+arguments at the end. The ellipses (...) indicate one or more of 
+this parameter is allowed. 
+.SH "RETURN VALUE" 
+.PP 
+What the program or function returns if successful. 
+.SH "ERRORS" 
+.PP 
+Return codes, either exit status or errno settings. 
+.SH "EXAMPLES" 
+.PP 
+Give some example uses of the program. 
+.SH "ENVIRONMENT" 
+.PP 
+Environment variables this program might care about. 
+.SH "FILES" 
+.PP 
+All files used by the program. Typical usage is like this: 
+.IP "\fB/usr/man\fP" 10 
+default man tree 
+.IP "\fB/usr/man/man*/*.*\fP" 10 
+unformatted (nroff source) man pages 
+.SH "NOTES" 
+.PP 
+Miscellaneous commentary. 
+.SH "CAVEATS" 
+.PP 
+This tool may break your system. Use with caution. 
+.SH "BUGS" 
+.PP 
+Please report bugs at: https://github.com/Utappia/uCareSystem 
+.SH "RESTRICTIONS" 
+.PP 
+The tool is limited to debian derived distributions only. It is work well and tested on Ubuntu. 
+Usage in other distributions may have bugs, or be less suported. 
+ 
+.SH "AUTHOR" 
+.PP 
+Who wrote it (or AUTHORS if multiple). 
+.\" created by instant / docbook-to-man 

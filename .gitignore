@@ -1,6 +1,10 @@
 debian/ucaresystem-core
+debian/.debhelper
 debian/ucaresystem-core.debhelper.log
 debian/ucaresystem-core.substvars
+debian/ucaresystem-core.postinst.debhelper
+debian/ucaresystem-core.postrm.debhelper
+debian/files
 packages
 TODO
 .idea

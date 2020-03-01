@@ -2,7 +2,7 @@
 # Remember to make the troff sources
 #
 
-all: ucaresystem.8.gz
+all: ucaresystem.8
 
 ucaresystem.8: ucaresystem.sgml
 	@echo "** Create troff sources " $<
@@ -10,10 +10,9 @@ ucaresystem.8: ucaresystem.sgml
 
 %.8.gz: %.8
 	@echo "** Gziping sources " $<
-	gzip --force $<
 
 .PHONY: man_ucare
 man_ucare: ucaresystem.8.gz
-	@zcat ucaresystem.8.gz | nroff -man
+	@cat ucaresystem.8 | nroff -man
 
 

@@ -1,9 +1,3 @@
-ucaresystem-core (4.4.0) trusty; urgency=high
-
-  * Added pkexec, check if reboot is required, fixed Debian Jessie issue
-  
- -- Salih Emin <salih-emin@ubuntu.com>  Wed, 25 Jan 2018 14:45:44 +0200
-
 ucaresystem-core (4.5.0) trusty; urgency=high
 
   * Major rewrite
@@ -15,10 +9,16 @@ ucaresystem-core (4.5.0) trusty; urgency=high
   * Better debian packaging
   * Use getopt, add many options
   * Add  man pages
-  * Compatible with WSL, dont use pkgexec on ucaresystem script
+  * Compatible with WSL, don't use pkgexec on ucaresystem script
   * Fix desktop menu file
-  * Allow to skip kernel removal
+  * Allow one to skip kernel removal
   * More secure bash script
   * Remove obsolete files
 
  -- Giannis Tsgakatakis <jtsagata@gmail.com>  Sat, 29 Feb 2020 00:01:54 +0200
+
+ucaresystem-core (4.4.0) trusty; urgency=high
+
+  * Added pkexec, check if reboot is required, fixed Debian Jessie issue
+  
+ -- Salih Emin <salih-emin@ubuntu.com>  Wed, 25 Jan 2018 14:45:44 +0200
