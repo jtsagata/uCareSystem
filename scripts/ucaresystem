@@ -19,7 +19,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 set -eu
-DIST_CODENAME=$(lsb_release --codename | cut -f2)
+codename=$(lsb_release --codename | cut -f2)
 UCARE_VERSION="4.5.0"
 #Config file
 if [ -x "/etc/ucaresystem.conf" ]; then
@@ -52,8 +52,58 @@ APT_GET="/usr/bin/apt-get"
 DEBORPHAN="/usr/bin/deborphan"
 UPDATE_TOOL="/usr/bin/do-release-upgrade"
 REMOVE_KERNEL_TOOL="/usr/bin/remove-old-kernels"
+LSB_RELEASE="/usr/bin/lsb_release"
 
-function check_root_priv() {
+function banner() {
+  title=$1
+  #  echo
+  #	echo "${GREEN}##################################################"
+  #	printf "%*s\n" $(((${#title}+50)/2)) "$title"
+  #	echo "##################################################${NORMAL}"
+  #	echo
+  echo -e "${GREEN}${BOLD}***${BOLDOFF} ${title}${NORMAL}"
+}
+
+function check_eol {
+  distribution_id=$(lsb_release --id | cut -f2)
+  codename=$(lsb_release --codename | cut -f2)
+
+#  distribution_id="Ubuntu" && codename="focal"
+
+  valid_ids=("Debian" "Ubuntu")
+  if [[ ! "${valid_ids[*]}" == *"${distribution_id}"* ]]; then
+    banner "Your distribution '${distribution_id}', codename:'${codename}' is unsupported."
+    exit
+  fi
+
+  case "${distribution_id}" in
+    "Debian" )  DISTRO_INFO="/usr/bin/debian-distro-info" ;;
+    "Ubuntu" )  DISTRO_INFO="/usr/bin/ubuntu-distro-info" ;;
+  esac
+
+  supported_distro=$(${DISTRO_INFO} --supported)
+  days=$(${DISTRO_INFO} --series=${codename} --days)
+
+  if [[ "${supported_distro[*]}" == *"${codename}"* ]]; then
+    banner "Your distribution '${GREEN}${distribution_id}${NORMAL}', codename:'${GREEN}${codename}${NORMAL}' is not at eol."
+    if [ ! "${days}" == "(unknown)" ]; then
+      if [[ "${days}" == *"-"* ]]; then
+        banner "The was a new distribution version before ${days//-/} days. Consider an upgrade."
+      else
+        banner "Expect a new version of your distribution in ${days} days."
+      fi
+    fi
+    return
+  else
+    banner "Your distribution '${distribution_id}', codename:'${codename}' is reach the end of support"
+    echo  "  The end of support was before ${days//-/} days."
+    echo  "  Please upgrade your distribution to a latest release!"
+    echo  "  Try run: $(basename "${0}") --upgrade"
+    exit
+  fi
+}
+
+function check_root_priv {
   # Checking if the user has run the script with "sudo" or not
   if [[ $EUID -ne 0 ]]; then
     echo -ne "${RED}${BOLD}Error: ${BOLDOFF} '$0'" 1>&2
@@ -121,15 +171,7 @@ function welcome_screen() {
   sleep $WAIT_START
 }
 
-function banner() {
-  title=$1
-  #  echo
-  #	echo "${GREEN}##################################################"
-  #	printf "%*s\n" $(((${#title}+50)/2)) "$title"
-  #	echo "##################################################${NORMAL}"
-  #	echo
-  echo -e "${GREEN}${BOLD}***${BOLDOFF} ${title}${NORMAL}"
-}
+
 
 function action_kernels() {
   check_root_priv
@@ -207,9 +249,9 @@ function action_upgrade_EOL() {
   else
     banner "Updating /etc/apt/sources.list"
     cat <<EOT >/etc/apt/sources.list
-deb http://old-releases.ubuntu.com/ubuntu/ $DIST_CODENAME main restricted universe multiverse
-deb http://old-releases.ubuntu.com/ubuntu/ $DIST_CODENAME-updates main restricted universe multiverse
-deb http://old-releases.ubuntu.com/ubuntu/ $DIST_CODENAME-security main restricted universe multiverse
+deb http://old-releases.ubuntu.com/ubuntu/ $codename main restricted universe multiverse
+deb http://old-releases.ubuntu.com/ubuntu/ $codename-updates main restricted universe multiverse
+deb http://old-releases.ubuntu.com/ubuntu/ $codename-security main restricted universe multiverse
 
 EOT
   fi
