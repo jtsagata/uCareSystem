@@ -25,7 +25,7 @@ cp assets/*.png "$DESTDIR/usr/share/icons"
 
 ## Misc Files
 mkdir -p "$DESTDIR/usr/share/doc/ucaresystem-core"
-cp assets/ucaresystem.conf "$DESTDIR/usr/share/doc/ucaresystem-core"
+cp assets/ucaresystem.conf.sample "$DESTDIR/usr/share/doc/ucaresystem-core"
 
 
 

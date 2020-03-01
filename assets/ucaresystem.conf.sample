@@ -1,0 +1,20 @@
+#
+# Edit and put copy of this file at
+# /etc/ucaresystem.conf
+#
+
+# Default mode
+# valid values are: "maintain", "upgrade","cleanup"
+# DEFAULT_MODE="maintain"
+
+# Kernels to keep. Default is 2
+# KEEP_KERNELS=2
+
+# Show welcome banner
+# SHOW_BANNER=true
+
+# Time to wait before action starts
+# WAIT_START=0
+# WAIT_ACTION=0
+
+

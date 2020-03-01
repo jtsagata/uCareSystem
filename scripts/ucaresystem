@@ -20,16 +20,19 @@
 set -e
 set -u
 
-#Variables
 DIST_CODENAME=$(lsb_release --codename | cut -f2)
 UCARE_VERSION="4.5.0"
-WAIT_START=10
-WAIT_ACTION=0
-KEEP_KERNELS=2
+#Config file
+if ! [ -x "/etc/ucaresystem.conf" ]; then
+  source /etc/ucaresystem.conf
+fi
+#Variables
+WAIT_START=${WAIT_START:=10}
+WAIT_ACTION=${WAIT_ACTION:=1}
+KEEP_KERNELS=${KEEP_KERNELS:=2}
+SHOW_BANNER=${SHOWBANNER:=true}
+DEFAULT_MODE=${DEFAULT_MODE:=maintain}
 
-#EXEC=""
-
-exit 1
 
 if test -n "$TERM" && test "$TERM" != "dumb"; then
   #    BLACK=$(tput setaf 0)
@@ -44,7 +47,7 @@ if test -n "$TERM" && test "$TERM" != "dumb"; then
   BOLDOFF=$(tput sgr0)
 fi
 
-function check_root_priv {
+function check_root_priv() {
   # Checking if the user has run the script with "sudo" or not
   if [[ $EUID -ne 0 ]]; then
     echo "${RED}${BOLD}uCareSystem Core must be run as root or with sudo.${BOLDOFF}${NORMAL}" 1>&2
@@ -52,7 +55,7 @@ function check_root_priv {
   fi
 }
 
-function welcome_screen {
+function welcome_screen() {
   clear
   echo "_______________________________________________________"
   echo "                                                       "
@@ -119,14 +122,14 @@ function banner() {
   echo -e "${GREEN}${BOLD}***${BOLDOFF} ${title}${NORMAL}"
 }
 
-function action_kernels {
+function action_kernels() {
   check_root_priv
   banner "Remove old kernels"
   ${EXEC} remove-old-kernels --keep ${KEEP_KERNELS}
   banner "Finished Remove old kernels"
 }
 
-function action_maintain {
+function action_maintain() {
   check_root_priv
   banner "Started"
 
@@ -165,7 +168,7 @@ function action_maintain {
   sleep ${WAIT_ACTION}
 }
 
-function check_reboot {
+function check_reboot() {
   banner "Checking to see if a reboot is required "
   ## Check to see if a reboot is required
   if [ -f /var/run/reboot-required ]; then
@@ -180,7 +183,7 @@ function check_reboot {
   fi
 }
 
-function action_upgrade_EOL {
+function action_upgrade_EOL() {
   check_root_priv
   curr_date=$(date +%F_%T)
   banner "Upgrade to EOL"
@@ -204,7 +207,7 @@ EOT
   sleep ${WAIT_ACTION}
 }
 
-function action_upgrade_next {
+function action_upgrade_next() {
   check_root_priv
   banner "Upgrade to next Release"
   ${EXEC} do-release-upgrade
@@ -212,64 +215,62 @@ function action_upgrade_next {
   sleep ${WAIT_ACTION}
 }
 
-function action_upgrade_devel {
+function action_upgrade_devel() {
   check_root_priv
   ${EXEC} do-release-upgrade -d
   banner "Done upgrade to next Release"
   sleep ${WAIT_ACTION}
 }
 
-function action_help {
+function action_help() {
   cat <<EOF
 	
-				uCareSystem Core
-				    ~ $UCARE_VERSION ~
-		     All-in-one system update and maintenance app
+uCareSystem Core $UCARE_VERSION : All-in-one system update and maintenance tool
 
-	Usage: sudo ucaresystem-core [options]
-	
-	If no parameter is specified, it will just do the regular
-	maintenance:
-	
-	 * Updates the list of available packages
-	 * Downloads and installs the available updates
-	 * Checks if there are older Linux kernels on the system and removes
-	   them. However it keeps the current and one previous version of 
-	   the kernel.
-	 * Cleans the cache of the downloaded packages
-	 * Removes obsolete packages
-	 * Removes orphan packets
-	 * Deletes package configuration files from packages that have been
-	   uninstalled by you.
-	
+Usage:
+  sudo ucaresystem [--mode=name] [mode-options]
+  ucaresystem --help|--version
+
+See man page for more info
+
 OPTIONS
-       -h, --help
-              Display help text and exit.  No other output is generated.
+  -m name, --mode=name
+    Choose mode of operation. Valid modes are "maintain", "upgrade","cleanup"
+    If no option is given "maintain" mode will be used (configurable)
 
-       -n, --dyrun
-              Show only the commands, but do not modify the system
+  -n, --dyrun
+    Show only the commands, but do not modify the system
 
-       -s, --skip
-              Do not show the welcome banner, and do not pause.
+  -h, --help
+    Display this help text
 
-       -k, --nokernel
-              Do not remove old kernels.
+  -v, --version
+    Display program version and exits
 
-       -u, --upgrade
-              Upgrade to next available release
+  -s, --skip
+    Do not show the welcome banner, and do not pause.
 
-       -d, --development
-              Upgrade to a development release. For testers and developers only
+  -w, --wait
+          Press ENTER to end the program. For the "gui" version
 
-       -e, --eol
-              If your Ubuntu (and official flavors) has reached the EOL support you can upgrade to the next supported  release.   This  option  is  for  Ubuntu
-              releases that have reached their EOL and the user wants to upgrade it to the next supported version.
+MAINTAIN OPTIONS
+  -n, --nokernel
+    Do not remove old kernels.
 
-       -w, --wait
-              Press ENTER to end the program. For the "gui" version
+   -u, --upgrade
+          Upgrade to next available release
 
-       -m, --maintenance
-              Do normal maintenance jobs. The default action id no option is given.
+   -d, --development
+          Upgrade to a development release. For testers and developers only
+
+   -e, --eol
+          If your Ubuntu (and official flavors) has reached the EOL support you can upgrade to the next supported  release.   This  option  is  for  Ubuntu
+          releases that have reached their EOL and the user wants to upgrade it to the next supported version.
+
+
+
+   -m, --maintenance
+          Do normal maintenance jobs. The default action id no option is given.
 
 EOF
 }
@@ -341,7 +342,7 @@ if [ "$DO_action_help" == true ]; then
   exit
 fi
 
-if [ "$DO_WELCOME_SCREEN" == true ]; then
+if [ "SHOW_BANNER" == true ]; then
   welcome_screen
 fi
 
