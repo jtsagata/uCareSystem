@@ -54,7 +54,6 @@ if [[ -z "${NO_COLOR}" ]]; then
 fi
 set -u
 
-
 # Programs used
 SUDO="/usr/bin/sudo"
 APT_GET="/usr/bin/apt-get"
@@ -64,7 +63,6 @@ REMOVE_KERNEL_TOOL="/usr/bin/remove-old-kernels"
 LSB_RELEASE="/usr/bin/lsb_release"
 
 trap trap_handler 1 2 3 6
-
 function trap_handler {
   banner "Program interrupt."
   echo "  The program have stop before finished. Your system maybe in an incomplete state."
@@ -155,16 +153,6 @@ function welcome_screen() {
   echo " uCareSystem Core will start in $WAIT_START seconds... "
 
   sleep $WAIT_START
-}
-
-
-
-function action_kernels() {
-  check_root_priv
-  banner "Remove old kernels"
-  set -x
-  ${EXEC} ${REMOVE_KERNEL_TOOL} --keep ${KEEP_KERNELS}
-  { set +x; } 2>/dev/null
 }
 
 function action_maintain() {
@@ -295,9 +283,6 @@ OPTIONS
   -w, --wait
           Press ENTER to end the program. For the "gui" version
 
-MAINTAIN OPTIONS
-  -n, --nokernel
-    Do not remove old kernels.
 
    -u, --upgrade
           Upgrade to next available release
@@ -330,7 +315,7 @@ DO_UPGRADE_TO_DEVEL_RELEASE=false
 DO_UPGRADE_EOL_TO_NEXT=false
 DO_WAIT=false
 
-ARGS=$(getopt -o hnskudewm --long help,dryrun,skip,nokernel,upgrade,development,eol,wait,maintenance -- "$@")
+ARGS=$(getopt -o hnsudewm --long help,dryrun,skip,upgrade,development,eol,wait,maintenance -- "$@")
 eval set -- "$ARGS"
 
 while true; do
@@ -345,10 +330,6 @@ while true; do
     ;;
   -s | --skip)
     DO_WELCOME_SCREEN=false
-    shift
-    ;;
-  -k | --nokernel)
-    DO_REMOVE_KERNELS=false
     shift
     ;;
   -u | --upgrade)
@@ -390,10 +371,6 @@ fi
 
 if [ "$DO_MAINTENACE" == true ]; then
   action_maintain
-fi
-
-if [ "$DO_REMOVE_KERNELS" == true ]; then
-  action_kernels
 fi
 
 if [ "$DO_UPGRADE_TO_NEXT_RELEASE" == true ]; then
