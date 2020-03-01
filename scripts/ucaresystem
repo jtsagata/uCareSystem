@@ -292,7 +292,7 @@ function action_upgrade_devel() {
   sleep ${WAIT_ACTION}
 }
 
-function action_help() {
+function action_help {
   cat <<EOF
 	
 uCareSystem Core $UCARE_VERSION : All-in-one system update and maintenance tool
