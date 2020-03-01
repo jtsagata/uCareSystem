@@ -4,7 +4,7 @@ Upstream-Contact: Salih Emin <salih-emin@ubuntu.com>
 Source: https://github.com/Utappia/uCareSystem.git
 
 Files: /usr/bin/remove-old-kernels
-Copyright: (C) 2012 Dustin Kirkland <kirkland@ubuntu.com>
+Copyright: (C) 2012 Dustin Kirkland <kirkland@ubuntu.com>, 2017 Esteban M. Navas Martín <algodelinux@gmail.com>
 License: GPL-2
  The full text of the GPL is distributed in
  /usr/share/common-licenses/GPL-2 on Debian systems.
