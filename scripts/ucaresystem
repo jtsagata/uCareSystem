@@ -182,6 +182,11 @@ function welcome_screen() {
   fi
 }
 
+function action_version {
+  echo "$(basename "${0}") version ${UCARE_VERSION}"
+  exit
+}
+
 function action_maintain {
   check_root_priv
   banner "Start System update actions"
@@ -358,7 +363,7 @@ DO_UPGRADE_TO_DEVEL_RELEASE=false
 DO_UPGRADE_EOL_TO_NEXT=false
 DO_WAIT=false
 
-ARGS=$(getopt -o hnsudewmy --long help,dryrun,skip,upgrade,development,eol,wait,maintenance,yes -- "$@")
+ARGS=$(getopt -o hnsudewmyv --long help,dryrun,skip,upgrade,development,eol,wait,maintenance,yes,version -- "$@")
 eval set -- "$ARGS"
 
 while true; do
@@ -373,6 +378,10 @@ while true; do
     ;;
   -y | --yes )
     ASK_CONFIRM=false
+    shift
+    ;;
+  -v | --version )
+    action_version
     shift
     ;;
   -s | --skip)
