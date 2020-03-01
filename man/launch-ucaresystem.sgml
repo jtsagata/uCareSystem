@@ -3,7 +3,7 @@
   <!ENTITY manfirstname "<firstname>FIRSTNAME</firstname>">
   <!ENTITY mansurname   "<surname>SURNAME</surname>">
   <!-- Please adjust the date whenever revising the manpage. -->
-  <!ENTITY mandate      "<date>Sun, 01 Mar 2020</date>">
+  <!ENTITY mandate      "<date>Sun, 01 Mar 2020 </date>">
   <!-- SECTION should be 1-8, maybe with subsection. Other parameters are
        allowed: see man(7), man(1). -->
   <!ENTITY mansection   "<manvolnum>1</manvolnum>">

@@ -46,6 +46,13 @@ if test -n "$TERM" && test "$TERM" != "dumb"; then
   BOLDOFF=$(tput sgr0)
 fi
 
+# Programs used
+SUDO="/usr/bin/sudo"
+APT_GET="/usr/bin/apt-get"
+DEBORPHAN="/usr/bin/deborphan"
+UPDATE_TOOL="/usr/bin/do-release-upgrade"
+REMOVE_KERNEL_TOOL="/usr/bin/remove-old-kernels"
+
 function check_root_priv() {
   # Checking if the user has run the script with "sudo" or not
   if [[ $EUID -ne 0 ]]; then
@@ -128,7 +135,7 @@ function action_kernels() {
   check_root_priv
   banner "Remove old kernels"
   set -x
-  ${EXEC} remove-old-kernels --keep ${KEEP_KERNELS}
+  ${EXEC} ${REMOVE_KERNEL_TOOL} --keep ${KEEP_KERNELS}
   { set +x; } 2>/dev/null
 }
 
@@ -139,28 +146,28 @@ function action_maintain() {
   ## Updates package lists
   banner "Updating package lists"
   set -x
-  ${EXEC} sudo apt update
+  ${EXEC} ${SUDO} ${APT_GET} update
   { set +x; } 2>/dev/null
   sleep ${WAIT_ACTION}
 
   ## Updates packages and libraries
   banner "Updating packages and system libraries"
   set -x
-  ${EXEC} sudo apt full-upgrade -y
+  ${EXEC} ${SUDO} ${APT_GET} full-upgrade -y
   { set +x; } 2>/dev/null
   sleep ${WAIT_ACTION}
 
   ## Removes unneeded packages
   banner "Removing unneeded packages"
   set -x
-  ${EXEC} sudo apt-get -y --purge autoremove # Debian Jessie uses old apt. So
+  ${EXEC} ${SUDO} ${APT_GET} -y --purge autoremove # Debian Jessie uses old apt. So
   { set +x; } 2>/dev/null
   sleep ${WAIT_ACTION}
 
   ## Removes unused config files
   banner "Removing unused config files"
   set -x
-  ${EXEC} sudo deborphan -n --find-config |  ${EXEC}  xargs sudo apt-get -y --purge autoremove
+  ${EXEC} ${SUDO} ${DEBORPHAN} -n --find-config |  ${EXEC}  xargs ${SUDO} ${APT_GET} -y --purge autoremove
   { set +x; } 2>/dev/null
   sleep ${WAIT_ACTION}
 
@@ -168,8 +175,8 @@ function action_maintain() {
   # the lock file in /var/cache/apt/archives, including directories.
   banner "Cleaned downloaded temporary packages"
   set -x
-  ${EXEC} sudo apt-get -y autoclean
-  ${EXEC} sudo apt-get -y clean
+  ${EXEC} ${SUDO} ${APT_GET} -y autoclean
+  ${EXEC} ${SUDO} ${APT_GET} -y clean
   { set +x; } 2>/dev/null
   banner "Finish cleaned Maintain actions"
   sleep ${WAIT_ACTION}
@@ -207,9 +214,9 @@ deb http://old-releases.ubuntu.com/ubuntu/ $DIST_CODENAME-security main restrict
 EOT
   fi
 
-  ${EXEC} sudo apt-get install update-manager-core
-  ${EXEC} sudo apt-get -y dist-upgrade
-  ${EXEC} sudo do-release-upgrade
+  ${EXEC} ${SUDO} ${APT_GET} install update-manager-core
+  ${EXEC} ${SUDO} ${APT_GET} -y dist-upgrade
+  ${EXEC} ${SUDO} ${UPDATE_TOOL}
   banner "Done upgrade to EOL"
   sleep ${WAIT_ACTION}
 }
@@ -217,14 +224,14 @@ EOT
 function action_upgrade_next() {
   check_root_priv
   banner "Upgrade to next Release"
-  ${EXEC} do-release-upgrade
+  ${EXEC} ${UPDATE_TOOL}
   banner "Done upgrade to next Release"
   sleep ${WAIT_ACTION}
 }
 
 function action_upgrade_devel() {
   check_root_priv
-  ${EXEC} do-release-upgrade -d
+  ${EXEC} ${UPDATE_TOOL} -d
   banner "Done upgrade to next Release"
   sleep ${WAIT_ACTION}
 }
@@ -349,7 +356,7 @@ if [ "$DO_action_help" == true ]; then
   exit
 fi
 
-if [ "SHOW_BANNER" == true ]; then
+if [ "$SHOW_BANNER" == true ]; then
   welcome_screen
 fi
 
