@@ -8,10 +8,10 @@ There is 3 modes of operation
   - Downloads and installs the available updates
   - do all clean actions
  * clean: Reclaim some disk space
-  - Removes obsolete packages
-  - Removes orphan packets, and old kernels
-  - Deletes package configuration files from packages that have been uninstalled by you
-  - Cleans the cache of the downloaded packages
+   - Removes obsolete packages
+   - Removes orphan packets, and old kernels
+   - Deletes package configuration files from packages that have been uninstalled by you
+   - Cleans the cache of the downloaded packages
 * upgrade: 
   - Update to next amiable release (Ubuntu)
   - Update to development release (Ubuntu)
