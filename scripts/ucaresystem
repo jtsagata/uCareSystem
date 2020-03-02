@@ -433,7 +433,7 @@ Usage:
   ucaresystem --help|--version
 
 MODES
-   -m, --maintenance
+   -m, --maintain
       Do normal maintenance jobs. The default action id no option is given.
    -c, --clean
       reclaim some disk space

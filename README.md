@@ -1,6 +1,58 @@
 Work in progress for the next major version
 
-## Basic usage
+## Modes of operation
+There is 3 modes of operation
+
+* maintain: Basic system maintainace
+  - Updates the list of available packages
+  - Downloads and installs the available updates
+  - do all clean actions
+ * clean: Reclaim some disk space
+  - Removes obsolete packages
+  - Removes orphan packets, and old kernels
+  - Deletes package configuration files from packages that have been uninstalled by you
+  - Cleans the cache of the downloaded packages
+* upgrade: 
+  - Update to next amiable release (Ubuntu)
+  - Update to development release (Ubuntu)
+  - Update to next available release if EOL (Ubuntu)
+  - Update to last stable version (Debian)
+
+The program reports the expected date of new distribution release, or how old is your release in some cases. 
+
+## Command line options
+If no options is specified the program runs in `maintain` mode
+
+    uCareSystem Core 4.5.0 : All-in-one system update and maintenance tool
+    
+    Usage:
+      sudo ucaresystem [options]
+      ucaresystem --help|--version
+    
+    MODES
+       -m, --maintain
+          Do normal maintenance jobs. The default action id no option is given.
+       -c, --clean
+          reclaim some disk space
+       -u type, --upgrade=type
+              Upgrade ...
+    OTHER OPTIONS
+      -n, --dyrun
+        Show only the commands, but do not modify the system
+      -y, --yes
+        Don't ask for confirmation
+      -h, --help
+        Display this help text
+      -v, --version
+        Display program version and exits
+      -s, --skip
+        Do not show the welcome banner, and do not pause.
+      -w, --wait
+        Press ENTER to end the program. For the "gui" version
+    
+    See man page for more info
+
+
 
 ## Supported distributions
 TODO: Debian, Ubuntu, Others, WSL
