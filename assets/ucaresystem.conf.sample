@@ -7,6 +7,9 @@
 # valid values are: "maintain", "upgrade","cleanup"
 # DEFAULT_MODE="maintain"
 
+# Enable STimeshift
+# ENABLE_TIMESHIFT=true
+
 # Do not ask for confirmation
 # ASK_CONFIRM=false
 

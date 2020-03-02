@@ -38,6 +38,7 @@ DEFAULT_MODE=${DEFAULT_MODE:=maintain}
 AUTO_REBOOT=${AUTO_REBOOT:=false}
 AUTO_REBOOT_TIMEOUT=${AUTO_REBOOT_TIMEOUT:=10}
 ASK_CONFIRM=${ASK_CONFIRM:=true}
+ENABLE_TIMESHIFT=${ENABLE_TIMESHIFT:=false}
 EXEC=""
 DO_WAIT=false
 
@@ -68,6 +69,8 @@ LSB_RELEASE="/usr/bin/lsb_release"
 REBOOT="/sbin/reboot"
 LOCALE="/usr/bin/locale"
 SED="/bin/sed"
+TIMESHIFT="/usr/bin/timeshift"
+
 # use apt or apt-get
 if [ -x "/usr/bin/apt" ]; then
   APT="/usr/bin/apt"
@@ -276,7 +279,7 @@ function action_upgrade_EOL() {
   check_root_priv
   curr_date=$(date +%F_%T)
 
-  new_codename=$(ubuntu-distro-info --supported | tail -1)
+  new_codename=$(/usr/bin/ubuntu-distro-info --supported | tail -1)
 
   banner "Upgrade to EOL"
   ${EXEC} "/etc/apt/sources.list" "/etc/apt/sources.eol_${curr_date}"
@@ -326,18 +329,21 @@ function do_ubuntu_upgrade() {
   fi
 
   case "$action" in
-    "next" )
-      action_upgrade_next
-      ;;
-    "development" )
-      action_upgrade_devel
-      ;;
-    "eol" )
-      action_upgrade_EOL
-      ;;
-    * )
-      echo "Error: unknown upgrade tag '$action'"
-      ;;
+  "next")
+    action_timeshift
+    action_upgrade_next
+    ;;
+  "development")
+    action_timeshift
+    action_upgrade_devel
+    ;;
+  "eol")
+    action_timeshift
+    action_upgrade_EOL
+    ;;
+  *)
+    echo "Error: unknown upgrade tag '$action'"
+    ;;
   esac
 }
 
@@ -351,23 +357,23 @@ function do_debian_upgrade() {
   codename=$(${LSB_RELEASE} --codename | cut -f2)
   new_codename=$(debian-distro-info --supported | tail -1)
 
+  action_timeshift
   action_maintain
 
   banner "Upgrade to $new_codename from $codename"
 
-if [ "$EXEC" == "echo" ]; then
+  if [ "$EXEC" == "echo" ]; then
     echo "...skiping updating /etc/apt/sources.list"
   else
     banner "Backup /etc/apt/sources.list"
     ${EXEC} cp "/etc/apt/sources.list" "/etc/apt/sources.${codename}_${curr_date}"
-    for file in /etc/apt/sources.list.d/*
-    do
+    for file in /etc/apt/sources.list.d/*; do
       ${EXEC} cp "$file" "${file}.${codename}_${curr_date}"
     done
 
     banner "Updating /etc/apt/sources.list"
-     ${EXEC} ${SUDO} ${SED} -i "s/${codename}/${new_codename}/g" /etc/apt/sources.list
-     ${EXEC} ${SUDO} ${SED} -i "s/${codename}/${new_codename}/g" /etc/apt/sources.list.d/*.list
+    ${EXEC} ${SUDO} ${SED} -i "s/${codename}/${new_codename}/g" /etc/apt/sources.list
+    ${EXEC} ${SUDO} ${SED} -i "s/${codename}/${new_codename}/g" /etc/apt/sources.list.d/*.list
   fi
 
   action_maintain
@@ -386,7 +392,7 @@ function action_upgrade_next() {
   banner "Upgrade to next Release"
   ${EXEC} ${UPDATE_TOOL}
   banner "Done upgrade to next Release"
-  }
+}
 
 function action_upgrade_devel() {
   if [ -x ${UPDATE_TOOL} ]; then
@@ -397,6 +403,22 @@ function action_upgrade_devel() {
   check_root_priv
   ${EXEC} ${UPDATE_TOOL} -d
   banner "Done upgrade to next Release"
+}
+
+function action_timeshift() {
+  if [ "${ENABLE_TIMESHIFT}" == "false" ]; then
+    return
+  fi
+
+  banner "Make a snapshot with timeshift"
+  if [ -z ${TIMESHIFT} ]; then
+    echo "timeshift is missing. Skipping ..."
+    return
+  fi
+
+  distribution_id=$(${LSB_RELEASE} --id | cut -f2)
+  curr_date=$(date +%F_%T)
+  ${EXEC} ${SUDO} ${TIMESHIFT} --create --comments "${distribution_id}-ucaresystem-${curr_date}"
 }
 
 function action_help() {
@@ -493,11 +515,13 @@ fi
 case "$MODE" in
 "maintain")
   check_eol
+  action_timeshift
   action_maintain
   action_clean
   ;;
 "clean")
   check_eol
+  action_timeshift
   action_clean
   ;;
 "upgrade")
