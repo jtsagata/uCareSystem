@@ -8,7 +8,7 @@ DESTDIR=${DESTDIR:=debian/ucaresystem}
 yes| rm -rf "$DESTDIR"
 
 ## Copy Main scripts
-main_scripts=("launch-ucaresystem" "remove-old-kernels" "ucaresystem")
+main_scripts=("launch-ucaresystem" "remove-old-kernels" "ucaresystem" "ucaresystem-core" )
 mkdir -p "$DESTDIR/usr/bin"
 for s in "${main_scripts[@]}"; do
   cp "${dir_name}/scripts/$s" "$DESTDIR/usr/bin/"

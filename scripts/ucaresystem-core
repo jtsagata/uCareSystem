@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+#    ucaresystem - All-in-one system update and maintenance tool
+#    Copyright (C) 2009-2020 Salih Emin <salih@utappia.org>
+#
+#    Authors: Salih Emin <salih@utappia.org>
+#             Ioannis Tsagkatakis <tsagatakis@protonmail.com>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, version 3 of the License.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+set -eu
+UCARE_VERSION="4.5.0"
+lib_dir="."
+
+if [[ "$(basename "$0")" == *"core"* ]]; then
+  echo "Warning: command name is now just 'ucaresystem' ucaresystem-core will be removed in next release."
+fi
+
+$(dirname "$0")/ucaresystem
+
