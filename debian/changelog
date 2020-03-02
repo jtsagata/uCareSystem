@@ -2,6 +2,7 @@ ucaresystem (4.5.0) trusty; urgency=high
 
   * Complete rewrite
   * Package rename to ucaresystem
+  * Timeshift integration
   * Rename exceutable to ucaresystem from ucaresystem-core
   * Automatically reboot system (configurable default is false)
   * Ask for confirmationm no wait (configurable and --yes flag)

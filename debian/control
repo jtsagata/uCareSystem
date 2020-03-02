@@ -16,6 +16,7 @@ Depends: apt,
          util-linux (>= 2.0),
          distro-info,
          sed (>= 1.0)
+Suggests: timeshift
 Description: All-in-one System Update and maintenance app
  This simple script will automatically refresh your packagelist,
  download and install software updates (if there are any), remove old
