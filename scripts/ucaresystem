@@ -418,7 +418,10 @@ function action_timeshift() {
 
   distribution_id=$(${LSB_RELEASE} --id | cut -f2)
   curr_date=$(date +%F_%T)
+  set -x
   ${EXEC} ${SUDO} ${TIMESHIFT} --create --comments "${distribution_id}-ucaresystem-${curr_date}"
+  { set +x; } 2>/dev/null
+  sleep ${WAIT_ACTION}
 }
 
 function action_help() {

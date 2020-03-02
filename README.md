@@ -2,6 +2,9 @@ Work in progress for the next major version
 
 ## Basic usage
 
+## Supported distributions
+TODO: Debian, Ubuntu, Others, WSLS
+
 ## Configuration
 Many aspect of the programs can be configured by a configuration file. A sample is provided.
 
