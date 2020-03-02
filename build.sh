@@ -1,17 +1,33 @@
 #!/bin/bash
-
 set -ex
-DESTDIR=${DESTDIR:=debian/ucaresystem}
+base_name="$(basename "$0")"
+dir_name="$(dirname "$0")"
+VERSION="5.0.0"
 
-## Scripts
+DESTDIR=${DESTDIR:=debian/ucaresystem}
+yes| rm -rf "$DESTDIR"
+
+## Copy Main scripts
+main_scripts=("launch-ucaresystem" "remove-old-kernels" "ucaresystem")
 mkdir -p "$DESTDIR/usr/bin"
-cp scripts/* "$DESTDIR/usr/bin/"
-ln -sf "$DESTDIR/usr/bin/ucacesystem" "$DESTDIR/usr/bin/ucaresystem-core"
+for s in "${main_scripts[@]}"; do
+  cp "${dir_name}/scripts/$s" "$DESTDIR/usr/bin/"
+  new_version="\"${VERSION}\""
+  sed -ri "s/^(UCARE_VERSION=)(.*)/\1${new_version}/g" "$DESTDIR/usr/bin/$s"
+  new_lib_dir='"../lib/ucaresystem"'
+  sed -ri "s@^(lib_dir=)(.*)@\1${new_lib_dir}@g" "$DESTDIR/usr/bin/$s"
+done
+
+## Copy Libraries
+libraries=("base")
+mkdir -p "$DESTDIR/usr/lib/ucaresystem"
+for s in "${libraries[@]}"; do
+  cp "${dir_name}/scripts/$s" "$DESTDIR/usr/lib/ucaresystem"
+done
 
 ## Policy files
 mkdir -p "$DESTDIR/usr/share/polkit-1/actions"
-cp assets/*.policy  $DESTDIR/usr/share/polkit-1/actions
-
+cp assets/*.policy "$DESTDIR/usr/share/polkit-1/actions"
 
 ## Desktop file
 mkdir -p "$DESTDIR/usr/share/applications"
@@ -24,10 +40,3 @@ cp assets/*.png "$DESTDIR/usr/share/icons"
 ## Misc Files
 mkdir -p "$DESTDIR/usr/share/doc/ucaresystem"
 cp assets/ucaresystem.conf.sample "$DESTDIR/usr/share/doc/ucaresystem"
-
-
-
-
-
-
-

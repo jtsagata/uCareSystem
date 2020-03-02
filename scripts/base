@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+
+#
+# Config file
+#
+if [ -x "/etc/ucaresystem.conf" ]; then
+  source /etc/ucaresystem.conf
+fi
+
+#
+# Colors
+#
+RED=""
+GREEN=""
+NORMAL=""
+BOLD=""
+BOLDOFF=""
+
+set +u
+if [[ -z "${NO_COLOR}" ]]; then
+  if test -n "$TERM" && test "$TERM" != "dumb"; then
+    RED=$(tput setaf 1)
+    GREEN=$(tput setaf 2)
+    NORMAL=$(tput setaf 7)
+    BOLD=$(tput bold)
+    BOLDOFF=$(tput sgr0)
+  fi
+fi
+set -u
+
+# Programs used
+SUDO="/usr/bin/sudo"
+DEBORPHAN="/usr/bin/deborphan"
+UPDATE_TOOL="/usr/bin/do-release-upgrade"
+LSB_RELEASE="/usr/bin/lsb_release"
+REBOOT="/sbin/reboot"
+LOCALE="/usr/bin/locale"
+SED="/bin/sed"
+TIMESHIFT="/usr/bin/timeshift"
+
+# use apt or apt-get
+if [ -x "/usr/bin/apt" ]; then
+  APT="/usr/bin/apt"
+else
+  APT="/usr/bin/apt-get"
+fi
+
+#
+# Display a header text
+#
+function header_text() {
+  echo -e "${GREEN}${BOLD}***${BOLDOFF} ${1}${NORMAL}"
+}
+
+#
+# Ask for yes/no (localized)
+#
+function ask_yesno() {
+  prompt=$1
+  set -- $(${LOCALE} LC_MESSAGES)
+  yesptrn="$1"
+  noptrn="$2"
+  yesword="$3"
+  noword="$4"
+  while true; do
+    read -rp "${prompt} (${yesword} / ${noword})? " yn
+    case $yn in
+    ${yesptrn##^})
+      response="yes"
+      break
+      ;;
+    ${noptrn##^})
+      response="no"
+      break
+      ;;
+    *) echo "${prompt} ${yesword} / ${noword}." ;;
+    esac
+  done
+}
+
+#
+# Display version
+#
+function action_version() {
+  echo "$(basename "${0}") version ${UCARE_VERSION}"
+  exit
+}
+
+#
+# Check if reboot is required
+#
+function check_reboot() {
+  header_text "Checking to see if a reboot is required "
+  ## Check to see if a reboot is required
+  if [ -f /var/run/reboot-required ]; then
+    echo
+    echo "${BOLD}${RED}* * * * * * * * * * * * * * * * * *"
+    echo "*                                 *"
+    echo "* Consider rebooting your system  *"
+    echo "* to finish applying updates      *"
+    echo "*                                 *"
+    echo "* * * * * * * * * * * * * * * * * *${BOLDOFF}${NORMAL}"
+    echo
+  fi
+
+  if [ "$AUTO_REBOOT" == true ]; then
+    header_text "Rebooting system"
+    echo " $(basename "${0}") will reboot the system in ${AUTO_REBOOT_TIMEOUT} seconds... "
+    sleep ${AUTO_REBOOT_TIMEOUT}
+    ${REBOOT}
+  fi
+}
+
+#
+# Make a timeshift backup
+#
+function action_timeshift() {
+  if [ "${ENABLE_TIMESHIFT}" == "false" ]; then
+    return
+  fi
+
+  header_text "Make a snapshot with timeshift"
+  if [ -z ${TIMESHIFT} ]; then
+    echo "timeshift is missing. Skipping ..."
+    return
+  fi
+
+  distribution_id=$(${LSB_RELEASE} --id | cut -f2)
+  curr_date=$(date +%F_%T)
+  set -x
+  ${EXEC} ${SUDO} ${TIMESHIFT} --create --comments "${distribution_id}-$(basename "${0}")-${curr_date}"
+  { set +x; } 2>/dev/null
+  sleep ${WAIT_ACTION}
+}

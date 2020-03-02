@@ -19,16 +19,19 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 set -eu
+UCARE_VERSION="4.5.0"
+lib_dir="."
+
+function require() {
+  source "$(dirname "$0")/${lib_dir}/$1"
+}
+
+require "base"
 
 if [[ "$(basename "$0")" == *"core"* ]]; then
   echo "Warning: command name is now just 'ucaresystem' ucaresystem-core will be removed in next release."
 fi
 
-UCARE_VERSION="4.5.0"
-#Config file
-if [ -x "/etc/ucaresystem.conf" ]; then
-  source /etc/ucaresystem.conf
-fi
 
 # Configuration variables and default values
 WAIT_ACTION=${WAIT_ACTION:=0}
@@ -42,77 +45,15 @@ ENABLE_TIMESHIFT=${ENABLE_TIMESHIFT:=false}
 EXEC=""
 DO_WAIT=false
 
-## Colors
-RED=""
-GREEN=""
-NORMAL=""
-BOLD=""
-BOLDOFF=""
-
-set +u
-if [[ -z "${NO_COLOR}" ]]; then
-  if test -n "$TERM" && test "$TERM" != "dumb"; then
-    RED=$(tput setaf 1)
-    GREEN=$(tput setaf 2)
-    NORMAL=$(tput setaf 7)
-    BOLD=$(tput bold)
-    BOLDOFF=$(tput sgr0)
-  fi
-fi
-set -u
-
-# Programs used
-SUDO="/usr/bin/sudo"
-DEBORPHAN="/usr/bin/deborphan"
-UPDATE_TOOL="/usr/bin/do-release-upgrade"
-LSB_RELEASE="/usr/bin/lsb_release"
-REBOOT="/sbin/reboot"
-LOCALE="/usr/bin/locale"
-SED="/bin/sed"
-TIMESHIFT="/usr/bin/timeshift"
-
-# use apt or apt-get
-if [ -x "/usr/bin/apt" ]; then
-  APT="/usr/bin/apt"
-else
-  APT="/usr/bin/apt-get"
-fi
 
 trap trap_handler 1 2 3 6
 function trap_handler() {
   { set +x; } 2>/dev/null
-  banner "Program interrupt."
+  header_text "Program interrupt."
   echo "  The program have stop before finished. Your system maybe in an incomplete state."
   echo "  You may need to do:"
   echo "     sudo apt update && sudo apt install -f"
   exit 1
-}
-
-function banner() {
-  echo -e "${GREEN}${BOLD}***${BOLDOFF} ${1}${NORMAL}"
-}
-
-function ask_yesno() {
-  prompt=$1
-  set -- $(${LOCALE} LC_MESSAGES)
-  yesptrn="$1"
-  noptrn="$2"
-  yesword="$3"
-  noword="$4"
-  while true; do
-    read -rp "${prompt} (${yesword} / ${noword})? " yn
-    case $yn in
-    ${yesptrn##^})
-      response="yes"
-      break
-      ;;
-    ${noptrn##^})
-      response="no"
-      break
-      ;;
-    *) echo "${prompt} ${yesword} / ${noword}." ;;
-    esac
-  done
 }
 
 function check_eol() {
@@ -123,7 +64,7 @@ function check_eol() {
 
   valid_ids=("Debian" "Ubuntu")
   if [[ ! "${valid_ids[*]}" == *"${distribution_id}"* ]]; then
-    banner "Your distribution is '${distribution_id}', codename:'${codename}'."
+    header_text "Your distribution is '${distribution_id}', codename:'${codename}'."
     return
   fi
 
@@ -136,17 +77,17 @@ function check_eol() {
   days=$(${DISTRO_INFO} --series="${codename}" --days)
 
   if [[ "${supported_distro[*]}" == *"${codename}"* ]]; then
-    banner "Your distribution '${GREEN}${distribution_id}${NORMAL}', codename:'${GREEN}${codename}${NORMAL}' is not at eol."
+    header_text "Your distribution '${GREEN}${distribution_id}${NORMAL}', codename:'${GREEN}${codename}${NORMAL}' is not at eol."
     if [ ! "${days}" == "(unknown)" ]; then
       if [[ "${days}" == *"-"* ]]; then
-        banner "The was a new distribution version before ${days//-/} days. Consider an upgrade."
+        header_text "The was a new distribution version before ${days//-/} days. Consider an upgrade."
       else
-        banner "Expect a new version of your distribution in ${days} days."
+        header_text "Expect a new version of your distribution in ${days} days."
       fi
     fi
     return
   else
-    banner "Your distribution '${distribution_id}', codename:'${codename}' is reach the end of support"
+    header_text "Your distribution '${distribution_id}', codename:'${codename}' is reach the end of support"
     echo "  The end of support was before ${days//-/} days."
     echo "  Please upgrade your distribution to a latest release!"
     echo "  Try run: $(basename "${0}") --upgrade"
@@ -199,44 +140,41 @@ function welcome_screen() {
   fi
 }
 
-function action_version() {
-  echo "$(basename "${0}") version ${UCARE_VERSION}"
-  exit
-}
+
 
 function action_maintain() {
   check_root_priv
-  banner "Start System update actions"
+  header_text "Start System update actions"
 
   ## Updates package lists
-  banner "Updating package lists"
+  header_text "Updating package lists"
   set -x
   ${EXEC} ${SUDO} ${APT} update
   { set +x; } 2>/dev/null
   sleep ${WAIT_ACTION}
 
   ## Updates packages and libraries
-  banner "Updating packages and system libraries"
+  header_text "Updating packages and system libraries"
   set -x
   ${EXEC} ${SUDO} ${APT} full-upgrade -y
   { set +x; } 2>/dev/null
   sleep ${WAIT_ACTION}
-  banner "Finish System update actions"
+  header_text "Finish System update actions"
   sleep ${WAIT_ACTION}
 }
 
 function action_clean() {
   check_root_priv
-  banner "Start Cleanup actions"
+  header_text "Start Cleanup actions"
   ## Removes unneeded packages
-  banner "Removing unneeded packages"
+  header_text "Removing unneeded packages"
   set -x
   ${EXEC} ${SUDO} ${APT} -y --purge autoremove
   { set +x; } 2>/dev/null
   sleep ${WAIT_ACTION}
 
   ## Removes unused config files
-  banner "Removing unused config files"
+  header_text "Removing unused config files"
   set -x
   ${EXEC} ${SUDO} ${DEBORPHAN} -n --find-config | ${EXEC} xargs ${SUDO} ${APT} -y --purge autoremove
   { set +x; } 2>/dev/null
@@ -244,35 +182,13 @@ function action_clean() {
 
   ## Removes package files that can no longer be downloaded and everything except
   # the lock file in /var/cache/apt/archives, including directories.
-  banner "Cleaned downloaded temporary packages"
+  header_text "Cleaned downloaded temporary packages"
   set -x
   ${EXEC} ${SUDO} ${APT} -y autoclean
   ${EXEC} ${SUDO} ${APT} -y clean
   { set +x; } 2>/dev/null
-  banner "Finish Cleanup actions"
+  header_text "Finish Cleanup actions"
   sleep ${WAIT_ACTION}
-}
-
-function check_reboot() {
-  banner "Checking to see if a reboot is required "
-  ## Check to see if a reboot is required
-  if [ -f /var/run/reboot-required ]; then
-    echo
-    echo "${BOLD}${RED}* * * * * * * * * * * * * * * * * *"
-    echo "*                                 *"
-    echo "* Consider rebooting your system  *"
-    echo "* to finish applying updates      *"
-    echo "*                                 *"
-    echo "* * * * * * * * * * * * * * * * * *${BOLDOFF}${NORMAL}"
-    echo
-  fi
-
-  if [ "$AUTO_REBOOT" == true ]; then
-    banner "Rebooting system"
-    echo " ucaresystem will reboot the system in ${AUTO_REBOOT_TIMEOUT} seconds... "
-    sleep ${AUTO_REBOOT_TIMEOUT}
-    ${REBOOT}
-  fi
 }
 
 function action_upgrade_EOL() {
@@ -281,12 +197,12 @@ function action_upgrade_EOL() {
 
   new_codename=$(/usr/bin/ubuntu-distro-info --supported | tail -1)
 
-  banner "Upgrade to EOL"
+  header_text "Upgrade to EOL"
   ${EXEC} "/etc/apt/sources.list" "/etc/apt/sources.eol_${curr_date}"
   if [ "$EXEC" == "echo" ]; then
     echo "...skiping updating /etc/apt/sources.list"
   else
-    banner "Updating /etc/apt/sources.list"
+    header_text "Updating /etc/apt/sources.list"
     cat <<EOT >/etc/apt/sources.list
 deb http://old-releases.ubuntu.com/ubuntu/ $new_codename main restricted universe multiverse
 deb http://old-releases.ubuntu.com/ubuntu/ $new_codename-updates main restricted universe multiverse
@@ -298,7 +214,7 @@ EOT
   ${EXEC} ${SUDO} ${APT} install update-manager-core
   ${EXEC} ${SUDO} ${APT} -y dist-upgrade
   ${EXEC} ${SUDO} ${UPDATE_TOOL}
-  banner "Done upgrade to EOL"
+  header_text "Done upgrade to EOL"
 }
 
 function action_upgrade() {
@@ -360,18 +276,18 @@ function do_debian_upgrade() {
   action_timeshift
   action_maintain
 
-  banner "Upgrade to $new_codename from $codename"
+  header_text "Upgrade to $new_codename from $codename"
 
   if [ "$EXEC" == "echo" ]; then
     echo "...skiping updating /etc/apt/sources.list"
   else
-    banner "Backup /etc/apt/sources.list"
+    header_text "Backup /etc/apt/sources.list"
     ${EXEC} cp "/etc/apt/sources.list" "/etc/apt/sources.${codename}_${curr_date}"
     for file in /etc/apt/sources.list.d/*; do
       ${EXEC} cp "$file" "${file}.${codename}_${curr_date}"
     done
 
-    banner "Updating /etc/apt/sources.list"
+    header_text "Updating /etc/apt/sources.list"
     ${EXEC} ${SUDO} ${SED} -i "s/${codename}/${new_codename}/g" /etc/apt/sources.list
     ${EXEC} ${SUDO} ${SED} -i "s/${codename}/${new_codename}/g" /etc/apt/sources.list.d/*.list
   fi
@@ -379,7 +295,7 @@ function do_debian_upgrade() {
   action_maintain
   ${EXEC} ${SUDO} apt dist-upgrade -y
 
-  banner "Done upgrade to $new_codename from $codename"
+  header_text "Done upgrade to $new_codename from $codename"
 }
 
 function action_upgrade_next() {
@@ -389,9 +305,9 @@ function action_upgrade_next() {
   fi
 
   check_root_priv
-  banner "Upgrade to next Release"
+  header_text "Upgrade to next Release"
   ${EXEC} ${UPDATE_TOOL}
-  banner "Done upgrade to next Release"
+  header_text "Done upgrade to next Release"
 }
 
 function action_upgrade_devel() {
@@ -402,26 +318,7 @@ function action_upgrade_devel() {
 
   check_root_priv
   ${EXEC} ${UPDATE_TOOL} -d
-  banner "Done upgrade to next Release"
-}
-
-function action_timeshift() {
-  if [ "${ENABLE_TIMESHIFT}" == "false" ]; then
-    return
-  fi
-
-  banner "Make a snapshot with timeshift"
-  if [ -z ${TIMESHIFT} ]; then
-    echo "timeshift is missing. Skipping ..."
-    return
-  fi
-
-  distribution_id=$(${LSB_RELEASE} --id | cut -f2)
-  curr_date=$(date +%F_%T)
-  set -x
-  ${EXEC} ${SUDO} ${TIMESHIFT} --create --comments "${distribution_id}-ucaresystem-${curr_date}"
-  { set +x; } 2>/dev/null
-  sleep ${WAIT_ACTION}
+  header_text "Done upgrade to next Release"
 }
 
 function action_help() {
@@ -449,7 +346,7 @@ OTHER OPTIONS
   -v, --version
     Display program version and exits
   -s, --skip
-    Do not show the welcome banner, and do not pause.
+    Do not show the welcome header_text, and do not pause.
   -w, --wait
     Press ENTER to end the program. For the "gui" version
 
@@ -533,7 +430,7 @@ case "$MODE" in
 esac
 
 check_reboot
-banner "Done"
+header_text "Done"
 
 if [ "$DO_WAIT" == true ]; then
   echo

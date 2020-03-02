@@ -20,10 +20,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#Config file
-if [ -x "/etc/ucaresystem.conf" ]; then
-  source /etc/ucaresystem.conf
-fi
+UCARE_VERSION="4.5.0"
+lib_dir="."
+
+function require() {
+  source "$(dirname "$0")/${lib_dir}/$1"
+}
+
+require "base"
+
 # NOTE: This script will ALWAYS keep the currently running kernel
 # NOTE: Default is to keep 2 more, user overrides with --keep N, or change in the config file
 KEEP_KERNELS=${KEEP_KERNELS:=2}
