@@ -6,6 +6,7 @@ DESTDIR=${DESTDIR:=debian/ucaresystem}
 ## Scripts
 mkdir -p "$DESTDIR/usr/bin"
 cp scripts/* "$DESTDIR/usr/bin/"
+ln -sf "$DESTDIR/usr/bin/ucacesystem" "$DESTDIR/usr/bin/ucacesystem-core"
 
 ## Policy files
 mkdir -p "$DESTDIR/usr/share/polkit-1/actions"
