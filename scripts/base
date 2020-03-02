@@ -63,7 +63,7 @@ function ask_yesno() {
   yesword="$3"
   noword="$4"
   while true; do
-    read -rp "${prompt} (${yesword} / ${noword})? " yn
+    read -rp "${prompt} (${yesword},yes / ${noword},no)? " yn
     case $yn in
     ${yesptrn##^})
       response="yes"
@@ -73,7 +73,7 @@ function ask_yesno() {
       response="no"
       break
       ;;
-    *) echo "${prompt} ${yesword} / ${noword}." ;;
+    *) echo "${prompt} ${yesword},yes / ${noword},no." ;;
     esac
   done
 }
