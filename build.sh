@@ -2,7 +2,7 @@
 set -ex
 base_name="$(basename "$0")"
 dir_name="$(dirname "$0")"
-VERSION="5.0.0"
+VERSION="4.5.0"
 
 DESTDIR=${DESTDIR:=debian/ucaresystem}
 yes| rm -rf "$DESTDIR"
