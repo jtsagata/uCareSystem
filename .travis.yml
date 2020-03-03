@@ -10,6 +10,8 @@ deploy:
     secure: B/mOp+U9RES/qsdGVhxiaxfQOkSYQd9BU0AmYsM5eMRJP4DqbMIUfu+Dh7sn6Tlv4WwpUZympAgAnWFHPoogRccTGOQjgJf3BjNCJZhTXVC8uz1OOHvest29S1wRJbXIuoIRNO76Lk8CvubgMHxdqJ3ngG40ho5wSgGa5hfdiSfLQ6KQIMpXwdlHoi4xipAgNvAt8whQMeKxF8IqSfGB0ZRswu7OvLUmKgJNobEp54fkf1wemuhFfcy8YRXDIf2E0d8/FyPFOtJAuRDUGvspSgieNtYste5s+O1J0ykZ6ajEP3mhglG8S8kojDz1BltBSOAeI735nr5VRkEtx3Gsh0VOjENAzr0Jp9Ou9F0zIGQzM8YBtgpdrWOOQnxITqVKn7VtzcnBCPUyZRMp5Ez/lk6k3hIjQVCafeIVh9gNM4pNb2o7D+i3OzriBSOvXuGaRYpGhEP24rk9oEWZv2Z/ABCFypomY/t+z+CFSGGkthkGtGuo9LLZKw4XoTlWCObuOURdcxho7EdqJrmXeViiDxY1qPtaZmRAEaumZ2VrVm+OMrJu7bAsEPWuzJ4U0tV3J9CuX7F4d53YBjgMl4SlDZBVDgkRgq850LVhFTCE9O0akoLhraTav3KmWC3qimCZyI0dOtnBElYpUPXsB6dB63chAKaQHBEc5frJ6UX6rXE=
   skip_cleanup: true
   file_glob: true
+  tag_name: v.4.5.0-beta
+  prelease: true
   file:
     - "dist/*.*"
   on:
