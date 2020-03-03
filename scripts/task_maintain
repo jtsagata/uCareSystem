@@ -33,7 +33,6 @@ maintain_loaded=true
 set -u
 
 function action_maintain() {
-  check_root_priv
   header_text "Start System update actions"
 
   ## Updates package lists
