@@ -19,7 +19,7 @@ for s in "${main_scripts[@]}"; do
 done
 
 ## Copy Libraries
-libraries=("base" "ucaresystem-cli" "ucaresystem-xterm")
+libraries=("base" "ucaresystem-cli" "ucaresystem-xterm" "task_cleanup" "task_check_eol" "task_maintain")
 mkdir -p "$DESTDIR/usr/lib/ucaresystem"
 for s in "${libraries[@]}"; do
   cp "${dir_name}/scripts/$s" "$DESTDIR/usr/lib/ucaresystem"
