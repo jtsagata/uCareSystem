@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Instructions
+#    travis setup releases
+
 set -ex
 
 top_dir="$(git rev-parse --show-toplevel)"
