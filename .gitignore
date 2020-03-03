@@ -1,3 +1,6 @@
+#
+# Debian artifacts
+#
 debian/ucaresystem/
 debian/ucaresystem-core/
 debian/.debhelper
@@ -5,8 +8,15 @@ debian/*.log
 debian/*.substvars
 debian/*.debhelper
 debian/files
+
+#
+# Debian packages
+#
 dist
+ucaresystem-build-deps*.*
+
+#
+# Misc files
+#
 TODO
 .idea
-ucaresystem-build-deps*.*
-.ci/secring.auto
