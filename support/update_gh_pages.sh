@@ -26,17 +26,16 @@ git rm -r *
 cp -r "$top_dir/docs/html/"* .
 
 # Create manual pages
-mkdir -p "$top_dir/docs/html/man"
+mkdir -p "/tmp/pages_ucaresystem/docs/html/man"
 ronn --html --warnings --style toc --manual="ucaresystem" --organization="Utappia" --date="2020-04-01" "$top_dir/docs/ronn/"*.ronn
-mv $top_dir/docs/ronn/*.1.html "$top_dir/docs/html/man/"
-mv $top_dir/docs/ronn/*.8.html "$top_dir/docs/html/man/"
+mv $top_dir/docs/ronn/*.1.html "/tmp/pages_ucaresystem/docs/html/man/docs/html/man/"
+mv $top_dir/docs/ronn/*.8.html "/tmp/pages_ucaresystem/docs/html/man/docs/html/man/"
 
 find . -name "*" | grep -v "git"
 git add *
-git commit -m "rebuild manual $(date +%F at %T)"
+git commit -m "rebuild manual at $(date +%F %T)"
 git push "${push_url}" gh-pages
 
-# Remove generated manpages
-rm -r "$top_dir/docs/html/man"
+
 
 popd
