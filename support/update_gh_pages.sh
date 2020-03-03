@@ -35,7 +35,7 @@ mv $top_dir/docs/ronn/*.8.html "/tmp/pages_ucaresystem/man/"
 find . -name "*" | grep -v "git"
 
 git add *
-mod_date=$((date +"%F %T")
+mod_date=$(date +"%F %T")
 git commit -m "rebuild manual at ${mod_date}"
 git push "${push_url}" gh-pages
 
