@@ -1,5 +1,4 @@
-#!/bin/bash
-#
+#!/usr/bin/env bash
 #    ucaresystem - All-in-one system update and maintenance tool
 #    Copyright (C) 2009-2020 Salih Emin <salih@utappia.org>
 #
@@ -18,310 +17,26 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set -eu
+set -e
 UCARE_VERSION="4.5.0"
 lib_dir="."
+base_dir=$(dirname "$0")
 
-function require() {
-  source "$(dirname "$0")/${lib_dir}/$1"
+show_help=false
+dispach="cli"
+
+#
+# Display version
+#
+function show_version() {
+  echo "$(basename "${0}") version ${UCARE_VERSION}"
+  exit
 }
 
-require "base"
-
-if [[ "$(basename "$0")" == *"core"* ]]; then
-  echo "Warning: command name is now just 'ucaresystem' ucaresystem-core will be removed in next release."
-fi
-
-
-# Configuration variables and default values
-WAIT_ACTION=${WAIT_ACTION:=0}
-KEEP_KERNELS=${KEEP_KERNELS:=2}
-SHOW_BANNER=${SHOWBANNER:=true}
-DEFAULT_MODE=${DEFAULT_MODE:=maintain}
-AUTO_REBOOT=${AUTO_REBOOT:=false}
-AUTO_REBOOT_TIMEOUT=${AUTO_REBOOT_TIMEOUT:=10}
-ASK_CONFIRM=${ASK_CONFIRM:=true}
-ENABLE_TIMESHIFT=${ENABLE_TIMESHIFT:=false}
-EXEC=""
-DO_WAIT=false
-
-
-trap trap_handler 1 2 3 6
-function trap_handler() {
-  { set +x; } 2>/dev/null
-  header_text "Program interrupt."
-  echo "  The program have stop before finished. Your system maybe in an incomplete state."
-  echo "  You may need to do:"
-  echo "     sudo apt update && sudo apt install -f"
-  exit 1
-}
-
-function check_eol() {
-  distribution_id=$(${LSB_RELEASE} --id | cut -f2)
-  codename=$(${LSB_RELEASE} --codename | cut -f2)
-
-  # distribution_id="Ubuntu" && codename="focal"
-
-  valid_ids=("Debian" "Ubuntu")
-  if [[ ! "${valid_ids[*]}" == *"${distribution_id}"* ]]; then
-    header_text "Your distribution is '${distribution_id}', codename:'${codename}'."
-    return
-  fi
-
-  case "${distribution_id}" in
-  "Debian") DISTRO_INFO="/usr/bin/debian-distro-info" ;;
-  "Ubuntu") DISTRO_INFO="/usr/bin/ubuntu-distro-info" ;;
-  esac
-
-  supported_distro=$(${DISTRO_INFO} --supported)
-  days=$(${DISTRO_INFO} --series="${codename}" --days)
-
-  if [[ "${supported_distro[*]}" == *"${codename}"* ]]; then
-    header_text "Your distribution '${GREEN}${distribution_id}${NORMAL}', codename:'${GREEN}${codename}${NORMAL}' is not at eol."
-    if [ ! "${days}" == "(unknown)" ]; then
-      if [[ "${days}" == *"-"* ]]; then
-        header_text "The was a new distribution version before ${days//-/} days. Consider an upgrade."
-      else
-        header_text "Expect a new version of your distribution in ${days} days."
-      fi
-    fi
-    return
-  else
-    header_text "Your distribution '${distribution_id}', codename:'${codename}' is reach the end of support"
-    echo "  The end of support was before ${days//-/} days."
-    echo "  Please upgrade your distribution to a latest release!"
-    echo "  Try run: $(basename "${0}") --upgrade"
-    exit
-  fi
-}
-
-function check_root_priv() {
-  # Checking if the user has run the script with "sudo" or not
-  if [[ $EUID -ne 0 ]]; then
-    echo -ne "${RED}${BOLD}Error: ${BOLDOFF} '$0'" 1>&2
-    echo -ne " ${BOLD}must run with root user privileges.${BOLDOFF}" 1>&2
-    echo -ne " ${BOLD}consider running it with 'sudo' ${BOLDOFF}" 1>&2
-    printf "\n\n"
-    exit 1
-  fi
-}
-
-function welcome_screen() {
-  clear
-  echo "_______________________________________________________"
-  echo "                                                       "
-  echo "            ${GREEN}uCareSystem Core ${UCARE_VERSION}${NORMAL}            "
-  echo "            ${GREEN}~~~~~~~~~~~~~~~~~~~~~~~${NORMAL}                      "
-  echo "                                                       "
-  echo " Welcome to all-in-one System Update and maintenance   "
-  echo " assistant app.                                        "
-  echo "                                                       "
-  echo "                                                       "
-  echo " This simple script will automatically         	     "
-  echo " refresh your packagelist, download and                "
-  echo " install updates (if there are any), remove any old    "
-  echo " kernels, obsolete packages and configuration files    "
-  echo " to free up disk space, without any need of user       "
-  echo " interference                                         "
-  echo "                   				                     "
-  echo " If you’ve found it useful and saved you time and you  "
-  echo " think it is worth of your support, you can make a     "
-  echo " donation via PayPal by clicking on the following:     "
-  echo "                                                       "
-  echo "           ${GREEN}https://www.paypal.me/cerebrux${NORMAL}              "
-  echo "_______________________________________________________"
-  echo
-
-  if [ "${ASK_CONFIRM}" == "true" ]; then
-    ask_yesno "Are you sure ?"
-    if [[ "${response}" == "no" ]]; then
-      exit 1
-    fi
-  fi
-}
-
-
-
-function action_maintain() {
-  check_root_priv
-  header_text "Start System update actions"
-
-  ## Updates package lists
-  header_text "Updating package lists"
-  set -x
-  ${EXEC} ${SUDO} ${APT} update
-  { set +x; } 2>/dev/null
-  sleep ${WAIT_ACTION}
-
-  ## Updates packages and libraries
-  header_text "Updating packages and system libraries"
-  set -x
-  ${EXEC} ${SUDO} ${APT} full-upgrade -y
-  { set +x; } 2>/dev/null
-  sleep ${WAIT_ACTION}
-  header_text "Finish System update actions"
-  sleep ${WAIT_ACTION}
-}
-
-function action_clean() {
-  check_root_priv
-  header_text "Start Cleanup actions"
-  ## Removes unneeded packages
-  header_text "Removing unneeded packages"
-  set -x
-  ${EXEC} ${SUDO} ${APT} -y --purge autoremove
-  { set +x; } 2>/dev/null
-  sleep ${WAIT_ACTION}
-
-  ## Removes unused config files
-  header_text "Removing unused config files"
-  set -x
-  ${EXEC} ${SUDO} ${DEBORPHAN} -n --find-config | ${EXEC} xargs ${SUDO} ${APT} -y --purge autoremove
-  { set +x; } 2>/dev/null
-  sleep ${WAIT_ACTION}
-
-  ## Removes package files that can no longer be downloaded and everything except
-  # the lock file in /var/cache/apt/archives, including directories.
-  header_text "Cleaned downloaded temporary packages"
-  set -x
-  ${EXEC} ${SUDO} ${APT} -y autoclean
-  ${EXEC} ${SUDO} ${APT} -y clean
-  { set +x; } 2>/dev/null
-  header_text "Finish Cleanup actions"
-  sleep ${WAIT_ACTION}
-}
-
-function action_upgrade_EOL() {
-  check_root_priv
-  curr_date=$(date +%F_%T)
-
-  new_codename=$(/usr/bin/ubuntu-distro-info --supported | tail -1)
-
-  header_text "Upgrade to EOL"
-  ${EXEC} "/etc/apt/sources.list" "/etc/apt/sources.eol_${curr_date}"
-  if [ "$EXEC" == "echo" ]; then
-    echo "...skiping updating /etc/apt/sources.list"
-  else
-    header_text "Updating /etc/apt/sources.list"
-    cat <<EOT >/etc/apt/sources.list
-deb http://old-releases.ubuntu.com/ubuntu/ $new_codename main restricted universe multiverse
-deb http://old-releases.ubuntu.com/ubuntu/ $new_codename-updates main restricted universe multiverse
-deb http://old-releases.ubuntu.com/ubuntu/ $new_codename-security main restricted universe multiverse
-
-EOT
-  fi
-
-  ${EXEC} ${SUDO} ${APT} install update-manager-core
-  ${EXEC} ${SUDO} ${APT} -y dist-upgrade
-  ${EXEC} ${SUDO} ${UPDATE_TOOL}
-  header_text "Done upgrade to EOL"
-}
-
-function action_upgrade() {
-  distribution_id=$(${LSB_RELEASE} --id | cut -f2)
-  codename=$(${LSB_RELEASE} --codename | cut -f2)
-
-  case "${distribution_id}" in
-  "Debian") do_debian_upgade "$1" ;;
-  "Ubuntu") do_ubuntu_upgade "$1" ;;
-  "LinuxMint")
-    echo "Linux Mint is unsupported. Please use the distro tool"
-    exit
-    ;;
-  *)
-    echo "Your distribution '${distribution_id}' is unsupported. Please do a pull request."
-    exit
-    ;;
-  esac
-
-}
-
-function do_ubuntu_upgrade() {
-  action="$1"
-  # Always ask
-  ask_yesno "Are you sure ?"
-  if [[ "${response}" == "no" ]]; then
-    exit 1
-  fi
-
-  case "$action" in
-  "next")
-    action_timeshift
-    action_upgrade_next
-    ;;
-  "development")
-    action_timeshift
-    action_upgrade_devel
-    ;;
-  "eol")
-    action_timeshift
-    action_upgrade_EOL
-    ;;
-  *)
-    echo "Error: unknown upgrade tag '$action'"
-    ;;
-  esac
-}
-
-function do_debian_upgrade() {
-  # TODO: Allow to set codename, test if given is newest
-  # TODO: Check if it is safe? (try to see if repo exist for PPAs etc.."
-
-  check_root_priv
-  curr_date=$(date +%F_%T)
-
-  codename=$(${LSB_RELEASE} --codename | cut -f2)
-  new_codename=$(debian-distro-info --supported | tail -1)
-
-  action_timeshift
-  action_maintain
-
-  header_text "Upgrade to $new_codename from $codename"
-
-  if [ "$EXEC" == "echo" ]; then
-    echo "...skiping updating /etc/apt/sources.list"
-  else
-    header_text "Backup /etc/apt/sources.list"
-    ${EXEC} cp "/etc/apt/sources.list" "/etc/apt/sources.${codename}_${curr_date}"
-    for file in /etc/apt/sources.list.d/*; do
-      ${EXEC} cp "$file" "${file}.${codename}_${curr_date}"
-    done
-
-    header_text "Updating /etc/apt/sources.list"
-    ${EXEC} ${SUDO} ${SED} -i "s/${codename}/${new_codename}/g" /etc/apt/sources.list
-    ${EXEC} ${SUDO} ${SED} -i "s/${codename}/${new_codename}/g" /etc/apt/sources.list.d/*.list
-  fi
-
-  action_maintain
-  ${EXEC} ${SUDO} apt dist-upgrade -y
-
-  header_text "Done upgrade to $new_codename from $codename"
-}
-
-function action_upgrade_next() {
-  if [ -x ${UPDATE_TOOL} ]; then
-    echo "Error missing ${UPDATE_TOOL}"
-    exit 1
-  fi
-
-  check_root_priv
-  header_text "Upgrade to next Release"
-  ${EXEC} ${UPDATE_TOOL}
-  header_text "Done upgrade to next Release"
-}
-
-function action_upgrade_devel() {
-  if [ -x ${UPDATE_TOOL} ]; then
-    echo "Error missing ${UPDATE_TOOL}"
-    exit 1
-  fi
-
-  check_root_priv
-  ${EXEC} ${UPDATE_TOOL} -d
-  header_text "Done upgrade to next Release"
-}
-
-function action_help() {
+#
+# Show help
+#
+function show_help() {
   cat <<EOF
 uCareSystem Core $UCARE_VERSION : All-in-one system update and maintenance tool
 
@@ -349,90 +64,56 @@ OTHER OPTIONS
     Do not show the welcome header_text, and do not pause.
   -w, --wait
     Press ENTER to end the program. For the "gui" version
+RUNNERS
+  --cli
+    Run the cli version
+  --xterm
+    Run the xterm version
 
 See man page for more info
 EOF
   exit
 }
 
-##
-## The main process starts here
-##
+# Store options
+opts=$@
 
-MODE="${DEFAULT_MODE}"
-UPGRADE_MODE="next"
-ARGS=$(getopt -o hvdysmcwu: --long help,version,dryrun,yes,skip,maintain,clean,wait,upgrade: -- "$@")
-eval set -- "$ARGS"
-
-while true; do
-  case "$1" in
-  -h | --help)
-    action_help
+for opt in "$@"; do
+  case "${opt}" in
+  "--cli")
     shift
     ;;
-  -v | --version)
-    action_version
+  "--xterm")
+    dispach="xterm"
     shift
     ;;
-  -d | --dryrun)
-    EXEC="echo"
+  "-h" | "--help" )
+    show_help
     shift
     ;;
-  -y | --yes)
-    ASK_CONFIRM=false
+  "-v" | "--version" )
+    show_version
     shift
     ;;
-  -s | --skip)
-    SHOW_BANNER=false
-    shift
-    ;;
-  -w | --wait)
-    DO_WAIT=true
-    shift
-    ;;
-  -m | --maintain)
-    MODE=maintain
-    shift
-    ;;
-  -c | --clean)
-    MODE=clean
-    shift
-    ;;
-  -u | --upgrade)
-    MODE=upgrade
-    UPGRADE_MODE="$2"
-    shift
-    shift
-    ;;
-  *) break ;;
   esac
 done
 
-if [ "$SHOW_BANNER" == true ]; then
-  welcome_screen
-fi
+# Remove options that already have been handled
+delete_options=("--help" "--version" "--cli" "--xterm")
+for del in "${delete_options[@]}"; do
+   opts=("${opts[@]/${del}}")
+done
 
-case "$MODE" in
-"maintain")
-  check_eol
-  action_timeshift
-  action_maintain
-  action_clean
+# Delegate to tool
+case "${dispach}" in
+"cli")
+  "${base_dir}/${lib_dir}"/ucaresystem-cli "$opts"
+  exit $?
   ;;
-"clean")
-  check_eol
-  action_timeshift
-  action_clean
-  ;;
-"upgrade")
-  action_upgrade "${UPGRADE_MODE}"
+"xterm")
+  "${base_dir}/${lib_dir}"/ucaresystem-xterm --wait "$opts"
+  exit $?
   ;;
 esac
 
-check_reboot
-header_text "Done"
-
-if [ "$DO_WAIT" == true ]; then
-  echo
-  read -r -p "Press enter to close the window"
-fi
+exit 1
