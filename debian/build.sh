@@ -47,3 +47,7 @@ mkdir -p "$DESTDIR/usr/share/man/man1"
 mv docs/ronn/*.1 "$DESTDIR/usr/share/man/man1"
 mkdir -p "$DESTDIR/usr/share/man/man8"
 mv docs/ronn/*.8 "$DESTDIR/usr/share/man/man8"
+
+## Lines of code report
+cloc . --quiet --report-file="$DESTDIR/usr/share/doc/ucaresystem/loc.txt"
+sed -i '1d' "$DESTDIR/usr/share/doc/ucaresystem/loc.txt"

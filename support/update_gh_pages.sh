@@ -31,7 +31,9 @@ ronn --html --warnings --style toc --manual="ucaresystem" --organization="Utappi
 mv $top_dir/docs/ronn/*.1.html "/tmp/pages_ucaresystem/man/"
 mv $top_dir/docs/ronn/*.8.html "/tmp/pages_ucaresystem/man/"
 
+# Show list of files
 find . -name "*" | grep -v "git"
+
 git add *
 git commit -m "rebuild manual at $(date +%F %T)"
 git push "${push_url}" gh-pages
