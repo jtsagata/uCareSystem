@@ -16,6 +16,7 @@ deploy:
       secure: $GITHUB_API_KEY_SECURE
     cleanup: false
     prerelease: true
+    force_update: true
     file_glob: true
     file:
       - "dist/*.*"
