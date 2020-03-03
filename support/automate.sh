@@ -1,12 +1,20 @@
 #!/usr/bin/env bash
-
-# Instructions
-#    travis setup releases
-
 set -ex
 
 top_dir="$(git rev-parse --show-toplevel)"
 cd "$top_dir"
+
+# PGP
+declare -r custom_gpg_home="${top_dir}/.ci"
+declare -r secring_auto="${custom_gpg_home}/secring.auto"
+declare -r pubring_auto="${custom_gpg_home}/pubring.auto"
+
+echo
+echo "Decrypting secret gpg keyring.."
+# $super_secret_password is taken from the script's env.
+# https://blogs.itemis.com/en/secure-your-travis-ci-releases-part-2-signature-with-openpgp
+{ echo $PGP_SECRET | gpg --passphrase-fd 0 "${secring_auto}".gpg ; } || { echo "Failed to decrypt secret gpg keyring." ; exit 1}
+echo Success!
 
 # install dependencies
 sudo apt-get update

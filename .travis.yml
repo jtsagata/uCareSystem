@@ -1,6 +1,10 @@
 language: bash
 dist: bionic
 
+env:
+  global:
+    secure: $PGP_SECRET
+
 script:
   - support/automate.sh
 
