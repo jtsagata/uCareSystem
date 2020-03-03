@@ -53,7 +53,7 @@ If no options is specified the program runs in `maintain` mode
       -w, --wait
         Press ENTER to end the program. For the "gui" version
     
-See [man page](man/ucaresystem.8.html) for more info
+See [man page](https://jtsagata.github.io/uCareSystem/man/ucaresystem.8.html) for more info
 
 
 
