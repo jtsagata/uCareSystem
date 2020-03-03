@@ -9,3 +9,4 @@ dist
 TODO
 .idea
 ucaresystem-build-deps*.*
+.ci/secring.auto
