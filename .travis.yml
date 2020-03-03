@@ -4,35 +4,17 @@ dist: bionic
 script:
   - support/automate.sh
 
-defore_deploy:
-  - git tag -f v.4.5.0-beta
+deploy:
+  provider: releases
+  api_key:
+    secure: $GITHUB_API_KEY_SECURE
+  cleanup: false
+  file_glob: true
+  file:
+    - "dist/*.*"
   on:
     repo: jtsagata/uCareSystem
     tags: true
-
-deploy:
-  - provider: releases
-    api_key:
-      secure: $GITHUB_API_KEY_SECURE
-    cleanup: false
-    prerelease: true
-    force_update: true
-    file_glob: true
-    file:
-      - "dist/*.*"
-    on:
-      repo: jtsagata/uCareSystem
-  - provider: releases
-    api_key:
-      secure: $GITHUB_API_KEY_SECURE
-    cleanup: false
-    file_glob: true
-    file:
-      - "dist/*.*"
-    on:
-      repo: jtsagata/uCareSystem
-      tags: true
-
 
 branches:
   except:
