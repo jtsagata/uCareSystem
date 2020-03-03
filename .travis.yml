@@ -2,7 +2,8 @@ language: bash
 dist: disco
 
 script:
-  - support/make_debian.sh
+  - support/automate.sh
+
 after_success:
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
   - bash upload.sh packages/*
