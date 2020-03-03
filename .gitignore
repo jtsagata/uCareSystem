@@ -5,7 +5,7 @@ debian/*.log
 debian/*.substvars
 debian/*.debhelper
 debian/files
-packages
+dist
 TODO
 .idea
 ucaresystem-build-deps*.*

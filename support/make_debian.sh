@@ -1,5 +1,5 @@
 #!/bin/bash
-ARTIFACTS="packages"
+ARTIFACTS="dist"
 
 dir_name="$(dirname "$0")"
 

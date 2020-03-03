@@ -18,6 +18,6 @@ VERSION=$(grep "Standards-Version" "${top_dir}/debian/control" | awk '{print $2}
 
 # Make tar release
 pushd debian/ucaresystem/
-tar cfz "${top_dir}/packages/ucaresystem-${VERSION}.tgz" usr
+tar cfz "${top_dir}/dist/ucaresystem-${VERSION}.tgz" usr
 popd
 
