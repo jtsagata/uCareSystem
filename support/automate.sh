@@ -13,7 +13,7 @@ echo
 echo "Decrypting secret gpg keyring.."
 # $super_secret_password is taken from the script's env.
 # https://blogs.itemis.com/en/secure-your-travis-ci-releases-part-2-signature-with-openpgp
-echo $PGP_SECRET | gpg --passphrase-fd 0 "${secring_auto}".gpg
+echo $PGP_SECRET | gpg --batch --passphrase-fd 0 "${secring_auto}".gpg
 if [ $retval -ne 0 ]; then
     echo "Failed to decrypt secret gpg keyring."
     exit 1
