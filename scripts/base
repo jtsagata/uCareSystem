@@ -28,15 +28,31 @@ if [[ -z "${NO_COLOR}" ]]; then
 fi
 set -u
 
+# Configuration variables and default values
+WAIT_ACTION=${WAIT_ACTION:=0}
+KEEP_KERNELS=${KEEP_KERNELS:=2}
+SHOW_BANNER=${SHOWBANNER:=true}
+DEFAULT_MODE=${DEFAULT_MODE:=maintain}
+AUTO_REBOOT=${AUTO_REBOOT:=false}
+AUTO_REBOOT_TIMEOUT=${AUTO_REBOOT_TIMEOUT:=10}
+ASK_CONFIRM=${ASK_CONFIRM:=true}
+ENABLE_TIMESHIFT=${ENABLE_TIMESHIFT:=false}
+
+EXEC=""
+DO_WAIT=false
+
+#
 # Programs used
-SUDO="/usr/bin/sudo"
-DEBORPHAN="/usr/bin/deborphan"
-UPDATE_TOOL="/usr/bin/do-release-upgrade"
-LSB_RELEASE="/usr/bin/lsb_release"
-REBOOT="/sbin/reboot"
-LOCALE="/usr/bin/locale"
-SED="/bin/sed"
-TIMESHIFT="/usr/bin/timeshift"
+# So user can change them in the config file
+#
+SUDO=${SUDO:=/usr/bin/sudo}
+DEBORPHAN=${DEBORPHAN:=/usr/bin/deborphan}
+UPDATE_TOOL=${UPDATE_TOOL:/usr/bin/do-release-upgrade}
+LSB_RELEASE=${LSB_RELEASE:/usr/bin/lsb_release}
+REBOOT=${REBOOT:/sbin/reboot}
+LOCALE=${LOCALE:/usr/bin/locale}
+SED=${SED:/bin/sed}
+TIMESHIFT=${TIMESHIFT:/usr/bin/timeshift}
 
 # use apt or apt-get
 if [ -x "/usr/bin/apt" ]; then
@@ -44,6 +60,14 @@ if [ -x "/usr/bin/apt" ]; then
 else
   APT="/usr/bin/apt-get"
 fi
+
+# Distro info tool
+distribution_id=$(${LSB_RELEASE} --id | cut -f2)
+case "${distribution_id}" in
+  "Debian") DISTRO_INFO="/usr/bin/debian-distro-info" ;;
+  "Ubuntu") DISTRO_INFO="/usr/bin/ubuntu-distro-info" ;;
+esac
+
 
 #
 # Display a header text
@@ -78,13 +102,6 @@ function ask_yesno() {
   done
 }
 
-#
-# Display version
-#
-function action_version() {
-  echo "$(basename "${0}") version ${UCARE_VERSION}"
-  exit
-}
 
 #
 # Check if reboot is required

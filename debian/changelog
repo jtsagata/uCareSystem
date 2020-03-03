@@ -1,6 +1,7 @@
 ucaresystem (4.5.0) trusty; urgency=high
 
   * Complete rewrite
+  * Modular system
   * Package rename to ucaresystem
   * Timeshift integration
   * Rename exceutable to ucaresystem from ucaresystem-core

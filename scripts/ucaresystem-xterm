@@ -4,15 +4,12 @@
 # Use of this source code is governed by GPLv3 license that can be
 # found in the copyright file.
 
+set -eu
 UCARE_VERSION="4.5.0"
 lib_dir="."
+base_dir=$(dirname "$0")
 
-function require() {
-  source "${lib_dir}/$1"
-}
-
-require "base"
-
+source "${base_dir}"/base
 
 terms=(x-terminal-emulator gnome-terminal konsole  i3-sensible-terminal uxterm xterm rxvt)
 for t in ${terms[*]}
