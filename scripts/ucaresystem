@@ -107,11 +107,11 @@ done
 # Delegate to tool
 case "${dispach}" in
 "cli")
-  "${base_dir}/${lib_dir}"/ucaresystem-cli "$opts"
+  "${base_dir}/${lib_dir}"/ucaresystem-cli ${opts[@]}
   exit $?
   ;;
 "xterm")
-  "${base_dir}/${lib_dir}"/ucaresystem-xterm --wait "$opts"
+  "${base_dir}/${lib_dir}"/ucaresystem-xterm --wait ${opts[@]}
   exit $?
   ;;
 esac

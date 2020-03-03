@@ -1,4 +1,36 @@
 #!/usr/bin/env bash
+#
+#    ucaresystem - All-in-one system update and maintenance tool
+#    Copyright (C) 2009-2020 Salih Emin <salih@utappia.org>
+#
+#    Authors: Salih Emin <salih@utappia.org>
+#             Ioannis Tsagkatakis <tsagatakis@protonmail.com>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, version 3 of the License.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+set -eu
+## Ensure this file can only be sourced once
+set +u
+if [[ "${FUNCNAME[0]}" != source ]]; then
+  echo "This file can only be source"
+  exit 1
+fi
+if [[ -n ${base_loaded} ]]; then
+  echo "Warning: This file can only be sourced once"
+  return 1
+fi
+base_loaded=true
+set -u
 
 #
 # Config file
@@ -45,14 +77,15 @@ DO_WAIT=false
 # Programs used
 # So user can change them in the config file
 #
+
 SUDO=${SUDO:=/usr/bin/sudo}
 DEBORPHAN=${DEBORPHAN:=/usr/bin/deborphan}
-UPDATE_TOOL=${UPDATE_TOOL:/usr/bin/do-release-upgrade}
-LSB_RELEASE=${LSB_RELEASE:/usr/bin/lsb_release}
-REBOOT=${REBOOT:/sbin/reboot}
-LOCALE=${LOCALE:/usr/bin/locale}
-SED=${SED:/bin/sed}
-TIMESHIFT=${TIMESHIFT:/usr/bin/timeshift}
+UPDATE_TOOL=${UPDATE_TOOL:=/usr/bin/do-release-upgrade}
+LSB_RELEASE=${LSB_RELEASE:=/usr/bin/lsb_release}
+REBOOT=${REBOOT:=/sbin/reboot}
+LOCALE=${LOCALE:=/usr/bin/locale}
+SED=${SED:=/bin/sed}
+TIMESHIFT=${TIMESHIFT:=/usr/bin/timeshift}
 
 # use apt or apt-get
 if [ -x "/usr/bin/apt" ]; then
@@ -68,6 +101,7 @@ case "${distribution_id}" in
   "Ubuntu") DISTRO_INFO="/usr/bin/ubuntu-distro-info" ;;
 esac
 
+set -u
 
 #
 # Display a header text
@@ -80,12 +114,12 @@ function header_text() {
 # Ask for yes/no (localized)
 #
 function ask_yesno() {
-  prompt=$1
+  local prompt=$1
   set -- $(${LOCALE} LC_MESSAGES)
-  yesptrn="$1"
-  noptrn="$2"
-  yesword="$3"
-  noword="$4"
+  local yesptrn="$1"
+  local noptrn="$2"
+  local yesword="$3"
+  local noword="$4"
   while true; do
     read -rp "${prompt} (${yesword},yes / ${noword},no)? " yn
     case $yn in
@@ -148,4 +182,18 @@ function action_timeshift() {
   ${EXEC} ${SUDO} ${TIMESHIFT} --create --comments "${distribution_id}-$(basename "${0}")-${curr_date}"
   { set +x; } 2>/dev/null
   sleep ${WAIT_ACTION}
+}
+
+#
+# Check if ypu can sudo
+#
+function check_root_priv() {
+  # Checking if the user has run the script with "sudo" or not
+  if [[ $EUID -ne 0 ]]; then
+    echo -ne "${RED}${BOLD}Error: ${BOLDOFF} '$0'" 1>&2
+    echo -ne " ${BOLD}must run with root user privileges.${BOLDOFF}" 1>&2
+    echo -ne " ${BOLD}consider running it with 'sudo' ${BOLDOFF}" 1>&2
+    printf "\n\n"
+    exit 1
+  fi
 }

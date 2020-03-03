@@ -35,51 +35,6 @@ function trap_handler() {
   exit 1
 }
 
-function check_eol() {
-  distribution_id=$(${LSB_RELEASE} --id | cut -f2)
-  codename=$(${LSB_RELEASE} --codename | cut -f2)
-
-  # distribution_id="Ubuntu" && codename="focal"
-
-  valid_ids=("Debian" "Ubuntu")
-  if [[ ! "${valid_ids[*]}" == *"${distribution_id}"* ]]; then
-    header_text "Your distribution is '${distribution_id}', codename:'${codename}'."
-    return
-  fi
-
-  supported_distro=$(${DISTRO_INFO} --supported)
-  days=$(${DISTRO_INFO} --series="${codename}" --days)
-
-  if [[ "${supported_distro[*]}" == *"${codename}"* ]]; then
-    header_text "Your distribution '${GREEN}${distribution_id}${NORMAL}', codename:'${GREEN}${codename}${NORMAL}' is not at eol."
-    if [ ! "${days}" == "(unknown)" ]; then
-      if [[ "${days}" == *"-"* ]]; then
-        header_text "The was a new distribution version before ${days//-/} days. Consider an upgrade."
-      else
-        header_text "Expect a new version of your distribution in ${days} days."
-      fi
-    fi
-    return
-  else
-    header_text "Your distribution '${distribution_id}', codename:'${codename}' is reach the end of support"
-    echo "  The end of support was before ${days//-/} days."
-    echo "  Please upgrade your distribution to a latest release!"
-    echo "  Try run: $(basename "${0}") --upgrade"
-    exit
-  fi
-}
-
-function check_root_priv() {
-  # Checking if the user has run the script with "sudo" or not
-  if [[ $EUID -ne 0 ]]; then
-    echo -ne "${RED}${BOLD}Error: ${BOLDOFF} '$0'" 1>&2
-    echo -ne " ${BOLD}must run with root user privileges.${BOLDOFF}" 1>&2
-    echo -ne " ${BOLD}consider running it with 'sudo' ${BOLDOFF}" 1>&2
-    printf "\n\n"
-    exit 1
-  fi
-}
-
 function welcome_screen() {
   clear
   echo "_______________________________________________________"
@@ -112,57 +67,6 @@ function welcome_screen() {
       exit 1
     fi
   fi
-}
-
-
-
-function action_maintain() {
-  check_root_priv
-  header_text "Start System update actions"
-
-  ## Updates package lists
-  header_text "Updating package lists"
-  set -x
-  ${EXEC} ${SUDO} ${APT} update
-  { set +x; } 2>/dev/null
-  sleep ${WAIT_ACTION}
-
-  ## Updates packages and libraries
-  header_text "Updating packages and system libraries"
-  set -x
-  ${EXEC} ${SUDO} ${APT} full-upgrade -y
-  { set +x; } 2>/dev/null
-  sleep ${WAIT_ACTION}
-  header_text "Finish System update actions"
-  sleep ${WAIT_ACTION}
-}
-
-function action_clean() {
-  check_root_priv
-  header_text "Start Cleanup actions"
-  ## Removes unneeded packages
-  header_text "Removing unneeded packages"
-  set -x
-  ${EXEC} ${SUDO} ${APT} -y --purge autoremove
-  { set +x; } 2>/dev/null
-  sleep ${WAIT_ACTION}
-
-  ## Removes unused config files
-  header_text "Removing unused config files"
-  set -x
-  ${EXEC} ${SUDO} ${DEBORPHAN} -n --find-config | ${EXEC} xargs ${SUDO} ${APT} -y --purge autoremove
-  { set +x; } 2>/dev/null
-  sleep ${WAIT_ACTION}
-
-  ## Removes package files that can no longer be downloaded and everything except
-  # the lock file in /var/cache/apt/archives, including directories.
-  header_text "Cleaned downloaded temporary packages"
-  set -x
-  ${EXEC} ${SUDO} ${APT} -y autoclean
-  ${EXEC} ${SUDO} ${APT} -y clean
-  { set +x; } 2>/dev/null
-  header_text "Finish Cleanup actions"
-  sleep ${WAIT_ACTION}
 }
 
 function action_upgrade_EOL() {
@@ -307,14 +211,6 @@ eval set -- "$ARGS"
 
 while true; do
   case "$1" in
-  -h | --help)
-    action_help
-    shift
-    ;;
-  -v | --version)
-    action_version
-    shift
-    ;;
   -d | --dryrun)
     EXEC="echo"
     shift
@@ -349,20 +245,30 @@ while true; do
   esac
 done
 
+# --help and --version is not our worries
+# So must always check root privileges.
+check_root_priv
+
+
 if [ "$SHOW_BANNER" == true ]; then
   welcome_screen
 fi
 
 case "$MODE" in
 "maintain")
+  source "${base_dir}"/task_check_eol
   check_eol
   action_timeshift
+  source "${base_dir}"/task_maintain
   action_maintain
+  source "${base_dir}"/task_cleanup
   action_clean
   ;;
 "clean")
+  source "${base_dir}"/task_check_eol
   check_eol
   action_timeshift
+  source "${base_dir}"/task_cleanup
   action_clean
   ;;
 "upgrade")

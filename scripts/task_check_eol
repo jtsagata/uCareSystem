@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+#
+#    ucaresystem - All-in-one system update and maintenance tool
+#    Copyright (C) 2009-2020 Salih Emin <salih@utappia.org>
+#
+#    Authors: Salih Emin <salih@utappia.org>
+#             Ioannis Tsagkatakis <tsagatakis@protonmail.com>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, version 3 of the License.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+set -eu
+## Ensure this file can only be sourced once
+set +u
+if [[ "${FUNCNAME[0]}" != source ]]; then
+  echo "This file can only be source"
+  exit 1
+fi
+if [[ -n ${check_eol_loaded} ]]; then
+  echo "Warning: This file can only be sourced once"
+  return 1
+fi
+check_eol=true
+set -u
+
+function check_eol() {
+  distribution_id=$(${LSB_RELEASE} --id | cut -f2)
+  codename=$(${LSB_RELEASE} --codename | cut -f2)
+
+  # distribution_id="Ubuntu" && codename="focal"
+
+  valid_ids=("Debian" "Ubuntu")
+  if [[ ! "${valid_ids[*]}" == *"${distribution_id}"* ]]; then
+    header_text "Your distribution is '${distribution_id}', codename:'${codename}'."
+    return
+  fi
+
+  supported_distro=$(${DISTRO_INFO} --supported)
+  days=$(${DISTRO_INFO} --series="${codename}" --days)
+
+  if [[ "${supported_distro[*]}" == *"${codename}"* ]]; then
+    header_text "Your distribution '${GREEN}${distribution_id}${NORMAL}', codename:'${GREEN}${codename}${NORMAL}' is not at eol."
+    if [ ! "${days}" == "(unknown)" ]; then
+      if [[ "${days}" == *"-"* ]]; then
+        header_text "The was a new distribution version before ${days//-/} days. Consider an upgrade."
+      else
+        header_text "Expect a new version of your distribution in ${days} days."
+      fi
+    fi
+    return
+  else
+    header_text "Your distribution '${distribution_id}', codename:'${codename}' is reach the end of support"
+    echo "  The end of support was before ${days//-/} days."
+    echo "  Please upgrade your distribution to a latest release!"
+    echo "  Try run: $(basename "${0}") --upgrade"
+  fi
+}
