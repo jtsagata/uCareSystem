@@ -1,4 +1,4 @@
-ronn(1) -- convert markdown files to manpages
+ucaresystem-core(8) -- convert markdown files to manpages
 =============================================
 
 ## SYNOPSIS

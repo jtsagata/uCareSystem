@@ -2,7 +2,9 @@ Source: ucaresystem
 Section: utils
 Priority: optional
 Maintainer: Salih Emin <salih-emin@ubuntu.com>
-Build-Depends: debhelper (>= 9), docbook-to-man
+Build-Depends:
+    debhelper (>= 9),
+    ruby-ronn
 Standards-Version: 4.5.0
 Homepage: http://utappia.org
 Vcs-Git: https://github.com/Utappia/uCareSystem.git
@@ -14,8 +16,7 @@ Depends: apt,
          lsb-release,
          policykit-1,
          util-linux (>= 2.0),
-         distro-info,
-         sed (>= 1.0)
+         distro-info
 Suggests: timeshift
 Description: All-in-one System Update and maintenance tool
  This simple script will automatically refresh your packagelist,

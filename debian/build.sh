@@ -1,14 +1,14 @@
 #!/bin/bash
 set -ex
 base_name="$(basename "$0")"
-dir_name="$(dirname "$0")"
+dir_name="$(dirname "$0")/.."
 VERSION="4.5.0"
 
 DESTDIR=${DESTDIR:=debian/ucaresystem}
-yes| rm -rf "$DESTDIR"
+yes | rm -rf "$DESTDIR"
 
 ## Copy Main scripts
-main_scripts=("launch-ucaresystem" "remove-old-kernels" "ucaresystem" "ucaresystem-core" )
+main_scripts=("launch-ucaresystem" "remove-old-kernels" "ucaresystem" "ucaresystem-core")
 mkdir -p "$DESTDIR/usr/bin"
 for s in "${main_scripts[@]}"; do
   cp "${dir_name}/scripts/$s" "$DESTDIR/usr/bin/"
@@ -40,3 +40,10 @@ cp assets/*.png "$DESTDIR/usr/share/icons"
 ## Misc Files
 mkdir -p "$DESTDIR/usr/share/doc/ucaresystem"
 cp assets/ucaresystem.conf.sample "$DESTDIR/usr/share/doc/ucaresystem"
+
+## Manual pages
+ronn --roff --manual="ucaresystem" --organization="Utappia" --date="2020-04-01" docs/ronn/*.ronn
+mkdir -p "$DESTDIR/usr/share/man/man1"
+mv docs/ronn/*.1 "$DESTDIR/usr/share/man/man1"
+mkdir -p "$DESTDIR/usr/share/man/man8"
+mv docs/ronn/*.8 "$DESTDIR/usr/share/man/man8"

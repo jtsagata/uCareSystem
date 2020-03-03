@@ -1,8 +1,11 @@
 #!/bin/bash
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ARTIFACTS="packages"
 
-pushd "${DIR}"
+dir_name="$(dirname "$0")"
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+pushd "${dir_name}/.."
 
 dpkg-buildpackage -b
 
