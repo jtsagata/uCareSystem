@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/jtsagata/uCareSystem.svg?branch=master)](https://travis-ci.org/jtsagata/uCareSystem)
+
 Work in progress for the next major version
 
 ## Modes of operation
