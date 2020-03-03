@@ -5,6 +5,13 @@ set -ex
 top_dir="$(git rev-parse --show-toplevel)"
 cd "$top_dir"
 
+# install dependencies
+sudo apt-get install -y devscripts equivs
+sudo mk-build-deps --install "${top_dir}/debian/control"
+# Remove gen file
+rm ucaresystem-build-deps*.*
+
+
 # Make debian package
 ./support/make_debian.sh
 

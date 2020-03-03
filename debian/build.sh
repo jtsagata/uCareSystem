@@ -43,8 +43,8 @@ cp assets/ucaresystem.conf.sample "$DESTDIR/usr/share/doc/ucaresystem"
 
 ## Manual pages
 ronn --roff --manual="ucaresystem" --organization="Utappia" --date="2020-04-01" docs/ronn/*.ronn
-mkdir -p "$DESTDIR/usr/share/man/man1"
-mv docs/ronn/*.1 "$DESTDIR/usr/share/man/man1"
+#mkdir -p "$DESTDIR/usr/share/man/man1"
+#mv docs/ronn/*.1 "$DESTDIR/usr/share/man/man1"
 mkdir -p "$DESTDIR/usr/share/man/man8"
 mv docs/ronn/*.8 "$DESTDIR/usr/share/man/man8"
 
