@@ -26,5 +26,5 @@ if [[ "$(basename "$0")" == *"core"* ]]; then
   echo "Warning: command name is now just 'ucaresystem' ucaresystem-core will be removed in next release."
 fi
 
-$(dirname "$0")/ucaresystem
+$(dirname "$0")/ucaresystem "$@"
 
