@@ -20,7 +20,7 @@ Depends: apt,
          sed (>= 1.0),
          distro-info
 Suggests: timeshift
-Description: All-in-one System Update and maintenance tool
+Description: All-in-one System Update and maintenance tool.
  This simple script will automatically refresh your packagelist,
  download and install software updates (if there are any), remove old
  kernels, obsolete packages and configuration files and free up disk space

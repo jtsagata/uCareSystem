@@ -72,70 +72,78 @@
             vertical-align: top;
             float: left;
         }
-    </style>
-</head>
-<body>
-<style>
-    #forkongithub a {
-        background: #36d72b;
-        color: #fff;
-        text-decoration: none;
-        font-family: arial, sans-serif;
-        text-align: center;
-        font-weight: bold;
-        padding: 5px 40px;
-        font-size: 1rem;
-        line-height: 2rem;
-        position: relative;
-        transition: 0.5s;
-    }
 
-    #forkongithub a:hover {
-        background: #d79d2b;
-        color: #000;
-    }
-
-    #forkongithub a::before, #forkongithub a::after {
-        content: "";
-        width: 100%;
-        display: block;
-        position: absolute;
-        top: 1px;
-        left: 0;
-        height: 1px;
-        background: #36d72b;
-    }
-
-    #forkongithub a::after {
-        bottom: 1px;
-        top: auto;
-    }
-
-    @media screen and (min-width: 800px) {
-        #forkongithub {
-            position: absolute;
+        .center {
             display: block;
-            top: 0;
-            right: 0;
-            width: 200px;
-            overflow: hidden;
-            height: 200px;
-            z-index: 9999;
+            margin-left: auto;
+            margin-right: auto;
+            width: 50%;
         }
 
         #forkongithub a {
-            width: 200px;
-            position: absolute;
-            top: 60px;
-            right: -60px;
-            transform: rotate(45deg);
-            -webkit-transform: rotate(45deg);
-            -ms-transform: rotate(45deg);
-            -moz-transform: rotate(45deg);
-            -o-transform: rotate(45deg);
-            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.8);
+            background: #36d72b;
+            color: #fff;
+            text-decoration: none;
+            font-family: arial, sans-serif;
+            text-align: center;
+            font-weight: bold;
+            padding: 5px 40px;
+            font-size: 1rem;
+            line-height: 2rem;
+            position: relative;
+            transition: 0.5s;
         }
-    }</style>
+
+        #forkongithub a:hover {
+            background: #d79d2b;
+            color: #000;
+        }
+
+        #forkongithub a::before, #forkongithub a::after {
+            content: "";
+            width: 100%;
+            display: block;
+            position: absolute;
+            top: 1px;
+            left: 0;
+            height: 1px;
+            background: #36d72b;
+        }
+
+        #forkongithub a::after {
+            bottom: 1px;
+            top: auto;
+        }
+
+        @media screen and (min-width: 800px) {
+            #forkongithub {
+                position: absolute;
+                display: block;
+                top: 0;
+                right: 0;
+                width: 200px;
+                overflow: hidden;
+                height: 200px;
+                z-index: 9999;
+            }
+
+            #forkongithub a {
+                width: 200px;
+                position: absolute;
+                top: 60px;
+                right: -60px;
+                transform: rotate(45deg);
+                -webkit-transform: rotate(45deg);
+                -ms-transform: rotate(45deg);
+                -moz-transform: rotate(45deg);
+                -o-transform: rotate(45deg);
+                box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.8);
+            }
+        }
+    </style>
+</head>
+
+<body>
 <span id="forkongithub"><a href="https://github.com/jtsagata/uCareSystem">Fork me on GitHub</a></span>
 <div id='index'>
     <img src="ucaresystem.png" class="logo" name="logo" alt="logo"/>
@@ -211,6 +219,28 @@
         </li>
         </dd>
     </ul>
+
+    <h4>Brooks Law</h4>
+
+    <p>The comic refers to the phenomenon in which computer programmers attempt to create programs to automate menial
+        but
+        frequent tasks, to save time and effort. These attempts often end up taking much more time than the menial tasks
+        would have taken. The first graph reflects the assumed ideal that leads programmers into such an attempt:
+        writing
+        the program will take more effort initially, but once the program is complete, it will take over the routine
+        tasks,
+        leaving the programmer free to do something else.</p>
+
+    <img src="automation.png" alt="automation" name="automation" class="center"/>
+    <a href="https://xkcd.com/1319/" class="center">https://xkcd.com/1319/</a>
+
+    <p>However, writing a program often turns out to be not that simple: programs can have defects, and certain
+        functionalities can be hard to implement. Because of this, programmers usually spend more time than projected to
+        finish a program. As time goes on, the desire to see it finished can consume the programmer's effort and
+        attention,
+        with the menial tasks left undone.</p>
+
+    <p>So this simple script is more than 700 lines of bash code. The number of bugs is still unknown.</p>
 
     <p class='copy'>Copyright &copy; 2020 www.utappia.org</p>
 </div>
