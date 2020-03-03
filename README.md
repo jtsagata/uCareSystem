@@ -25,32 +25,43 @@ The program reports the expected date of new distribution release, or how old is
 ## Command line options
 If no options is specified the program runs in `maintain` mode
 
-    uCareSystem Core 4.5.0 : All-in-one system update and maintenance tool
-    
-    Usage:
-      sudo ucaresystem [options]
-      ucaresystem --help|--version
-    
-    MODES
-       -m, --maintain
-          Do normal maintenance jobs. The default action id no option is given.
-       -c, --clean
-          reclaim some disk space
-       -u type, --upgrade=type
-              Upgrade ...
-    OTHER OPTIONS
-      -n, --dyrun
-        Show only the commands, but do not modify the system
-      -y, --yes
-        Don't ask for confirmation
-      -h, --help
-        Display this help text
-      -v, --version
-        Display program version and exits
-      -s, --skip
-        Do not show the welcome banner, and do not pause.
-      -w, --wait
-        Press ENTER to end the program. For the "gui" version
+```text
+Usage:
+  sudo ucaresystem [options]
+  ucaresystem --help|--version
+
+MODES
+   -m, --maintain
+      Do normal maintenance jobs. The default action id no option is given.
+   -c, --clean
+      reclaim some disk space
+   -u type, --upgrade=type
+          Upgrade ...
+
+OTHER OPTIONS
+  -n, --dyrun
+    Show only the commands, but do not modify the system
+  -y, --yes
+    Don't ask for confirmation
+  -h, --help
+    Display this help text
+  -v, --version
+    Display program version and exits
+  -s, --skip
+    Do not show the welcome header_text, and do not pause.
+  -w, --wait
+    Press ENTER to end the program. For the "gui" version
+
+RUNNERS
+  --cli
+    Run the cli version
+  --xterm
+    Run the xterm version
+   --dialog
+    Run the dialog version
+  --gtk
+    (maybe some day)  
+```
     
 See [man page](https://jtsagata.github.io/uCareSystem/man/ucaresystem.8.html) for more info
 
