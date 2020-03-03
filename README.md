@@ -1,6 +1,3 @@
-[![](https://tokei.rs/b1/github/jtsagata/uCareSystem?category=lines)](https://github.com/jtsagata/uCareSystem).
-[![](https://tokei.rs/b1/github/jtsagata/uCareSystem?category=code)](https://github.com/jtsagata/uCareSystem).
-
 Work in progress for the next major version
 
 ## Modes of operation
