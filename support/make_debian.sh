@@ -25,7 +25,6 @@ mv ../ucare*.changes ${ARTIFACTS}
 
 lintian ${ARTIFACTS}/*.changes
 
-#sudo apt remove -y ucaresystem-core
 #sudo dpkg -i packages/*.deb
 
 popd
