@@ -68,7 +68,7 @@ DEFAULT_MODE=${DEFAULT_MODE:=maintain}
 AUTO_REBOOT=${AUTO_REBOOT:=false}
 AUTO_REBOOT_TIMEOUT=${AUTO_REBOOT_TIMEOUT:=10}
 ASK_CONFIRM=${ASK_CONFIRM:=true}
-ENABLE_TIMESHIFT=${ENABLE_TIMESHIFT:=false}
+ENABLE_TIMESHIFT=${ENABLE_TIMESHIFT:=auto}
 
 EXEC=""
 DO_WAIT=false
@@ -86,6 +86,7 @@ REBOOT=${REBOOT:=/sbin/reboot}
 LOCALE=${LOCALE:=/usr/bin/locale}
 SED=${SED:=/bin/sed}
 TIMESHIFT=${TIMESHIFT:=/usr/bin/timeshift}
+AWK=${AWK:=/usr/bin/awk}
 
 # use apt or apt-get
 if [ -x "/usr/bin/apt" ]; then
@@ -162,38 +163,15 @@ function check_reboot() {
   fi
 }
 
-#
-# Make a timeshift backup
-#
-function action_timeshift() {
-  if [ "${ENABLE_TIMESHIFT}" == "false" ]; then
-    return
-  fi
-
-  header_text "Make a snapshot with timeshift"
-  if [ -z ${TIMESHIFT} ]; then
-    echo "timeshift is missing. Skipping ..."
-    return
-  fi
-
-  distribution_id=$(${LSB_RELEASE} --id | cut -f2)
-  curr_date=$(date +%F_%T)
-  set -x
-  ${EXEC} ${SUDO} ${TIMESHIFT} --create --comments "${distribution_id}-$(basename "${0}")-${curr_date}"
-  { set +x; } 2>/dev/null
-  sleep ${WAIT_ACTION}
-}
 
 #
-# Check if ypu can sudo
+# Check if you can sudo
 #
 function check_root_priv() {
   # Checking if the user has run the script with "sudo" or not
   if [[ $EUID -ne 0 ]]; then
-    echo -ne "${RED}${BOLD}Error: ${BOLDOFF} '$0'" 1>&2
-    echo -ne " ${BOLD}must run with root user privileges.${BOLDOFF}" 1>&2
-    echo -ne " ${BOLD}consider running it with 'sudo' ${BOLDOFF}" 1>&2
-    printf "\n\n"
+    echo  "${RED}${BOLD}Error: ${BOLDOFF} Application needs admin access.${BOLDOFF}" 1>&2
+    echo  "Please run the application as admin (using 'sudo' or 'su')" 1>&2
     exit 1
   fi
 }

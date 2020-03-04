@@ -257,18 +257,20 @@ fi
 case "$MODE" in
 "maintain")
   source "${base_dir}"/task_check_eol
+  source "${base_dir}"/task_maintain
+  source "${base_dir}"/task_cleanup
+  source "${base_dir}"/task_timeshift
   check_eol
   action_timeshift
-  source "${base_dir}"/task_maintain
   action_maintain
-  source "${base_dir}"/task_cleanup
   action_clean
   ;;
 "clean")
   source "${base_dir}"/task_check_eol
+  source "${base_dir}"/task_cleanup
+  source "${base_dir}"/task_timeshift
   check_eol
   action_timeshift
-  source "${base_dir}"/task_cleanup
   action_clean
   ;;
 "upgrade")

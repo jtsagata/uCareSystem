@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/jtsagata/uCareSystem.svg?branch=master)](https://travis-ci.org/jtsagata/uCareSystem)
 
-Work in progress for the next major version
+Work in progress for the next major version. Only for brave testers atm.
 
 ## Modes of operation
 There is 3 modes of operation
@@ -77,9 +77,13 @@ Many aspect of the programs can be configured by a configuration file. A sample 
     sudo $EDITOR etc/ucaresystem.conf
 
 ## Timeshift backups
-If `timeshift` is installed, there is an option 
-to enable automatic snapshots in the config file.
-It is recommended to install and enable timeshift in `btrfs` filesystems. 
+With **timeshift** a snapshoot of the OS can be created before maintain and cleanup actions.
+The default setting is `ENABLE_TIMESHIFT=auto` which enables timeshift if timeshift is installed 
+and operates in `btrfs` mode.
+
+To enable timeshift in `rsync` mode set the option `ENABLE_TIMESHIFT=yes`
+  
+It is recommended to install and enable timeshift. 
   
 ## Topgrade integration
 
