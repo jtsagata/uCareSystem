@@ -206,6 +206,10 @@ function action_upgrade_devel() {
 
 MODE="${DEFAULT_MODE}"
 UPGRADE_MODE="next"
+SHOW_BANNER=true
+EXEC=""
+DO_WAIT=false
+
 ARGS=$(getopt -o hvdysmcwu: --long help,version,dryrun,yes,skip,maintain,clean,wait,upgrade: -- "$@")
 eval set -- "$ARGS"
 

@@ -20,17 +20,35 @@
 
 set -eu
 ## Ensure this file can only be sourced once
-set +u
-if [[ "${FUNCNAME[0]}" != source ]]; then
-  echo "This file can only be source"
-  exit 1
-fi
+task_timeshift_loaded=${task_timeshift_loaded:-}
 if [[ -n ${task_timeshift_loaded} ]]; then
   echo "Warning: This file can only be sourced once"
   return 1
 fi
 task_timeshift_loaded=true
-set -u
+
+
+#
+# Make a timeshift backup
+#
+function action_timeshift() {
+  type=${1:-standalone}
+
+  enable_timesfit_q result
+  if [[ "${result}" == "no" ]]; then
+    return
+  fi
+
+  header_text "Make a snapshot with timeshift"
+
+  distribution_id=$(${LSB_RELEASE} --id | cut -f2)
+  codename=$(${LSB_RELEASE} --codename | cut -f2)
+  label=${distribution_id}-${codename}-${type}
+  set -x
+  ${EXEC} ${SUDO} ${TIMESHIFT} --create --scripted --comments "$label"
+  { set +x; } 2>/dev/null
+  sleep ${WAIT_ACTION}
+}
 
 #
 # Check if timeshift action is to be done
@@ -39,15 +57,15 @@ function enable_timesfit_q() {
   local -n _ret=$1
   local enable
   local timeshift_type
-  enable=ENABLE_TIMESHIFT
+  enable=$ENABLE_TIMESHIFT
 
-  # Auto enable timeshift if
+  # Enable timeshift if
   #   a) program exists
   #   b) filesystem is btrfs
   #   c) config option is set to `auto`
-  if [ "${enable,,}" == "auto" ]; then
-    if [ -x "${TIMESHIFT}" ]; then
-      timeshift_type=$(${SUDO} ${TIMESHIFT} --list | ${AWK} '/^Mode/ {print $3}')
+  if [[ "${enable,,}" == "auto" ]]; then
+    if [[ -x "${TIMESHIFT}" ]]; then
+      timeshift_type=$(${EXEC} ${SUDO} ${TIMESHIFT} --list | ${AWK} '/^Mode/ {print $3}')
       if [ "${timeshift_type,,}" == "btrfs" ]; then
         enable=yes
       else
@@ -65,33 +83,28 @@ function enable_timesfit_q() {
   "yes" | "true" | "1")
     # check if executable is present
     if [ -z "${TIMESHIFT}" ]; then
-      echo "Error: Bad Configuration timeshift is missing. Configuration key 'ENABLE_TIMESHIFT'"
+      echo "Error: Bad Configuration timeshift is missing. Configuration key TIMESHIFT='$TIMESHIFT'"
       return
     fi
     _ret="yes"
     ;;
   *)
-    echo "Error: Bad Configuration key 'ENABLE_TIMESHIFT'"
+    echo "Error: Bad Configuration key 'ENABLE_TIMESHIFT=$ENABLE_TIMESHIFT'"
     exit 2
     ;;
   esac
 }
 
-#
-# Make a timeshift backup
-#
-function action_timeshift() {
-  enable_timesfit_q result
-  if [ "${result}" == "no" ]; then
-    return
-  fi
 
-  header_text "Make a snapshot with timeshift"
+#
+# Standalone
+#
+if [[ "${FUNCNAME[0]}" != source ]]; then
+  base_dir=$(dirname "$0")
+  source "${base_dir}"/base
 
-  distribution_id=$(${LSB_RELEASE} --id | cut -f2)
-  curr_date=$(date +%F_%T)
-  set -x
-  ${EXEC} ${SUDO} ${TIMESHIFT} --create --scripted --comments "${distribution_id}-$(basename "${0}")-${curr_date}"
-  { set +x; } 2>/dev/null
-  sleep ${WAIT_ACTION}
-}
+  EXEC=${EXEC:-}
+  check_root_priv
+  action_timeshift
+fi
+

@@ -20,7 +20,7 @@
 
 set -eu
 ## Ensure this file can only be sourced once
-set +u
+base_loaded=${base_loaded:-}
 if [[ "${FUNCNAME[0]}" != source ]]; then
   echo "This file can only be source"
   exit 1
@@ -30,79 +30,6 @@ if [[ -n ${base_loaded} ]]; then
   return 1
 fi
 base_loaded=true
-set -u
-
-#
-# Config file
-#
-if [ -x "/etc/ucaresystem.conf" ]; then
-  source /etc/ucaresystem.conf
-fi
-
-#
-# Colors
-#
-RED=""
-GREEN=""
-NORMAL=""
-BOLD=""
-BOLDOFF=""
-
-set +u
-if [[ -z "${NO_COLOR}" ]]; then
-  if test -n "$TERM" && test "$TERM" != "dumb"; then
-    RED=$(tput setaf 1)
-    GREEN=$(tput setaf 2)
-    NORMAL=$(tput setaf 7)
-    BOLD=$(tput bold)
-    BOLDOFF=$(tput sgr0)
-  fi
-fi
-set -u
-
-# Configuration variables and default values
-WAIT_ACTION=${WAIT_ACTION:=0}
-KEEP_KERNELS=${KEEP_KERNELS:=2}
-SHOW_BANNER=${SHOWBANNER:=true}
-DEFAULT_MODE=${DEFAULT_MODE:=maintain}
-AUTO_REBOOT=${AUTO_REBOOT:=false}
-AUTO_REBOOT_TIMEOUT=${AUTO_REBOOT_TIMEOUT:=10}
-ASK_CONFIRM=${ASK_CONFIRM:=true}
-ENABLE_TIMESHIFT=${ENABLE_TIMESHIFT:=auto}
-
-EXEC=""
-DO_WAIT=false
-
-#
-# Programs used
-# So user can change them in the config file
-#
-
-SUDO=${SUDO:=/usr/bin/sudo}
-DEBORPHAN=${DEBORPHAN:=/usr/bin/deborphan}
-UPDATE_TOOL=${UPDATE_TOOL:=/usr/bin/do-release-upgrade}
-LSB_RELEASE=${LSB_RELEASE:=/usr/bin/lsb_release}
-REBOOT=${REBOOT:=/sbin/reboot}
-LOCALE=${LOCALE:=/usr/bin/locale}
-SED=${SED:=/bin/sed}
-TIMESHIFT=${TIMESHIFT:=/usr/bin/timeshift}
-AWK=${AWK:=/usr/bin/awk}
-
-# use apt or apt-get
-if [ -x "/usr/bin/apt" ]; then
-  APT="/usr/bin/apt"
-else
-  APT="/usr/bin/apt-get"
-fi
-
-# Distro info tool
-distribution_id=$(${LSB_RELEASE} --id | cut -f2)
-case "${distribution_id}" in
-  "Debian") DISTRO_INFO="/usr/bin/debian-distro-info" ;;
-  "Ubuntu") DISTRO_INFO="/usr/bin/ubuntu-distro-info" ;;
-esac
-
-set -u
 
 #
 # Display a header text
@@ -137,7 +64,6 @@ function ask_yesno() {
   done
 }
 
-
 #
 # Check if reboot is required
 #
@@ -163,15 +89,139 @@ function check_reboot() {
   fi
 }
 
-
 #
 # Check if you can sudo
 #
 function check_root_priv() {
   # Checking if the user has run the script with "sudo" or not
   if [[ $EUID -ne 0 ]]; then
-    echo  "${RED}${BOLD}Error: ${BOLDOFF} Application needs admin access.${BOLDOFF}" 1>&2
-    echo  "Please run the application as admin (using 'sudo' or 'su')" 1>&2
+    echo "${RED}${BOLD}Error: ${BOLDOFF} Application needs admin access.${BOLDOFF}" 1>&2
+    echo "Please run the application as admin (using 'sudo' or 'su')" 1>&2
     exit 1
   fi
 }
+
+#
+# Test if a program is executable by you
+# Usage: text_executable path res
+#
+function test_excutable() {
+  local -n _ret=$2
+  _ret="bad"
+  if [[ -x $1 ]]; then _ret="ok"; fi
+}
+
+#
+# Set executable
+# usage set_executable VAR path required|optional
+#
+function set_executable() {
+  set +u
+  var_name=$1
+  default_path=$2
+  required=${3:-required}
+
+  if [[ -z ${!var_name} ]]; then
+    # User have not provide a default value. Set default
+    IFS= read -r "$var_name" <<< "$default_path"
+  fi
+
+  if [[ $required == "required" ]]; then
+    # check if path exist
+    res=""
+    test_excutable "${!var_name}" res
+    if [[ $res == "bad" ]]; then
+      echo "Bad config option '${var_name=}':  Missing executable ${!var_name}"
+      exit 2
+    fi
+  fi
+  set -u
+}
+
+#
+# Load the config file safely
+#
+function load_config_file() {
+  config_file="/etc/ucaresystem.conf"
+  if [ -r $config_file ]; then
+    $(awk -F= '/^[A-Z_]*=/ {printf "declare %s=%s\n", $1, $2}' $config_file)
+  fi
+
+  # Configuration variables and default values
+  WAIT_ACTION=${WAIT_ACTION:=0}
+  KEEP_KERNELS=${KEEP_KERNELS:=2}
+  DEFAULT_MODE=${DEFAULT_MODE:=maintain}
+  AUTO_REBOOT=${AUTO_REBOOT:=false}
+  AUTO_REBOOT_TIMEOUT=${AUTO_REBOOT_TIMEOUT:=10}
+  ASK_CONFIRM=${ASK_CONFIRM:=true}
+  ENABLE_TIMESHIFT=${ENABLE_TIMESHIFT:=auto}
+  ENABLE_TOPGRADE=${ENABLE_TOPGRADE:=auto}
+
+  # Programs used
+  set_executable  DEBORPHAN    /usr/bin/deborphan            required
+  set_executable  LSB_RELEASE  /usr/bin/lsb_release          required
+  set_executable  REBOOT       /sbin/reboot                  required
+  set_executable  LOCALE       /usr/bin/locale               required
+  set_executable  SED          /bin/sed                      required
+  set_executable  AWK          /usr/bin/awk                  required
+  set_executable  SUDO         /usr/bin/sudo                 required
+
+  set_executable  UPDATE_TOOL  /usr/bin/do-release-upgrade   optional
+  set_executable  TIMESHIFT    /usr/bin/timeshift            optional
+  set_executable  TOPGRADE     "$HOME/.cargo/bin/topgrade"   optional
+
+  # Distribution specific programs
+  # APT
+  APT=${APT:-}
+  if [[ -n $APT ]]; then
+    # APT is defined in the config file. Check is it is valid
+    set_executable APT "${APT}" required
+  else
+    # use apt or apt-get
+    if [ -x "/usr/bin/apt" ]; then
+      APT="/usr/bin/apt"
+    else
+      APT="/usr/bin/apt-get"
+    fi
+  fi
+
+  # Distribution info tool
+  DISTRO_INFO=${DISTRO_INFO:-}
+  if [[ -n $DISTRO_INFO ]]; then
+    # APT is defined in the config file. Check is it is valid
+    set_executable DISTRO_INFO "${DISTRO_INFO}" required
+  else
+    # TRY TO FIND distribution specific tool
+    distribution_id=$(${LSB_RELEASE} --id | cut -f2)
+    case "${distribution_id}" in
+      "Debian") DISTRO_INFO="/usr/bin/debian-distro-info" ;;
+      "Ubuntu") DISTRO_INFO="/usr/bin/ubuntu-distro-info" ;;
+    esac
+  fi
+
+}
+
+#
+# Setup colors
+#
+function setup_colors() {
+  RED=""
+  GREEN=""
+  NORMAL=""
+  BOLD=""
+  BOLDOFF=""
+
+  NO_COLOR=${NO_COLOR:-}
+  if [[ -z "${NO_COLOR}" ]]; then
+    if test -n "$TERM" && test "$TERM" != "dumb"; then
+      RED=$(tput setaf 1)
+      GREEN=$(tput setaf 2)
+      NORMAL=$(tput setaf 7)
+      BOLD=$(tput bold)
+      BOLDOFF=$(tput sgr0)
+    fi
+  fi
+}
+
+load_config_file
+setup_colors
