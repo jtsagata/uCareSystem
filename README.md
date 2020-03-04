@@ -79,11 +79,9 @@ Many aspect of the programs can be configured by a configuration file. A sample 
 ## Timeshift backups
 With **timeshift** a snapshoot of the OS can be created before maintain and cleanup actions.
 The default setting is `ENABLE_TIMESHIFT=auto` which enables timeshift if timeshift is installed 
-and operates in `btrfs` mode.
+and operates in `btrfs` mode. We recommend to install and enable timeshift. 
 
-To enable timeshift in `rsync` mode set the option `ENABLE_TIMESHIFT=yes`
-  
-It is recommended to install and enable timeshift. 
+To enable timeshift in `rsync` mode set the option `ENABLE_TIMESHIFT=yes`  
   
 ## Topgrade integration
 

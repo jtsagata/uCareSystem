@@ -43,7 +43,7 @@ function welcome_screen() {
   echo "            ${GREEN}~~~~~~~~~~~~~~~~~~~~~~~${NORMAL}                      "
   echo "                                                       "
   echo " Welcome to all-in-one System Update and maintenance   "
-  echo " assistant app.                                        "
+  echo " assistant tool.                                        "
   echo "                                                       "
   echo "                                                       "
   echo " This simple script will automatically         	     "
@@ -252,6 +252,8 @@ check_root_priv
 
 if [ "$SHOW_BANNER" == true ]; then
   welcome_screen
+else
+  echo "${GREEN}ucaresystem${NORMAL}: All-in-one System Update and maintenance tool."
 fi
 
 case "$MODE" in
