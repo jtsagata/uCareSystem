@@ -4,18 +4,6 @@ dist: bionic
 script:
   - support/make_debian.sh --travis
 
-deploy:
-  provider: releases
-  api_key:
-    secure: $GITHUB_API_KEY_SECURE
-  cleanup: false
-  file_glob: true
-  file:
-    - "dist/*.*"
-  on:
-    repo: jtsagata/uCareSystem
-    tags: true
-
 branches:
   except:
     - # Do not build tags that we create when we upload to GitHub Releases
