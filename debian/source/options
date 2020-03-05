@@ -1,7 +1,11 @@
-# don't pack some non-free and generated files for Debian
-tar-ignore = ".git/*"
-tar-ignore = ".idea/*"
+# Bzip2 compression for debian.tar
+compression = "bzip2"
+compression-level = 7
+
+# Exclude some files from source build
+tar-ignore = ".travis.yml"
 tar-ignore = ".git"
 tar-ignore = ".idea"
-tar-ignore = "NOTES"
-tar-ignore = "TODO"
+tar-ignore = ".gitignore"
+tar-ignore = "dist"
+tar-ignore = "dist/"

@@ -1,37 +1,38 @@
 #!/bin/bash
 do_sign=$1
+
+VERSION="4.5.0"
+
+SIGN_BY="tsagatakis@protonmail.com"
+
+
 ARTIFACTS="dist"
 
-dir_name="$(dirname "$0")"
+top_dir="$(git rev-parse --show-toplevel)"
+cd "$top_dir"
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-
-pushd "${dir_name}/.."
-
+#
+# Make Debian package
+#
 if [[ -n $do_sign ]]; then
-  debuild -F -ktsagatakis@protonmail.com
+  dpkg-buildpackage -F -k${SIGN_BY}
 else
-  debuild -F
+  dpkg-buildpackage -F
 fi
+
+#
+# Check for errors with lintian
+#
+lintian --verbose -I ${ARTIFACTS}/*.changes
 
 # move source artifacts
 mkdir -p ${ARTIFACTS}
-rm -f ${ARTIFACTS}/* 
-
+rm -f ${ARTIFACTS}/*
 mv ../ucare*.deb ${ARTIFACTS}
-mv ../ucare*.buildinfo ${ARTIFACTS} 
-mv ../ucare*.changes ${ARTIFACTS}
-mv ../ucare*.tar.gz ${ARTIFACTS}
-mv ../ucare*.dsc ${ARTIFACTS}
+mv "../ucaresystem_${VESRION}"*.* ${ARTIFACTS}
+ls ${ARTIFACTS}
 
-#echo "*********TRANSIENT*******"
-#find debian/ucaresystem-core -name "*"
-#echo "*********BASIC*******"
-#find debian/ucaresystem -name "*"
-#echo "****************"
 
-#dpkg-deb --info ${ARTIFACTS}/ucaresystem_4.5.0_all.deb
-#lintian --verbose -I ${ARTIFACTS}/*.changes
 
 #echo "Enter root password to install package"
 #sudo dpkg -i dist/ucaresystem_4.5.0_all.deb

@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+#
+# This will build the packages, sign them and upload to github Releases
+#
 set -ex
 
 top_dir="$(git rev-parse --show-toplevel)"
