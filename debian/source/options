@@ -1,0 +1,7 @@
+# don't pack some non-free and generated files for Debian
+tar-ignore = ".git/*"
+tar-ignore = ".idea/*"
+tar-ignore = ".git"
+tar-ignore = ".idea"
+tar-ignore = "NOTES"
+tar-ignore = "TODO"

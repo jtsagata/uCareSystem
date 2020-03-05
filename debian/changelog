@@ -19,7 +19,7 @@ ucaresystem (4.5.0) trusty; urgency=high
   * Secure bash scripting
   * Remove obsolete files
 
- -- Giannis Tsgakatakis <jtsagata@gmail.com>  Sat, 29 Feb 2020 00:01:54 +0200
+ -- Ioannis Tsgakatakis <tsagatakis@protonmail.com>  Sat, 29 Feb 2020 00:01:54 +0200
 
 ucaresystem (4.4.0) trusty; urgency=high
 
