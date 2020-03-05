@@ -1,7 +1,7 @@
 Source: ucaresystem
 Section: utils
 Priority: optional
-Maintainer: Salih Emin <salih-emin@ubuntu.com>
+Maintainer: "Giannis Tsgakatakis <tsagatakis@protonmail.com>
 Build-Depends:
     debhelper (>= 9),
     ruby-ronn,

@@ -25,7 +25,7 @@ mv ../ucare*.changes ${ARTIFACTS}
 
 lintian ${ARTIFACTS}/*.changes
 
-echo "Enter root password to install package"
-sudo dpkg -i dist/ucaresystem_4.5.0_all.deb
+#echo "Enter root password to install package"
+#sudo dpkg -i dist/ucaresystem_4.5.0_all.deb
 
 popd
