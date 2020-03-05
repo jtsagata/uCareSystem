@@ -2,7 +2,7 @@ language: bash
 dist: bionic
 
 script:
-  - support/make_debian.sh
+  - support/make_debian.sh --travis
 
 deploy:
   provider: releases

@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-do_sign=$1
+param=$1
 SIGN_BY="tsagatakis@protonmail.com"
 
 ARTIFACTS="dist"
@@ -25,15 +25,18 @@ VERSION=$(grep "Standards-Version" "${top_dir}/debian/control" | awk '{print $2}
 top_dir="$(git rev-parse --show-toplevel)"
 cd "$top_dir" || exit
 
-# install dependencies
-#sudo apt-get update
-#sudo apt-get install -y devscripts equivs
-#sudo mk-build-deps --install "${top_dir}/debian/control"
+# hack for travis
+if [[ $param == "--travis" ]]; then
+  # install dependencies
+  sudo apt-get update
+  sudo apt-get install -y devscripts equivs
+  sudo mk-build-deps --install "${top_dir}/debian/control"
+fi
 
 #
 # Make Debian package
 #
-if [[ -n $do_sign ]]; then
+if [[ $param == "--sign" ]]; then
   dpkg-buildpackage -F -k${SIGN_BY}
 else
   dpkg-buildpackage -F
