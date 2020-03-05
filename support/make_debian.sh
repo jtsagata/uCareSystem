@@ -31,6 +31,8 @@ if [[ $param == "--travis" ]]; then
   sudo apt-get update
   sudo apt-get install -y devscripts equivs lintian
   sudo mk-build-deps --install "${top_dir}/debian/control"
+else
+  mk-build-deps "${top_dir}/debian/control"
 fi
 
 #
@@ -52,6 +54,7 @@ mkdir -p ${ARTIFACTS}
 rm -f ${ARTIFACTS}/*
 mv ../ucare*.deb ${ARTIFACTS}
 mv "../ucaresystem_${VERSION}"*.* ${ARTIFACTS}
+mv "ucaresystem-build-deps_${VERSION}_all.deb" ${ARTIFACTS}
 
 #
 # Check for errors with lintian

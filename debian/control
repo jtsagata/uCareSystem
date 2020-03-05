@@ -6,6 +6,7 @@ Build-Depends:
     debhelper (>= 9),
     ruby-ronn,
     cloc,
+    equivs,
     sed (>= 1.0)
 Standards-Version: 4.1.4
 Homepage: https://jtsagata.github.io/uCareSystem/

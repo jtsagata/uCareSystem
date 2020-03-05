@@ -57,12 +57,13 @@ message3="The file you need is ucaresystem_${DEB_VERSION}_all.deb."
 message4="If you have install the package from PPA download and install both debs."
 
 ${HUB} release create --prerelease \
-      --attach dist/ucaresystem_${DEB_VERSION}_all.deb \
-      --attach dist/ucaresystem-core_${DEB_VERSION}_all.deb \
-      --attach dist/ucaresystem_${DEB_VERSION}.tar.bz2 \
-      --attach dist/ucaresystem_${DEB_VERSION}.dsc \
-      --attach dist/ucaresystem_${DEB_VERSION}_amd64.buildinfo \
-      --attach dist/ucaresystem_${DEB_VERSION}_amd64.changes \
+      --attach "dist/ucaresystem_${DEB_VERSION}_all.deb" \
+      --attach "dist/ucaresystem-core_${DEB_VERSION}_all.deb" \
+      --attach "dist/ucaresystem_${DEB_VERSION}.tar.bz2" \
+      --attach "dist/ucaresystem_${DEB_VERSION}.dsc" \
+      --attach "dist/ucaresystem_${DEB_VERSION}_amd64.buildinfo" \
+      --attach "dist/ucaresystem_${DEB_VERSION}_amd64.changes" \
+      --attach "dist/ucaresystem-build-deps_${DEB_VERSION}_all.deb" \
       --message "$message1" \
       --message "$message2" \
       --message "$message3" \

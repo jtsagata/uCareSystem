@@ -13,7 +13,6 @@ debian/files
 # Debian packages
 #
 dist
-ucaresystem-build-deps*.*
 
 #
 # Misc files
