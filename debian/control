@@ -7,7 +7,7 @@ Build-Depends:
     ruby-ronn,
     cloc,
     sed (>= 1.0)
-Standards-Version: 4.1.4
+Standards-Version: 4.5.0
 Homepage: https://jtsagata.github.io/uCareSystem/
 Vcs-Git: https://github.com/Utappia/uCareSystem.git
 
