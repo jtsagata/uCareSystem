@@ -1,15 +1,15 @@
 Source: ucaresystem
 Section: utils
 Priority: optional
-Maintainer: "Giannis Tsgakatakis <tsagatakis@protonmail.com>
+Maintainer: Ioannis Tsgakatakis <tsagatakis@protonmail.com>
 Build-Depends:
     debhelper (>= 9),
     ruby-ronn,
     cloc,
     sed (>= 1.0)
-Standards-Version: 4.5.0
+Standards-Version: 4.1.4
 Homepage: https://jtsagata.github.io/uCareSystem/
-Vcs-Git: https://github.com/Utappia/uCareSystem.git
+Vcs-Browser: https://github.com/jtsagata/uCareSystem.git
 
 Package: ucaresystem
 Architecture: all
@@ -19,9 +19,10 @@ Depends: apt,
          policykit-1,
          util-linux (>= 2.0),
          sed (>= 1.0),
-         distro-info
+         distro-info,
+         ${misc:Depends}
 Suggests: timeshift
-Description: All-in-one System Update and maintenance tool.
+Description: All-in-one System Update and maintenance tool
  This simple script will automatically refresh your packagelist,
  download and install software updates (if there are any), remove old
  kernels, obsolete packages and configuration files and free up disk space

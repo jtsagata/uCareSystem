@@ -28,3 +28,5 @@ else
     add_debian_repository
   fi
 fi
+
+#DEBHELPER#

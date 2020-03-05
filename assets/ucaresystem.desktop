@@ -7,3 +7,4 @@ Icon=ucaresystem
 Exec=ucaresystem --xterm
 Terminal=false
 Categories=GNOME;GTK;System;
+Keywords==package;apt;dpkg;install;clean

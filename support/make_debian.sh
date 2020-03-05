@@ -1,9 +1,29 @@
 #!/bin/bash
+#
+#    make_debian.sh - helper script to create the debian packages
+#    Copyright:
+#       2020 Ioannis Tsagatakis <tsagatakis@protonmail.com>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, version 3 of the License.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 do_sign=$1
 SIGN_BY="tsagatakis@protonmail.com"
 
+ARTIFACTS="dist"
+VERSION=$(grep "Standards-Version" "${top_dir}/debian/control" | awk '{print $2}')
+
 top_dir="$(git rev-parse --show-toplevel)"
-cd "$top_dir"
+cd "$top_dir" || exit
 
 # install dependencies
 #sudo apt-get update
@@ -19,26 +39,23 @@ else
   dpkg-buildpackage -F
 fi
 
-#
-# Check for errors with lintian
-#
-lintian --verbose -I ${ARTIFACTS}/*.changes
-
-#
-# Find version number
-#
-VERSION=$(grep "Standards-Version" "${top_dir}/debian/control" | awk '{print $2}')
-
+# Parse changelog to get latest version
+VERSION=$(dpkg-parsechangelog -S Version)
 
 #
 # move source artifacts
 #
-ARTIFACTS="dist"
 mkdir -p ${ARTIFACTS}
 rm -f ${ARTIFACTS}/*
 mv ../ucare*.deb ${ARTIFACTS}
-mv "../ucaresystem_${VESRION}"*.* ${ARTIFACTS}
-ls ${ARTIFACTS}
+mv "../ucaresystem_${VERSION}"*.* ${ARTIFACTS}
+
+#
+# Check for errors with lintian
+#
+lintian --verbose -I "${ARTIFACTS}/"*.changes
+
+
 
 #echo "Enter root password to install package"
 #sudo dpkg -i dist/ucaresystem_4.5.0_all.deb

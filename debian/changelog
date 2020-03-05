@@ -1,14 +1,13 @@
 ucaresystem (4.5.0) trusty; urgency=high
 
   * Complete rewrite
-  * Modular system
   * Package rename to ucaresystem
+  * Modular system
   * Timeshift integration
-  * Rename exceutable to ucaresystem from ucaresystem-core
+  * Rename executable to ucaresystem from ucaresystem-core
   * Automatically reboot system (configurable default is false)
-  * Ask for confirmationm no wait (configurable and --yes flag)
-  * Proper integration with polikit
-  * Use x-teminal-emulator
+  * Proper integration with polkit and pkexec
+  * Use x-terminal-emulator
   * Add remove-old-kernels tool
   * Add color output, Honor NO_COLOR (https://no-color.org/)
   * Better debian packaging

@@ -1,12 +1,10 @@
 #!/bin/bash
 #
 #    remove-old-kernels - remove old kernel packages
-#    Copyright (C) 2012 Dustin Kirkland <kirkland@ubuntu.com>
-#                  2017 Esteban M. Navas Martín <algodelinux@gmail.com>
-#
-#    Authors: Dustin Kirkland <kirkland@ubuntu.com>
-#             Kees Cook <kees@ubuntu.com>
-#             Esteban M. Navas Martín <algodelinux@gmail.com>
+#    Copyright:
+#       2012 Dustin Kirkland <kirkland@ubuntu.com>
+#       2017 Esteban M. Navas Martín <algodelinux@gmail.com>
+#       2020 Ioannis Tsagatakis <tsagatakis@protonmail.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by

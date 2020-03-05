@@ -1,4 +1,21 @@
 #!/usr/bin/env bash
+#
+#    do_release.h - helper script to upload to github releases
+#    Copyright:
+#       2020 Ioannis Tsagatakis <tsagatakis@protonmail.com>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, version 3 of the License.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 set -exu
 top_dir="$(git rev-parse --show-toplevel)"
 cd "$top_dir"
@@ -6,7 +23,7 @@ cd "$top_dir"
 #
 # Find version number (Fix for normal release)
 #
-DEB_VERSION=$(grep "Standards-Version" "${top_dir}/debian/control" | awk '{print $2}')
+DEB_VERSION=$(dpkg-parsechangelog -S Version)
 OLD_RELEASE_TAG="v.${DEB_VERSION}-beta"
 NEW_RELEASE_TAG="v.${DEB_VERSION}-beta"
 
@@ -36,6 +53,8 @@ fi
 
 message1="${NEW_RELEASE_TAG}"
 message2="This is beta software. Use at your own risk."
+message3="The file you need is ucaresystem_${DEB_VERSION}_all.deb."
+message4="If you have install the package from PPA download and install both debs."
 
 ${HUB} release create --prerelease \
       --attach dist/ucaresystem_${DEB_VERSION}_all.deb \
@@ -46,6 +65,8 @@ ${HUB} release create --prerelease \
       --attach dist/ucaresystem_${DEB_VERSION}_amd64.changes \
       --message "$message1" \
       --message "$message2" \
+      --message "$message3" \
+      --message "$message4" \
       --browse \
       "${NEW_RELEASE_TAG}"
 

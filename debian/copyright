@@ -1,16 +1,30 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: ucaresystem-core
-Upstream-Contact: Salih Emin <salih-emin@ubuntu.com>
-Source: https://github.com/Utappia/uCareSystem.git
+Upstream-Name: ucaresystem
+Upstream-Contact: Ioannis Tsagatakis <tsagatakis@protonmail.com>
+Source:https://github.com/jtsagata/uCareSystem.git
 
-Files: /usr/bin/remove-old-kernels
-Copyright: (C) 2012 Dustin Kirkland <kirkland@ubuntu.com>, 2017 Esteban M. Navas Martín <algodelinux@gmail.com>
+Files: *
+Copyright: 2018 Salih Emin <salih-emin@ubuntu.com>
+           2020 Ioannis Tsagatakis <tsagatakis@protonmail.com>
+License: GPL-3
+Comment: This is a package written originally by
+ Salih Emin <salih-emin@ubuntu.com> and extensively modified by
+ Ioannis Tsagatakis <tsagatakis@protonmail.com>.
+
+Files: scripts/remove-old-kernels
+Copyright: 2012 Dustin Kirkland <kirkland@ubuntu.com>
+           2017 Esteban M. Navas Martín <algodelinux@gmail.com>
+           2020 Ioannis Tsagatakis <tsagatakis@protonmail.com>
+License: GPL-2
+Comment: This was originated from byobu
+ Modified by Ioannis Tsagatakis <tsagatakis@protonmail.com>.
+
+License: GPL-3
+ The full text of the GPL is distributed in
+ /usr/share/common-licenses/GPL-3 on Debian systems.
+
 License: GPL-2
  The full text of the GPL is distributed in
  /usr/share/common-licenses/GPL-2 on Debian systems.
 
-Files: *
-Copyright: (C) 2020 Salih Emin <salih-emin@ubuntu.com>
-License: GPL-3
- The full text of the GPL is distributed in
- /usr/share/common-licenses/GPL-3 on Debian systems.
+
