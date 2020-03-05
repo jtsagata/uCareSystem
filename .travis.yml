@@ -2,7 +2,7 @@ language: bash
 dist: bionic
 
 script:
-  - support/automate.sh
+  - support/make_debian.sh
 
 deploy:
   provider: releases
