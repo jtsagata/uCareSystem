@@ -144,7 +144,7 @@ function set_executable() {
 function load_config_file() {
   config_file="/etc/ucaresystem.conf"
   if [ -r $config_file ]; then
-    $(awk -F= '/^[A-Z_]*=/ {printf "declare %s=%s\n", $1, $2}' $config_file)
+    $(awk -F= '/^[A-Z_]*=/ {printf "declare -g %s=%s\n", $1, $2}' $config_file)
   fi
 
   # Configuration variables and default values
@@ -165,6 +165,7 @@ function load_config_file() {
   set_executable  SED          /bin/sed                      required
   set_executable  AWK          /usr/bin/awk                  required
   set_executable  SUDO         /usr/bin/sudo                 required
+  set_executable  PS           /bin/ps                       required
 
   set_executable  UPDATE_TOOL  /usr/bin/do-release-upgrade   optional
   set_executable  TIMESHIFT    /usr/bin/timeshift            optional

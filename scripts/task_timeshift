@@ -27,7 +27,6 @@ if [[ -n ${task_timeshift_loaded} ]]; then
 fi
 task_timeshift_loaded=true
 
-
 #
 # Make a timeshift backup
 #
@@ -40,10 +39,12 @@ function action_timeshift() {
   fi
 
   header_text "Make a snapshot with timeshift"
+  test_timeshift_running
 
   distribution_id=$(${LSB_RELEASE} --id | cut -f2)
   codename=$(${LSB_RELEASE} --codename | cut -f2)
   label=${distribution_id}-${codename}-${type}
+
   set -x
   ${EXEC} ${SUDO} ${TIMESHIFT} --create --scripted --comments "$label"
   { set +x; } 2>/dev/null
@@ -65,6 +66,8 @@ function enable_timesfit_q() {
   #   c) config option is set to `auto`
   if [[ "${enable,,}" == "auto" ]]; then
     if [[ -x "${TIMESHIFT}" ]]; then
+      header_text "Checking if timeshift use btrfs."
+      header_text "This is slow set option to 'true' to speed up."
       timeshift_type=$(${EXEC} ${SUDO} ${TIMESHIFT} --list | ${AWK} '/^Mode/ {print $3}')
       if [ "${timeshift_type,,}" == "btrfs" ]; then
         enable=yes
@@ -95,6 +98,19 @@ function enable_timesfit_q() {
   esac
 }
 
+function test_timeshift_running() {
+  if [[ -f /var/run/lock/timeshift/lock ]]; then
+    local pid=$(cat /var/run/lock/timeshift/lock)
+    # remove last char
+    pid=${pid::-1}
+
+    ${PS} --pid "$pid" >/dev/null 2>&1
+    if [[ $? ]]; then
+      echo "Problem: Timeshift is  running. Close Timeshift and retry."
+      exit 1
+    fi
+  fi
+}
 
 #
 # Standalone
@@ -103,8 +119,9 @@ if [[ "${FUNCNAME[0]}" != source ]]; then
   base_dir=$(dirname "$0")
   source "${base_dir}"/base
 
+  header_text "Make a snapshot with timeshift (standalone version)."
+
   EXEC=${EXEC:-}
   check_root_priv
   action_timeshift standalone
 fi
-
