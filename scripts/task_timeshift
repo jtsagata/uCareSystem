@@ -105,6 +105,6 @@ if [[ "${FUNCNAME[0]}" != source ]]; then
 
   EXEC=${EXEC:-}
   check_root_priv
-  action_timeshift
+  action_timeshift standalone
 fi
 

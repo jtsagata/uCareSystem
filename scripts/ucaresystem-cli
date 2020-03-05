@@ -268,7 +268,7 @@ case "$MODE" in
   source "${base_dir}"/task_timeshift
   check_eol
   action_timeshift
-  action_maintain
+  action_maintain maintain
   action_clean
   ;;
 "clean")
@@ -276,7 +276,7 @@ case "$MODE" in
   source "${base_dir}"/task_cleanup
   source "${base_dir}"/task_timeshift
   check_eol
-  action_timeshift
+  action_timeshift clean
   action_clean
   ;;
 "upgrade")
