@@ -5,17 +5,17 @@
 <policyconfig>
     <vendor>Utapia</vendor>
     <vendor_url>https://www.utappia.org/</vendor_url>
-    <action id="org.ucare.launch-ucaresystem">
+    <action id="org.utappia.launch-ucaresystem">
     <description>Run ucaresystem</description>
-    <message>ucaresystem: This may be dangerus. Do you want to procced?</message>
-    <message xml:lang="el">ucaresystem: Αυτό μπορεί να είναι επικύνδυνο. Είστε σίγουροι ότι θέλετε να συνεχίσετε;</message>
+    <message>ucaresystem: This may be dangerous.</message>
+    <message xml:lang="el">ucaresystem: Αυτό μπορεί να είναι επικύνδυνο.</message>
     <icon_name>ucaresystem</icon_name>
     <defaults>
       <allow_any>no</allow_any>
       <allow_inactive>no</allow_inactive>
       <allow_active>auth_admin_keep</allow_active>
     </defaults>
-    <!-- This policy is missing so allow run x-terminal-emulator -->
+    <!-- This policy is missing so allow to run x-terminal-emulator -->
     <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/x-terminal-emulator</annotate>
     <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
     </action>

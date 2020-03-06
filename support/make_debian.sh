@@ -20,10 +20,10 @@ param=$1
 SIGN_BY="tsagatakis@protonmail.com"
 
 ARTIFACTS="dist"
-VERSION=$(grep "Standards-Version" "${top_dir}/debian/control" | awk '{print $2}')
-
 top_dir="$(git rev-parse --show-toplevel)"
 cd "$top_dir" || exit
+
+VERSION=$(grep "Standards-Version" "${top_dir}/debian/control" | awk '{print $2}')
 
 # hack for travis
 if [[ $param == "--travis" ]]; then

@@ -34,8 +34,17 @@ mkdir -p "$DESTDIR/usr/share/applications"
 cp assets/*.desktop "$DESTDIR/usr/share/applications"
 
 ## Icons
-mkdir -p "$DESTDIR/usr/share/icons"
-cp assets/*.png "$DESTDIR/usr/share/icons"
+#mkdir -p "$DESTDIR/usr/share/icons"
+#cp assets/*.png "$DESTDIR/usr/share/icons"
+icon_sizes=("24" "28" "32" "36" "48" "96" "128" "256" "512")
+for s in "${icon_sizes[@]}"; do
+  dirname="usr/share/icons/hicolor/${s}x${s}/apps/"
+  mkdir -p "${DESTDIR}/${dirname}"
+  rsvg-convert -w "$s" -h "$s" assets/ucaresystem.svg --no-keep-image-data --output "${DESTDIR}/${dirname}/ucaresystem.png"
+done
+# Scalable icons
+mkdir -p "${DESTDIR}/usr/share/icons/hicolor/scalable/apps"
+cp assets/ucaresystem.svg "${DESTDIR}/usr/share/icons/hicolor/scalable/apps"
 
 ## Misc Files
 mkdir -p "$DESTDIR/usr/share/doc/ucaresystem"
