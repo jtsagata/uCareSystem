@@ -42,20 +42,23 @@ function header_text() {
 # Ask for yes/no (localized)
 #
 function ask_yesno() {
-  local prompt=$1
-  set -- $(${LOCALE} LC_MESSAGES)
-  local yesptrn="$1"
-  local noptrn="$2"
-  local yesword="$3"
-  local noword="$4"
+  local prompt
+  local prompt=${1:-}
+  set -- "$("${LOCALE}" LC_MESSAGES)"
+  local yesptrn="${1:-}"
+  local noptrn="${2:-}"
+  local yesword="${3:-}"
+  local noword="${4:-}"
   while true; do
     read -rp "${prompt} (${yesword},yes / ${noword},no)? " yn
     case $yn in
     ${yesptrn##^})
+      # shellcheck disable=SC2034
       response="yes"
       break
       ;;
     ${noptrn##^})
+      # shellcheck disable=SC2034
       response="no"
       break
       ;;
@@ -63,6 +66,7 @@ function ask_yesno() {
     esac
   done
 }
+
 
 #
 # Check if reboot is required
@@ -81,10 +85,10 @@ function check_reboot() {
     echo
   fi
 
-  if [ "$AUTO_REBOOT" == true ]; then
+  if [ "$AUTO_REBOOT" == "true" ]; then
     header_text "Rebooting system"
     echo " $(basename "${0}") will reboot the system in ${AUTO_REBOOT_TIMEOUT} seconds... "
-    sleep ${AUTO_REBOOT_TIMEOUT}
+    sleep "${AUTO_REBOOT_TIMEOUT}"
     ${REBOOT}
   fi
 }
@@ -108,6 +112,7 @@ function check_root_priv() {
 function test_excutable() {
   local -n _ret=$2
   _ret="bad"
+  # shellcheck disable=SC2034
   if [[ -x $1 ]]; then _ret="ok"; fi
 }
 
@@ -123,6 +128,7 @@ function set_executable() {
 
   if [[ -z ${!var_name} ]]; then
     # User have not provide a default value. Set default
+    # shellcheck disable=SC2229
     IFS= read -r "$var_name" <<< "$default_path"
   fi
 
@@ -144,7 +150,8 @@ function set_executable() {
 function load_config_file() {
   config_file="/etc/ucaresystem.conf"
   if [ -r $config_file ]; then
-    $(awk -F= '/^[A-Z_]*=/ {printf "declare -g %s=%s\n", $1, $2}' $config_file)
+    # shellcheck disable=SC2091
+    awk -F= '/^[A-Z_]*=/ {printf "declare -g %s=%s\n", $1, $2}' $config_file
   fi
 
   # Configuration variables and default values
@@ -223,6 +230,17 @@ function setup_colors() {
     fi
   fi
 }
+
+
+# hack for  EXEC=
+function no_opp() {
+  echo + "$@"
+}
+function yes_opp() {
+  set -x
+  "$@"
+}
+
 
 load_config_file
 setup_colors

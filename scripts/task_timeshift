@@ -33,6 +33,7 @@ task_timeshift_loaded=true
 function action_timeshift() {
   type=${1:-standalone}
 
+  local result
   enable_timesfit_q result
   if [[ "${result}" == "no" ]]; then
     return
@@ -43,12 +44,11 @@ function action_timeshift() {
 
   distribution_id=$(${LSB_RELEASE} --id | cut -f2)
   codename=$(${LSB_RELEASE} --codename | cut -f2)
-  label=${distribution_id}-${codename}-${type}
+  label="${distribution_id}-${codename}-${type}(ucare)"
 
-  set -x
-  ${EXEC} ${SUDO} ${TIMESHIFT} --create --scripted --comments "$label"
+  "${EXEC}" "${SUDO}" "${TIMESHIFT}" --create --scripted --comments "$label"
   { set +x; } 2>/dev/null
-  sleep ${WAIT_ACTION}
+  sleep "${WAIT_ACTION}"
 }
 
 #
@@ -68,7 +68,8 @@ function enable_timesfit_q() {
     if [[ -x "${TIMESHIFT}" ]]; then
       header_text "Checking if timeshift use btrfs."
       header_text "This is slow set option to 'true' to speed up."
-      timeshift_type=$(${EXEC} ${SUDO} ${TIMESHIFT} --list | ${AWK} '/^Mode/ {print $3}')
+      # shellcheck disable=SC2016
+      timeshift_type=$("${EXEC}" "${SUDO}" "${TIMESHIFT}" --list | "${AWK}" '/^Mode/ {print $3}')
       if [ "${timeshift_type,,}" == "btrfs" ]; then
         enable=yes
       else
@@ -89,6 +90,7 @@ function enable_timesfit_q() {
       echo "Error: Bad Configuration timeshift is missing. Configuration key TIMESHIFT='$TIMESHIFT'"
       return
     fi
+    # shellcheck disable=SC2034
     _ret="yes"
     ;;
   *)
@@ -100,7 +102,8 @@ function enable_timesfit_q() {
 
 function test_timeshift_running() {
   if [[ -f /var/run/lock/timeshift/lock ]]; then
-    local pid=$(cat /var/run/lock/timeshift/lock)
+    local pid
+    pid=$(cat /var/run/lock/timeshift/lock)
     # remove last char
     pid=${pid::-1}
 
@@ -117,11 +120,12 @@ function test_timeshift_running() {
 #
 if [[ "${FUNCNAME[0]}" != source ]]; then
   base_dir=$(dirname "$0")
+  # shellcheck source=base
   source "${base_dir}"/base
 
   header_text "Make a snapshot with timeshift (standalone version)."
 
-  EXEC=${EXEC:-}
+  EXEC=${EXEC:=yes_opp}
   check_root_priv
   action_timeshift standalone
 fi
