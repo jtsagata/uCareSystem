@@ -19,36 +19,49 @@
 
 set -eu
 ## Ensure this file can only be sourced once
+cleanup_loaded=${cleanup_loaded:-}
 if [[ -n ${cleanup_loaded} ]]; then
   echo "Warning: This file can only be sourced once"
   return 1
 fi
 cleanup_loaded=true
-set -u
 
 function action_clean() {
+
   header_text "Start Cleanup actions"
+
   ## Removes unneeded packages
   header_text "Removing unneeded packages"
-  set -x
-  ${EXEC} ${SUDO} ${APT} -y --purge autoremove
-  { set +x; } 2>/dev/null
-  sleep ${WAIT_ACTION}
+  "${EXEC}" "${SUDO}" "${APT}" -y --purge autoremove
+  sleep "${WAIT_ACTION}"
 
   ## Removes unused config files
   header_text "Removing unused config files"
-  set -x
-  ${EXEC} ${SUDO} ${DEBORPHAN} -n --find-config | ${EXEC} xargs ${SUDO} ${APT} -y --purge autoremove
-  { set +x; } 2>/dev/null
-  sleep ${WAIT_ACTION}
+  "${EXEC}" "${SUDO}" "${DEBORPHAN}" -n --find-config | "${EXEC}" "${XARGS}" "${SUDO}" "${APT}" -y --purge autoremove
+  sleep "${WAIT_ACTION}"
 
   ## Removes package files that can no longer be downloaded and everything except
   # the lock file in /var/cache/apt/archives, including directories.
   header_text "Cleaned downloaded temporary packages"
 
-  ${EXEC} ${SUDO} ${APT} -y autoclean
-  ${EXEC} ${SUDO} ${APT} -y clean
-  { set +x; } 2>/dev/null
+  "${EXEC}" "${SUDO}" "${APT}" -y autoclean
+  "${EXEC}" "${SUDO}" "${APT}" -y clean
+
   header_text "Finish Cleanup actions"
-  sleep ${WAIT_ACTION}
+  sleep "${WAIT_ACTION}"
 }
+
+#
+# Standalone
+#
+if [[ "${FUNCNAME[0]}" != source ]]; then
+  base_dir=$(dirname "$0")
+  # shellcheck source=base
+  source "${base_dir}"/base
+
+  header_text "Cleanup system (standalone version)."
+
+  EXEC=${EXEC:=yes_opp}
+  check_root_priv
+  action_clean
+fi

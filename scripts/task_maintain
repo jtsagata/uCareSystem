@@ -19,34 +19,41 @@
 
 set -eu
 ## Ensure this file can only be sourced once
-set +u
-if [[ "${FUNCNAME[0]}" != source ]]; then
-  echo "This file can only be source"
-  exit 1
-fi
+maintain_loaded=${maintain_loaded:-}
 if [[ -n ${maintain_loaded} ]]; then
   echo "Warning: This file can only be sourced once"
   return 1
 fi
 maintain_loaded=true
-set -u
 
 function action_maintain() {
   header_text "Start System update actions"
 
   ## Updates package lists
   header_text "Updating package lists"
-  set -x
-  ${EXEC} ${SUDO} ${APT} update
-  { set +x; } 2>/dev/null
-  sleep ${WAIT_ACTION}
+  "${EXEC}" "${SUDO}" "${APT}" update
+  sleep "${WAIT_ACTION}"
 
   ## Updates packages and libraries
   header_text "Updating packages and system libraries"
-  set -x
-  ${EXEC} ${SUDO} ${APT} full-upgrade -y
-  { set +x; } 2>/dev/null
-  sleep ${WAIT_ACTION}
+  "${EXEC}" "${SUDO}" "${APT}" full-upgrade -y
+  sleep "${WAIT_ACTION}"
+
   header_text "Finish System update actions"
-  sleep ${WAIT_ACTION}
+  sleep "${WAIT_ACTION}"
 }
+
+#
+# Standalone
+#
+if [[ "${FUNCNAME[0]}" != source ]]; then
+  base_dir=$(dirname "$0")
+  # shellcheck source=base
+  source "${base_dir}"/base
+
+  header_text "Maintain system (standalone version)."
+
+  EXEC=${EXEC:=yes_opp}
+  check_root_priv
+  action_maintain
+fi

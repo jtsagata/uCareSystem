@@ -172,6 +172,7 @@ function load_config_file() {
   set_executable  AWK          /usr/bin/awk                  required
   set_executable  SUDO         /usr/bin/sudo                 required
   set_executable  PS           /bin/ps                       required
+  set_executable  XARGS        /usr/bin/xargs                required
 
   set_executable  UPDATE_TOOL  /usr/bin/do-release-upgrade   optional
   set_executable  TIMESHIFT    /usr/bin/timeshift            optional
@@ -238,6 +239,7 @@ function no_opp() {
 function yes_opp() {
   set -x
   "$@"
+  { set +x; } 2>/dev/null
 }
 
 
