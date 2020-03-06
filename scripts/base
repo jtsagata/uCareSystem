@@ -155,6 +155,7 @@ function load_config_file() {
   ENABLE_TOPGRADE=${ENABLE_TOPGRADE:=auto}
 
   # Programs used
+  set_executable  APT_GET      /usr/bin/apt-get              required
   set_executable  DEBORPHAN    /usr/bin/deborphan            required
   set_executable  LSB_RELEASE  /usr/bin/lsb_release          required
   set_executable  REBOOT       /sbin/reboot                  required
@@ -163,40 +164,11 @@ function load_config_file() {
   set_executable  SUDO         /usr/bin/sudo                 required
   set_executable  PS           /bin/ps                       required
   set_executable  XARGS        /usr/bin/xargs                required
+  set_executable  DISTRO_INFO  /usr/bin/distro-info          required
 
   set_executable  UPDATE_TOOL  /usr/bin/do-release-upgrade   optional
   set_executable  TIMESHIFT    /usr/bin/timeshift            optional
-  set_executable  TOPGRADE     "$HOME/.cargo/bin/topgrade"   optional
-
-  # Distribution specific programs
-  # APT
-  APT=${APT:-}
-  if [[ -n $APT ]]; then
-    # APT is defined in the config file. Check is it is valid
-    set_executable APT "${APT}" required
-  else
-    # use apt or apt-get
-    if [ -x "/usr/bin/apt" ]; then
-      APT="/usr/bin/apt"
-    else
-      APT="/usr/bin/apt-get"
-    fi
-  fi
-
-  # Distribution info tool
-  DISTRO_INFO=${DISTRO_INFO:-}
-  if [[ -n $DISTRO_INFO ]]; then
-    # APT is defined in the config file. Check is it is valid
-    set_executable DISTRO_INFO "${DISTRO_INFO}" required
-  else
-    # TRY TO FIND distribution specific tool
-    distribution_id=$(${LSB_RELEASE} --id | cut -f2)
-    case "${distribution_id}" in
-      "Debian") DISTRO_INFO="/usr/bin/debian-distro-info" ;;
-      "Ubuntu") DISTRO_INFO="/usr/bin/ubuntu-distro-info" ;;
-    esac
-  fi
-
+  set_executable  TOPGRADE     "${HOME}/.cargo/bin/topgrade" optional
 }
 
 #

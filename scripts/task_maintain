@@ -17,6 +17,23 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# TODO: Check return status of all commands
+# TODO: Use linux mint tool
+# TODO: Use topgrade
+# TODO: Use --yes on normal mode, --force-yes on CRON mode
+# TODO: What about debconfig and override files on /etc?
+# TODO: What about packages that needs to accept a licence?
+# TODO: Use simulate on apt upgrade
+# TODO: Use --verbose-versions
+# TODO: Check internet connectivity
+
+# TODO: From man page: An update should always be performed before an upgrade or dist-upgrade.
+# TODO: Not the same semantics: apt full-upgrade performs the same function as apt-get dist-upgrade.
+# TODO: Config option APT_UPGRADE_METHOD to do upgrade or dist-upgrade
+
+# TODO: never use apt
+
+
 set -eu
 ## Ensure this file can only be sourced once
 maintain_loaded=${maintain_loaded:-}
@@ -31,12 +48,12 @@ function action_maintain() {
 
   ## Updates package lists
   header_text "Updating package lists"
-  "${EXEC}" "${SUDO}" "${APT}" update
+  "${EXEC}" "${SUDO}" "${APT_GET}" update
   sleep "${WAIT_ACTION}"
 
   ## Updates packages and libraries
   header_text "Updating packages and system libraries"
-  "${EXEC}" "${SUDO}" "${APT}" full-upgrade -y
+  "${EXEC}" "${SUDO}" "${APT_GET}" full-upgrade -y
   sleep "${WAIT_ACTION}"
 
   header_text "Finish System update actions"
@@ -54,6 +71,7 @@ if [[ "${FUNCNAME[0]}" != source ]]; then
   header_text "Maintain system (standalone version)."
 
   EXEC=${EXEC:=yes_opp}
+  EXEC=no_opp
   check_root_priv
   action_maintain
 fi

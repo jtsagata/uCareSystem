@@ -40,7 +40,7 @@ function action_help {
   exit
 }
 
-APT_OPTS=
+APT_GRT_OPTS=
 while [ ! -z "$1" ]; do
 	case "$1" in
 		-h | --help)
@@ -52,7 +52,7 @@ while [ ! -z "$1" ]; do
 			shift 2
 		;;
 		*)
-			APT_OPTS="$APT_OPTS $1"
+			APT_GRT_OPTS="$APT_GRT_OPTS $1"
 			shift 1
 		;;
 	esac
@@ -77,12 +77,12 @@ fi
 
 if [ -n "$REMOVED" ]; then
    # Purge old uninstalled kernels
-   apt-get $APT_OPTS remove --purge $REMOVED
+   apt-get $APT_GRT_OPTS remove --purge $REMOVED
 fi
 
 if [ -n "$OLD_HEADERS" ]; then
    # Purge old headers
-   apt-get $APT_OPTS remove --purge $OLD_HEADERS
+   apt-get $APT_GRT_OPTS remove --purge $OLD_HEADERS
 fi
 
 for c in $CANDIDATES; do
@@ -95,5 +95,5 @@ if [ -z "$PURGE" ]; then
 fi
 
 # Purge old installed kernels
-apt-get $APT_OPTS remove --purge $PURGE
+apt-get $APT_GRT_OPTS remove --purge $PURGE
 

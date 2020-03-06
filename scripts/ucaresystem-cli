@@ -88,8 +88,8 @@ deb http://old-releases.ubuntu.com/ubuntu/ $new_codename-security main restricte
 EOT
   fi
 
-  ${EXEC} ${SUDO} ${APT} install update-manager-core
-  ${EXEC} ${SUDO} ${APT} -y dist-upgrade
+  ${EXEC} ${SUDO} ${APT_GET} install update-manager-core
+  ${EXEC} ${SUDO} ${APT_GET} -y dist-upgrade
   ${EXEC} ${SUDO} ${UPDATE_TOOL}
   header_text "Done upgrade to EOL"
 }

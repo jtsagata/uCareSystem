@@ -32,20 +32,20 @@ function action_clean() {
 
   ## Removes unneeded packages
   header_text "Removing unneeded packages"
-  "${EXEC}" "${SUDO}" "${APT}" -y --purge autoremove
+  "${EXEC}" "${SUDO}" "${APT_GET}" -y --purge autoremove
   sleep "${WAIT_ACTION}"
 
   ## Removes unused config files
   header_text "Removing unused config files"
-  "${EXEC}" "${SUDO}" "${DEBORPHAN}" -n --find-config | "${EXEC}" "${XARGS}" "${SUDO}" "${APT}" -y --purge autoremove
+  "${EXEC}" "${SUDO}" "${DEBORPHAN}" -n --find-config | "${EXEC}" "${XARGS}" "${SUDO}" "${APT_GET}" -y --purge autoremove
   sleep "${WAIT_ACTION}"
 
   ## Removes package files that can no longer be downloaded and everything except
   # the lock file in /var/cache/apt/archives, including directories.
   header_text "Cleaned downloaded temporary packages"
 
-  "${EXEC}" "${SUDO}" "${APT}" -y autoclean
-  "${EXEC}" "${SUDO}" "${APT}" -y clean
+  "${EXEC}" "${SUDO}" "${APT_GET}" -y autoclean
+  "${EXEC}" "${SUDO}" "${APT_GET}" -y clean
 
   header_text "Finish Cleanup actions"
   sleep "${WAIT_ACTION}"
