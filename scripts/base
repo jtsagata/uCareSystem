@@ -193,6 +193,16 @@ function setup_colors() {
   fi
 }
 
+#
+# Trap Handler
+#
+function trap_handler() {
+  header_text "Program interrupt."
+  echo "  The program have stop before finished. Your system maybe in an incomplete state."
+  echo "  You may need to do:"
+  echo "     sudo apt update && sudo apt install -f"
+  exit 1
+}
 
 # hack for  EXEC=
 function no_opp() {
@@ -204,6 +214,6 @@ function yes_opp() {
   { set +x; } 2>/dev/null
 }
 
-
+trap trap_handler 1 2 3 6
 load_config_file
 setup_colors

@@ -24,16 +24,6 @@ base_dir=$(dirname "$0")
 
 source "${base_dir}"/base
 
-trap trap_handler 1 2 3 6
-function trap_handler() {
-  { set +x; } 2>/dev/null
-  header_text "Program interrupt."
-  echo "  The program have stop before finished. Your system maybe in an incomplete state."
-  echo "  You may need to do:"
-  echo "     sudo apt update && sudo apt install -f"
-  exit 1
-}
-
 function welcome_screen() {
   clear
   echo "_______________________________________________________"
