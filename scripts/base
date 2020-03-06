@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 #
 #    ucaresystem - All-in-one system update and maintenance tool
-#    Copyright (C) 2009-2020 Salih Emin <salih@utappia.org>
-#
-#    Authors: Salih Emin <salih@utappia.org>
-#             Ioannis Tsagkatakis <tsagatakis@protonmail.com>
+#    Copyright:
+#       2009 Salih Emin <salih@utappia.org>
+#       2020 Ioannis Tsagatakis <tsagatakis@protonmail.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
