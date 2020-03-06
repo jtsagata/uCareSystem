@@ -1,11 +1,10 @@
 #!/bin/bash
 set -ex
-base_name="$(basename "$0")"
 dir_name="$(dirname "$0")/.."
-VERSION="4.5.0"
+VERSION=$(dpkg-parsechangelog -S Version)
 
 DESTDIR=${DESTDIR:=debian/ucaresystem}
-yes | rm -rf "$DESTDIR"
+rm -rf "$DESTDIR"
 
 ## Copy Main scripts
 main_scripts=("remove-old-kernels" "ucaresystem" "ucaresystem-core")
@@ -59,6 +58,7 @@ ronn --roff --manual="ucaresystem" --organization="Utappia" --date="2020-04-01" 
 #mv docs/ronn/*.1 "$DESTDIR/usr/share/man/man1"
 mkdir -p "$DESTDIR/usr/share/man/man8"
 mv docs/ronn/*.8 "$DESTDIR/usr/share/man/man8"
+
 
 ## Lines of code report
 cloc . --exclude-dir=.idea --quiet --report-file="$DESTDIR/usr/share/doc/ucaresystem/loc.txt"

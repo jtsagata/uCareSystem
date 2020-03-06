@@ -59,7 +59,8 @@ mv "ucaresystem-build-deps_${VERSION}_all.deb" ${ARTIFACTS}
 #
 # Check for errors with lintian
 #
-lintian --verbose -I "${ARTIFACTS}/"*.changes
+echo "*** Debian linting errors"
+lintian --display-experimental --display-info "${ARTIFACTS}/"*.changes
 
 
 

@@ -6,5 +6,3 @@
 override_dh_prep:
 	env DESTDIR=debian/ucaresystem ./debian/build.sh
 
-override_dh_install:
-	dh_install --list-missing

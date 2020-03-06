@@ -39,33 +39,24 @@ function header_text() {
 
 #
 # Ask for yes/no (localized)
+# Usage ask_yesno prompt res variable
 #
 function ask_yesno() {
-  local prompt
   local prompt=${1:-}
-  set -- "$("${LOCALE}" LC_MESSAGES)"
-  local yesptrn="${1:-}"
-  local noptrn="${2:-}"
-  local yesword="${3:-}"
-  local noword="${4:-}"
-  while true; do
-    read -rp "${prompt} (${yesword},yes / ${noword},no)? " yn
+  local -n _ret=${2:-}
+  local response=""
+
+  while [[ -z $response ]]; do
+    read -rp "${prompt} Yes/No? " yn
     case $yn in
-    ${yesptrn##^})
-      # shellcheck disable=SC2034
-      response="yes"
-      break
-      ;;
-    ${noptrn##^})
-      # shellcheck disable=SC2034
-      response="no"
-      break
-      ;;
-    *) echo "${prompt} ${yesword},yes / ${noword},no." ;;
+      [Yy]* ) response="yes" ;;
+      [Nn]* ) response="no"  ;;
+      *) echo "Again: ${prompt} Yes/No?" ;;
     esac
   done
-}
 
+  _ret="$response"
+}
 
 #
 # Check if reboot is required
@@ -167,7 +158,6 @@ function load_config_file() {
   set_executable  DEBORPHAN    /usr/bin/deborphan            required
   set_executable  LSB_RELEASE  /usr/bin/lsb_release          required
   set_executable  REBOOT       /sbin/reboot                  required
-  set_executable  LOCALE       /usr/bin/locale               required
   set_executable  SED          /bin/sed                      required
   set_executable  AWK          /usr/bin/awk                  required
   set_executable  SUDO         /usr/bin/sudo                 required

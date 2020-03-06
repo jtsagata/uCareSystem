@@ -61,8 +61,8 @@ function welcome_screen() {
   echo
 
   if [ "${ASK_CONFIRM}" == "true" ]; then
-    ask_yesno "Are you sure ?"
-    if [[ "${response}" == "no" ]]; then
+    ask_yesno "Are you sure ?" resp
+    if [[ "${resp}" == "no" ]]; then
       exit 1
     fi
   fi
