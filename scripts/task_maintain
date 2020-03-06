@@ -72,6 +72,6 @@ if [[ "${FUNCNAME[0]}" != source ]]; then
 
   EXEC=${EXEC:=yes_opp}
   EXEC=no_opp
-  check_root_priv
+  [[ $EXEC == "yes_opp" ]] && check_root_priv
   action_maintain
 fi

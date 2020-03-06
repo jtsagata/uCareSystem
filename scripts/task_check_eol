@@ -19,35 +19,26 @@
 
 set -eu
 ## Ensure this file can only be sourced once
-set +u
-if [[ "${FUNCNAME[0]}" != source ]]; then
-  echo "This file can only be source"
-  exit 1
-fi
+check_eol_loaded=${check_eol_loaded:-}
 if [[ -n ${check_eol_loaded} ]]; then
   echo "Warning: This file can only be sourced once"
   return 1
 fi
-check_eol=true
-set -u
+check_eol_loaded=true
 
 function check_eol() {
-  distribution_id=$(${LSB_RELEASE} --id | cut -f2)
-  codename=$(${LSB_RELEASE} --codename | cut -f2)
-
-  # distribution_id="Ubuntu" && codename="focal"
 
   valid_ids=("Debian" "Ubuntu")
-  if [[ ! "${valid_ids[*]}" == *"${distribution_id}"* ]]; then
-    header_text "Your distribution is '${distribution_id}', codename:'${codename}'."
+  if [[ ! "${valid_ids[*]}" == *"${DISTRIBUTION_ID}"* ]]; then
+    header_text "Your distribution is '${DISTRIBUTION_ID}', DISTRIBUTION_CODENAME:'${DISTRIBUTION_CODENAME}'."
     return
   fi
 
   supported_distro=$(${DISTRO_INFO} --supported)
-  days=$(${DISTRO_INFO} --series="${codename}" --days)
+  days=$(${DISTRO_INFO} --series="${DISTRIBUTION_CODENAME}" --days)
 
-  if [[ "${supported_distro[*]}" == *"${codename}"* ]]; then
-    header_text "Your distribution '${GREEN}${distribution_id}${NORMAL}', codename:'${GREEN}${codename}${NORMAL}' is not at eol."
+  if [[ "${supported_distro[*]}" == *"${DISTRIBUTION_CODENAME}"* ]]; then
+    header_text "Your distribution '${GREEN}${DISTRIBUTION_ID}${NORMAL}', DISTRIBUTION_CODENAME:'${GREEN}${DISTRIBUTION_CODENAME}${NORMAL}' is not at eol."
     if [ ! "${days}" == "(unknown)" ]; then
       if [[ "${days}" == *"-"* ]]; then
         header_text "The was a new distribution version before ${days//-/} days. Consider an upgrade."
@@ -57,9 +48,27 @@ function check_eol() {
     fi
     return
   else
-    header_text "Your distribution '${distribution_id}', codename:'${codename}' is reach the end of support"
+    header_text "Your distribution '${DISTRIBUTION_ID}', DISTRIBUTION_CODENAME:'${DISTRIBUTION_CODENAME}' is reach the end of support"
     echo "  The end of support was before ${days//-/} days."
     echo "  Please upgrade your distribution to a latest release!"
     echo "  Try run: $(basename "${0}") --upgrade"
   fi
 }
+
+#
+# Standalone
+#
+if [[ "${FUNCNAME[0]}" != source ]]; then
+  base_dir=$(dirname "$0")
+  # shellcheck source=base
+  source "${base_dir}"/base
+
+  # DISTRIBUTION_ID="Ubuntu" && DISTRIBUTION_CODENAME="focal"
+
+  header_text "Get distribution info (standalone version)."
+
+  EXEC=${EXEC:=yes_opp}
+  EXEC=no_opp
+  [[ $EXEC == "yes_opp" ]] && check_root_priv
+  check_eol
+fi

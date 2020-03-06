@@ -49,9 +49,9 @@ function ask_yesno() {
   while [[ -z $response ]]; do
     read -rp "${prompt} Yes/No? " yn
     case $yn in
-      [Yy]* ) response="yes" ;;
-      [Nn]* ) response="no"  ;;
-      *) echo "Again: ${prompt} Yes/No?" ;;
+    [Yy]*) response="yes" ;;
+    [Nn]*) response="no" ;;
+    *) echo "Again: ${prompt} Yes/No?" ;;
     esac
   done
 
@@ -119,7 +119,7 @@ function set_executable() {
   if [[ -z ${!var_name} ]]; then
     # User have not provide a default value. Set default
     # shellcheck disable=SC2229
-    IFS= read -r "$var_name" <<< "$default_path"
+    IFS= read -r "$var_name" <<<"$default_path"
   fi
 
   if [[ $required == "required" ]]; then
@@ -141,7 +141,7 @@ function load_config_file() {
   config_file="/etc/ucaresystem.conf"
   if [ -r $config_file ]; then
     # shellcheck disable=SC2091
-    awk -F= '/^[A-Z_]*=/ {printf "declare -g %s=%s\n", $1, $2}' $config_file
+    $(/usr/bin/awk -F= '/^[A-Z_]*=/ {printf "declare -g %s=%s\n", $1, $2}' $config_file)
   fi
 
   # Configuration variables and default values
@@ -155,20 +155,26 @@ function load_config_file() {
   ENABLE_TOPGRADE=${ENABLE_TOPGRADE:=auto}
 
   # Programs used
-  set_executable  APT_GET      /usr/bin/apt-get              required
-  set_executable  DEBORPHAN    /usr/bin/deborphan            required
-  set_executable  LSB_RELEASE  /usr/bin/lsb_release          required
-  set_executable  REBOOT       /sbin/reboot                  required
-  set_executable  SED          /bin/sed                      required
-  set_executable  AWK          /usr/bin/awk                  required
-  set_executable  SUDO         /usr/bin/sudo                 required
-  set_executable  PS           /bin/ps                       required
-  set_executable  XARGS        /usr/bin/xargs                required
-  set_executable  DISTRO_INFO  /usr/bin/distro-info          required
+  set_executable APT_GET /usr/bin/apt-get required
+  set_executable DEBORPHAN /usr/bin/deborphan required
+  set_executable LSB_RELEASE /usr/bin/lsb_release required
+  set_executable REBOOT /sbin/reboot required
+  set_executable SED /bin/sed required
+  set_executable AWK /usr/bin/awk required
+  set_executable SUDO /usr/bin/sudo required
+  set_executable PS /bin/ps required
+  set_executable XARGS /usr/bin/xargs required
+  set_executable DISTRO_INFO /usr/bin/distro-info required
 
-  set_executable  UPDATE_TOOL  /usr/bin/do-release-upgrade   optional
-  set_executable  TIMESHIFT    /usr/bin/timeshift            optional
-  set_executable  TOPGRADE     "${HOME}/.cargo/bin/topgrade" optional
+  set_executable UPDATE_TOOL /usr/bin/do-release-upgrade optional
+  set_executable TIMESHIFT /usr/bin/timeshift optional
+  set_executable TOPGRADE "${HOME}/.cargo/bin/topgrade" optional
+
+  # Get basic distribution information
+  # shellcheck disable=SC2034
+  DISTRIBUTION_ID=$(${LSB_RELEASE} --id | cut -f2)
+  # shellcheck disable=SC2034
+  DISTRIBUTION_CODENAME=$(${LSB_RELEASE} --codename | cut -f2)
 }
 
 #
@@ -193,6 +199,7 @@ function setup_colors() {
   fi
 }
 
+
 #
 # Trap Handler
 #
@@ -214,6 +221,9 @@ function yes_opp() {
   { set +x; } 2>/dev/null
 }
 
+#
+# Common tasks
+#
 trap trap_handler 1 2 3 6
 load_config_file
 setup_colors

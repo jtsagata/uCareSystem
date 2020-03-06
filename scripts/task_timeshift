@@ -41,9 +41,7 @@ function action_timeshift() {
   header_text "Make a snapshot with timeshift"
   test_timeshift_running
 
-  distribution_id=$(${LSB_RELEASE} --id | cut -f2)
-  codename=$(${LSB_RELEASE} --codename | cut -f2)
-  label="${distribution_id}-${codename}-${type}(ucare)"
+  label="${DISTRIBUTION_ID}-${DISTRIBUTION_CODENAME}-${type}(ucare)"
 
   "${EXEC}" "${SUDO}" "${TIMESHIFT}" --create --scripted --comments "$label"
   { set +x; } 2>/dev/null
@@ -125,6 +123,7 @@ if [[ "${FUNCNAME[0]}" != source ]]; then
   header_text "Make a snapshot with timeshift (standalone version)."
 
   EXEC=${EXEC:=yes_opp}
-  check_root_priv
+  [[ $EXEC == "yes_opp" ]] && check_root_priv
+
   action_timeshift standalone
 fi
