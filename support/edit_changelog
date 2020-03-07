@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Create a new Debian changelog entry
+
+EDITOR=xed \
+DEBEMAIL="tsagatakis@protonmail.com" \
+DEBFULLNAME="Ioannis Tsagatakis" \
+debchange --increment

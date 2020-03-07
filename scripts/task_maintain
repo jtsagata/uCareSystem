@@ -33,7 +33,6 @@
 
 # TODO: never use apt
 
-
 set -eu
 ## Ensure this file can only be sourced once
 maintain_loaded=${maintain_loaded:-}
@@ -42,8 +41,9 @@ if [[ -n ${maintain_loaded} ]]; then
   return 1
 fi
 maintain_loaded=true
+## Ensure this file can only be sourced once
 
-function action_maintain() {
+function method_classic() {
   header_text "Start System update actions"
 
   ## Updates package lists
@@ -73,5 +73,5 @@ if [[ "${FUNCNAME[0]}" != source ]]; then
   EXEC=${EXEC:=yes_opp}
   EXEC=no_opp
   [[ $EXEC == "yes_opp" ]] && check_root_priv
-  action_maintain
+  method_classic
 fi

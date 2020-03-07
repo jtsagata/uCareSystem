@@ -1,4 +1,11 @@
-ucaresystem (4.5.0) trusty; urgency=high
+ucaresystem (4.5.0ubuntu1) UNRELEASED; urgency=medium
+
+  * Flexible configuration system
+  * Test suite
+
+ -- Ioannis Tsagatakis <tsagatakis@protonmail.com>  Sat, 07 Mar 2020 23:21:56 +0200
+
+ucaresystem (4.5.0) UNRELEASED; urgency=medium
 
   * Complete rewrite
   * Package rename to ucaresystem
@@ -18,10 +25,10 @@ ucaresystem (4.5.0) trusty; urgency=high
   * Secure bash scripting
   * Remove obsolete files
 
- -- Ioannis Tsgakatakis <tsagatakis@protonmail.com>  Sat, 29 Feb 2020 00:01:54 +0200
+ -- Ioannis Tsagatakis <tsagatakis@protonmail.com>  Sat, 29 Feb 2020 00:01:54 +0200
 
 ucaresystem (4.4.0) trusty; urgency=high
 
   * Added pkexec, check if reboot is required, fixed Debian Jessie issue
-  
+
  -- Salih Emin <salih-emin@ubuntu.com>  Wed, 25 Jan 2018 14:45:44 +0200

@@ -18,19 +18,15 @@
 
 set -e
 UCARE_VERSION="4.5.0"
-lib_dir="."
 base_dir=$(dirname "$0")
+# shellcheck source=base
+source "${base_dir}"/config
+basic_setup
 
 show_help=false
 dispach="cli"
 
-#
-# Display version
-#
-function show_version() {
-  echo "$(basename "${0}") version ${UCARE_VERSION}"
-  exit
-}
+
 
 #
 # Show help

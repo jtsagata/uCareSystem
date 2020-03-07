@@ -39,9 +39,9 @@ fi
 # Make Debian package
 #
 if [[ $param == "--sign" ]]; then
-  dpkg-buildpackage -F -k${SIGN_BY}
+  debuild -F -k${SIGN_BY} --force-sign
 else
-  dpkg-buildpackage -F
+  debuild -F
 fi
 
 # Parse changelog to get latest version
@@ -55,13 +55,6 @@ rm -f ${ARTIFACTS}/*
 mv ../ucare*.deb ${ARTIFACTS}
 mv "../ucaresystem_${VERSION}"*.* ${ARTIFACTS}
 mv "ucaresystem-build-deps_${VERSION}_all.deb" ${ARTIFACTS}
-
-#
-# Check for errors with lintian
-#
-echo "*** Debian linting errors"
-lintian --display-experimental --display-info "${ARTIFACTS}/"*.changes
-
 
 
 #echo "Enter root password to install package"

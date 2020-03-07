@@ -57,7 +57,8 @@ function action_clean() {
 if [[ "${FUNCNAME[0]}" != source ]]; then
   base_dir=$(dirname "$0")
   # shellcheck source=base
-  source "${base_dir}"/base
+  source "${base_dir}"/config
+  basic_setup
 
   header_text "Cleanup system (standalone version)."
 

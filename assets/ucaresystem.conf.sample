@@ -27,7 +27,7 @@ ENABLE_TIMESHIFT=true
 # WAIT_ACTION=0
 
 # GUI options
-#X_TERMINAL="gnome-terminal"
+X_TERMINAL="/usr/bin/uxterm"
 #X_TERMINAL_OPTS=""
 
 # Disable colors

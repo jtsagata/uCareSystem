@@ -1,7 +1,6 @@
 #!/bin/bash
 set -ex
 dir_name="$(dirname "$0")/.."
-VERSION=$(dpkg-parsechangelog -S Version)
 
 DESTDIR=${DESTDIR:=debian/ucaresystem}
 rm -rf "$DESTDIR"
@@ -11,18 +10,22 @@ main_scripts=("remove-old-kernels" "ucaresystem" "ucaresystem-core")
 mkdir -p "$DESTDIR/usr/bin"
 for s in "${main_scripts[@]}"; do
   cp "${dir_name}/scripts/$s" "$DESTDIR/usr/bin/"
-  new_version="\"${VERSION}\""
-  sed -ri "s/^(UCARE_VERSION=)(.*)/\1${new_version}/g" "$DESTDIR/usr/bin/$s"
   new_lib_dir='"../lib/ucaresystem"'
   sed -ri "s@^(lib_dir=)(.*)@\1${new_lib_dir}@g" "$DESTDIR/usr/bin/$s"
 done
 
 ## Copy Libraries
-libraries=("base" "ucaresystem-cli" "ucaresystem-xterm" "task_cleanup" "task_check_eol" "task_maintain" "task_timeshift")
+libraries=("config" "ucaresystem-cli" "ucaresystem-xterm" "task_cleanup" "task_check_eol" "task_maintain" "task_timeshift")
 mkdir -p "$DESTDIR/usr/lib/ucaresystem"
 for s in "${libraries[@]}"; do
   cp "${dir_name}/scripts/$s" "$DESTDIR/usr/lib/ucaresystem"
 done
+
+## Update VERSION NUMBER
+VERSION=$(dpkg-parsechangelog -S Version)
+new_version="\"${VERSION}\""
+sed -ri "s/^(UCARE_VERSION=)(.*)/\1${new_version}/g" "$DESTDIR/usr/lib/ucaresystem/config"
+
 
 ## Policy files
 mkdir -p "$DESTDIR/usr/share/polkit-1/actions"
@@ -63,6 +66,11 @@ mkdir -p "$DESTDIR/lib/systemd/system/"
 cp assets/ucaresystem-automation-cleanup.service "$DESTDIR/lib/systemd/system/"
 mkdir -p mkdir -p "$DESTDIR/usr/lib/ucaresystem/automation"
 cp assets/99-ucaresystem-temporary.pkla "$DESTDIR/usr/lib/ucaresystem/automation"
+
+## Banner test
+grep -v '^#' assets/banner.txt.in| boxes -d dog -a c -s 80X12 > assets/banner.txt
+mkdir -p "$DESTDIR/usr/lib/ucaresystem/support"
+mv assets/banner.txt "$DESTDIR/usr/lib/ucaresystem/support"
 
 ## Lines of code report
 cloc . --exclude-dir=.idea --quiet --report-file="$DESTDIR/usr/share/doc/ucaresystem/loc.txt"

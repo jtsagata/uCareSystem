@@ -9,6 +9,7 @@ Build-Depends:
     equivs,
     librsvg2-bin,
     shunit2,
+    boxes,
     sed (>= 1.0)
 Standards-Version: 4.1.4
 Homepage: https://jtsagata.github.io/uCareSystem/

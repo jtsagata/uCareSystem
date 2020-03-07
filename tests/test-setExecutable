@@ -1,0 +1,160 @@
+#! /bin/bash
+
+### ShellCheck (http://www.shellcheck.net/)
+# shellcheck disable=SC2034
+base_dir=$(dirname "$0")
+
+function oneTimeSetUp() {
+  # shellcheck source=../scripts/base
+  source "${base_dir}"/../scripts/config
+  set +eu
+}
+
+function setUp() {
+  unset PS
+}
+
+test_SetExecutable_Fixed() {
+  assertNull "Start with empty variable '$PS'" "$PS"
+
+  set_executable PS /bin/ps fixed
+  local ret=$?
+
+  assertEquals "The path is set" "/bin/ps" "${PS}"
+  assertTrue "The have_var is set to true" "${HAVE_PS}"
+  assertTrue "Returns status 0, return ${ret}" "${ret}"
+}
+
+test_SetExecutable_Fixed_Invalid() {
+  set_executable PS /bin/invalid_cmd fixed
+  local ret=$?
+
+  assertEquals "The path is set  to ${PS}" "/bin/invalid_cmd" "${PS}"
+  assertFalse "The have_var is set to false" "${PS}"
+  assertFalse "Returns status NOT 0, return ${ret}" "${ret}"
+}
+
+test_SetExecutable_Fixed_WithConfigValue() {
+  assertNull "$PS"
+
+  # The config files contains
+  PS=/bin/something
+  set_executable PS /bin/ps fixed
+  local ret=$?
+
+  assertEquals "The path is set to ${PS}" "/bin/ps" "${PS}"
+  assertTrue "The have_var is set to true" "${HAVE_PS}"
+  assertTrue "Returns status 0, return ${ret}" "${ret}"
+}
+
+test_SetExecutable_Fixed_WithConfigValue() {
+  assertNull "Start with empty variable '$PS'" "$PS"
+
+  # The config files contains
+  PS=/bin/something
+  set_executable PS /bin/ps fixed
+  local ret=$?
+
+  assertEquals "The path is set to ${PS}" "/bin/ps" "${PS}"
+  assertTrue "The have_var is set to true" "${HAVE_PS}"
+  assertTrue "Returns status 0, return ${ret}" "${ret}"
+}
+
+test_SetExecutable_Optional() {
+  assertNull "Start with empty variable '$PS'" "$PS"
+
+  set_executable PS /bin/ps optional
+  local ret=$?
+
+  assertEquals "The path is set to ${PS}" "/bin/ps" "${PS}"
+  assertTrue "The have_var is set to true" "${HAVE_PS}"
+  assertTrue "Returns status 0, return ${ret}" "${ret}"
+}
+
+test_SetExecutable_Optional_Invalid() {
+  set_executable PS /bin/invalid_cmd optional
+  local ret=$?
+
+  assertEquals "The path is set" "/bin/invalid_cmd" "${PS}"
+  assertFalse "The have_var is set to false" "${PS}"
+  assertTrue "Returns status 0, return ${ret}" "${ret}"
+}
+
+test_SetExecutable_Optional_WithConfigValue_Valid() {
+  assertNull "Start with empty variable '$PS'" "$PS"
+
+  # The config files contains
+  PS=/bin/sed
+  set_executable PS /bin/ps optional
+  local ret=$?
+
+  assertEquals "The path is set to ${PS}" "/bin/sed" "${PS}"
+  assertTrue "The have_var is set to true" "${HAVE_PS}"
+  assertTrue "Returns status 0, return ${ret}" "${ret}"
+}
+
+test_SetExecutable_Optional_WithConfigValue_InValid() {
+  assertNull "Start with empty variable '$PS'" "$PS"
+
+  # The config files contains
+  PS=/bin/invalid_cmd
+  set_executable PS /bin/ps optional
+  local ret=$?
+
+  assertEquals "The path is set to ${PS}" "/bin/invalid_cmd" "${PS}"
+  assertFalse "The have_var is set to FALSE" "${HAVE_PS}"
+  assertTrue "Returns status 0, return ${ret}" "${ret}"
+}
+
+test_SetExecutable_Required() {
+  assertNull "Start with empty variable '$PS'" "$PS"
+
+  set_executable PS /bin/ps required
+  local ret=$?
+
+  assertEquals "The path is set" "/bin/ps" "${PS}"
+  assertTrue "The have_var is set to true" "${HAVE_PS}"
+  assertTrue "Returns status 0, return ${ret}" "${ret}"
+}
+
+test_SetExecutable_Required_Invalid() {
+  assertNull "Start with empty variable '$PS'" "$PS"
+
+  set_executable PS /bin/invalid_cmd required
+  local ret=$?
+
+  assertEquals "The path is set" "/bin/invalid_cmd" "${PS}"
+  assertFalse "The have_var is NOT set to true" "${HAVE_PS}"
+  assertFalse "Returns status NOT 0, return ${ret}" "${ret}"
+}
+
+test_SetExecutable_Required_WithConfigValue_Valid() {
+  assertNull "Start with empty variable '$PS'" "$PS"
+
+  # The config files contains
+  PS=/bin/sed
+  set_executable PS /bin/ps required
+  local ret=$?
+
+  assertEquals "The path is set to ${PS}" "/bin/sed" "${PS}"
+  assertTrue "The have_var is set to true" "${HAVE_PS}"
+  assertTrue "Returns status 0, return ${ret}" "${ret}"
+}
+
+test_SetExecutable_Required_WithConfigValue_InValid() {
+  assertNull "Start with empty variable '$PS'" "$PS"
+
+  # The config files contains
+  PS=/bin/invalid_cmd
+  set_executable PS /bin/ps required
+  local ret=$?
+
+  assertEquals "The path is set to ${PS}" "/bin/invalid_cmd" "${PS}"
+  assertFalse "The have_var is set to FALSE" "${HAVE_PS}"
+  assertFalse "Returns status NOT 0, return ${ret}" "${ret}"
+}
+
+# Load shUnit2.
+# https://github.com/kward/shunit2/
+SHUNIT_COLOR='always'
+source shunit2

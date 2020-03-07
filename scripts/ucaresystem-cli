@@ -19,36 +19,18 @@
 
 set -eu
 UCARE_VERSION="4.5.0"
-lib_dir="."
 base_dir=$(dirname "$0")
-
-source "${base_dir}"/base
+# shellcheck source=base
+source "${base_dir}"/config
+basic_setup
 
 function welcome_screen() {
   clear
-  echo "_______________________________________________________"
-  echo "                                                       "
-  echo "            ${GREEN}uCareSystem Core ${UCARE_VERSION}${NORMAL}            "
-  echo "            ${GREEN}~~~~~~~~~~~~~~~~~~~~~~~${NORMAL}                      "
-  echo "                                                       "
-  echo " Welcome to all-in-one System Update and maintenance   "
-  echo " assistant tool.                                        "
-  echo "                                                       "
-  echo "                                                       "
-  echo " This simple script will automatically         	     "
-  echo " refresh your packagelist, download and                "
-  echo " install updates (if there are any), remove any old    "
-  echo " kernels, obsolete packages and configuration files    "
-  echo " to free up disk space, without any need of user       "
-  echo " interference                                         "
-  echo "                   				                     "
-  echo " If you’ve found it useful and saved you time and you  "
-  echo " think it is worth of your support, you can make a     "
-  echo " donation via PayPal by clicking on the following:     "
-  echo "                                                       "
-  echo "           ${GREEN}https://www.paypal.me/cerebrux${NORMAL}              "
-  echo "_______________________________________________________"
-  echo
+  if [[ -f "${base_dir}/support/banner.txt" ]]; then
+    cat "${base_dir}/support/banner.txt"
+  else
+    cat  "${base_dir}../assets/banner.txt"
+  fi
 
   if [ "${ASK_CONFIRM}" == "true" ]; then
     ask_yesno "Are you sure ?" resp

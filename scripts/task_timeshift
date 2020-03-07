@@ -118,7 +118,8 @@ function test_timeshift_running() {
 if [[ "${FUNCNAME[0]}" != source ]]; then
   base_dir=$(dirname "$0")
   # shellcheck source=base
-  source "${base_dir}"/base
+  source "${base_dir}"/config
+  basic_setup
 
   header_text "Make a snapshot with timeshift (standalone version)."
 

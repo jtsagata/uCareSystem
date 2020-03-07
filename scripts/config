@@ -1,0 +1,381 @@
+#!/usr/bin/env bash
+#
+#    ucaresystem - All-in-one system update and maintenance tool
+#    Copyright:
+#       2009 Salih Emin <salih@utappia.org>
+#       2020 Ioannis Tsagatakis <tsagatakis@protonmail.com>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, version 3 of the License.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+## Ensure this file can only be sourced once
+base_loaded=${base_loaded:-}
+if [[ -n ${base_loaded} ]]; then
+  echo "Warning: This file can only be sourced once"
+  return 1
+fi
+base_loaded=true
+
+# Set the version from Debian changelog
+UCARE_VERSION="4.5.0"
+
+# Default program paths
+declare -A EXECUTABLES
+EXECUTABLES=(
+  [SYSTEMD_INHIBIT]=/bin/systemd-inhibit:fixed
+  [REBOOT]=/sbin/reboot:fixed
+  [AWK]=/usr/bin/awk:fixed
+  [SUDO]=/usr/bin/sudo:fixed
+  [PS]=/bin/ps:fixed
+  [XARGS]=/usr/bin/xargs:fixed
+  [APT_GET]=/usr/bin/apt-get:required
+  [DEBORPHAN]=/usr/bin/deborphan:required
+  [LSB_RELEASE]=/usr/bin/lsb_release:required
+  [DISTRO_INFO]=/usr/bin/distro-info:required
+  [UPDATE_TOOL]=/usr/bin/do-release-upgrade:optional
+  [TIMESHIFT]=/usr/bin/timeshift:optional
+  [TOPGRADE]="${HOME}/.cargo/bin/topgrade":optional
+  [X_TERMINAL]=/usr/bin/x-terminal-emulator:optional
+)
+
+# Default config_options
+declare -A DEFAULT_VALUES
+DEFAULT_VALUES=(
+  [WAIT_ACTION]=0
+  [KEEP_KERNELS]=2
+  [DEFAULT_MODE]=maintain
+  [AUTO_REBOOT]=false
+  [AUTO_REBOOT_TIMEOUT]=10
+  [ASK_CONFIRM]=ASK_CONFIRM
+  [ENABLE_TIMESHIFT]=ENABLE_TIMESHIFT
+  [ENABLE_TOPGRADE]=ENABLE_TOPGRADE
+  [CONFIG_FILE]=/etc/ucaresystem.conf
+  [EXEC]=yes_opp
+)
+
+#
+# Display a header text
+#
+function header_text() {
+  echo -e "${GREEN}${BOLD}***${BOLDOFF} ${1}${NORMAL}"
+}
+
+#
+# Ask for yes/no (localized)
+# Usage ask_yesno prompt res variable
+#
+function ask_yesno() {
+  local prompt=${1:-}
+  local -n _ret=${2:-}
+  local response=""
+
+  while [[ -z $response ]]; do
+    read -rp "${prompt} Yes/No? " yn
+    case $yn in
+    [Yy]*) response="yes" ;;
+    [Nn]*) response="no" ;;
+    *) echo "Again: ${prompt} Yes/No?" ;;
+    esac
+  done
+
+  # shellcheck disable=SC2034
+  _ret="$response"
+}
+
+#
+# Check if reboot is type
+#
+function check_reboot() {
+  header_text "Checking to see if a reboot is type  "
+  ## Check to see if a reboot is type
+  if [ -f /var/run/reboot-type ]; then
+    echo
+    echo "${BOLD}${RED}* * * * * * * * * * * * * * * * * *"
+    echo "*                                 *"
+    echo "* Consider rebooting your system  *"
+    echo "* to finish applying updates      *"
+    echo "*                                 *"
+    echo "* * * * * * * * * * * * * * * * * *${BOLDOFF}${NORMAL}"
+    echo
+  fi
+
+  if [ "$AUTO_REBOOT" == "true" ]; then
+    header_text "Rebooting system"
+    echo " $(basename "${0}") will reboot the system in ${AUTO_REBOOT_TIMEOUT} seconds... "
+    sleep "${AUTO_REBOOT_TIMEOUT}"
+    ${REBOOT}
+  fi
+}
+
+#
+# Check if you can sudo
+#
+function check_root_priv() {
+  # Checking if the user has run the script with "sudo" or not
+  if [[ $EUID -ne 0 ]]; then
+    echo "${RED}${BOLD}Error: ${BOLDOFF} Application needs admin access.${BOLDOFF}" 1>&2
+    echo "Please run the application as admin (using 'sudo' or 'su')" 1>&2
+    exit 1
+  fi
+}
+
+#
+# Set executable
+# usage set_executable VAR path type required|optional|fixed
+#
+function set_executable() {
+  local var_name=${1:-}
+  local default_path=${2:-}
+  local type=${3:-type }
+
+  path_value="$default_path"
+  case "$type" in
+  "fixed")
+    must_exist=true
+    ;;
+  "required")
+    [[ -n ${!var_name} ]] && path_value="${!var_name}"
+    must_exist=true
+    ;;
+  "optional")
+    [[ -n ${!var_name} ]] && path_value="${!var_name}"
+    must_exist=false
+    ;;
+  esac
+
+  path_valid=false
+  [[ -x "$path_value" ]] && path_valid=true
+
+  # shellcheck disable=SC2229
+  IFS= read -r "$var_name" <<<"$path_value"
+  IFS= read -r "HAVE_$var_name" <<<"${path_valid}"
+
+  #  echo "must_exist: $must_exist, path_valid: $path_valid"
+  [[ $must_exist == true && $path_valid == false ]] && return 1
+  return 0
+}
+
+#
+# Load the config file safely
+#
+function load_config_file() {
+  CONFIG_FILE=${CONFIG_FILE:-/etc/ucaresystem.conf}
+
+  if [[ ! "$CONFIG_FILE" == "${DEFAULT_VALUES[CONFIG_FILE]}" ]]; then
+    # Config file request must exists!
+    if [ ! -r "$CONFIG_FILE" ]; then
+      echo "${RED}Error${NORMAL}: Configuration file '$CONFIG_FILE' does not exits or it is not readable."
+      exit 1
+    fi
+  fi
+
+  if [ -r "$CONFIG_FILE" ]; then
+    vars_file=$(mktemp "${TMPDIR:-/tmp/}ucaresystem-vars-XXX.sh")
+    /usr/bin/awk -F= '/^[A-Z_]*=/ {printf "declare -g %s=%s\n", $1, $2}' "$CONFIG_FILE" >"${vars_file}"
+    # shellcheck disable=SC1090
+    source "${vars_file}"
+    rm "${vars_file}"
+  fi
+
+  # Configuration variables and default values
+  for v in "${!DEFAULT_VALUES[@]}"; do
+    # shellcheck disable=SC2229
+    [[ -z ${!v} ]] && IFS= read -r "${v}" <<<"${DEFAULT_VALUES[$v]}"
+  done
+
+  # Programs used
+  for i in "${!EXECUTABLES[@]}"; do
+    IFS=':' read -ra split <<<"${EXECUTABLES[$i]}"
+    set_executable "$i" "${split[0]}" "${split[1]}"
+    local ok_var="HAVE_${i}"
+    if [[ "${split[1]}" != "optional" && "${!ok_var}" == "false" ]]; then
+      echo "${RED}Bad config option${NORMAL}: '${GREEN}$i${NORMAL}' missing executable '${GREEN}${!i}${NORMAL}'"
+      exit 2
+    fi
+  done
+
+  # Get basic distribution information
+  # shellcheck disable=SC2034
+  DISTRIBUTION_ID=$(${LSB_RELEASE} --id | cut -f2)
+  # shellcheck disable=SC2034
+  DISTRIBUTION_CODENAME=$(${LSB_RELEASE} --codename | cut -f2)
+}
+
+#
+# Setup colors
+#
+function setup_colors() {
+  RED=""
+  GREEN=""
+  NORMAL=""
+  BOLD=""
+  BOLDOFF=""
+
+  NO_COLOR=${NO_COLOR:-}
+  if [[ -z "${NO_COLOR}" ]]; then
+    if test -n "$TERM" && test "$TERM" != "dumb"; then
+      RED=$(tput setaf 1)
+      GREEN=$(tput setaf 2)
+      NORMAL=$(tput setaf 7)
+      BOLD=$(tput bold)
+      BOLDOFF=$(tput sgr0)
+    fi
+  fi
+}
+
+#
+# Trap Handler
+#
+function trap_handler() {
+  header_text "Program interrupt."
+  echo "  The program have stop before finished. Your system maybe in an incomplete state."
+  echo "  You may need to do:"
+  echo "     sudo apt update && sudo apt install -f"
+  exit 1
+}
+
+# hack for  EXEC=
+function no_opp() {
+  echo + "$@"
+}
+function yes_opp() {
+  set -x
+  "$@"
+  { set +x; } 2>/dev/null
+}
+
+#
+# Show the configuration
+#
+function show_config() {
+  help_header
+
+  echo
+  echo "*** Settings ***"
+  for v in "${!DEFAULT_VALUES[@]}"; do
+    echo -n "${GREEN}$v${NORMAL}=${!v}"
+    [[ ! "${!v}" == "${DEFAULT_VALUES[$v]}" ]] && echo -n " ${GREEN}--Changed--${NORMAL}"
+    echo
+  done
+
+  echo
+  echo "*** Programs used ***"
+  for prog in "${!EXECUTABLES[@]}"; do
+    echo -n "${GREEN}$prog${NORMAL}=${!prog}"
+    ok_var="HAVE_${prog}"
+    [[ "${!ok_var}" == "true" ]] && echo " ${GREEN}--OK--${NORMAL}"
+    [[ "${!ok_var}" == "false" ]] && echo " ${RED}--BAD EXECUTABLE--${NORMAL}"
+  done
+
+  echo
+  echo "Please do not worry about --BAD EXECUTABLE-- if you haven'y change them in your config file."
+
+  exit 0
+}
+
+#
+# Display version
+#
+function show_version() {
+  echo "${UCARE_VERSION}"
+  exit
+}
+
+#
+# Common cmd options
+#
+# shellcheck disable=SC2120
+function common_cmd_options() {
+  ARGS=$(getopt -a -o hvdc:s --long config:,help,version,dryrun,show-config -- "$command_line_options")
+  eval set -- "$ARGS"
+
+  while true; do
+    case "$1" in
+    "-h" | "--help")
+      show_help
+      shift
+      ;;
+    "-v" | "--version")
+      show_version
+      shift
+      ;;
+    "-s" | "--show_config")
+      show_config
+      shift
+      ;;
+    "-c" | "--config")
+      CONFIG_FILE="$2"
+      shift 2
+      ;;
+    "-d" | "--dryrun")
+      # shellcheck disable=SC2034
+      EXEC="no_opp"
+      shift
+      ;;
+    *) break ;;
+    esac
+  done
+}
+
+#
+# Common tasks
+#
+function basic_setup() {
+  trap trap_handler 1 2 3 6
+  setup_colors
+  common_cmd_options
+  load_config_file
+}
+
+function show_help() {
+  help_header
+  echo
+  "${help_action}"
+
+  help_footer
+  exit
+}
+
+function help_header() {
+  executable=$(basename "${0}")
+  echo "${GREEN}ucaresystem${NORMAL}:($executable) All-in-one system update and maintenance tool"
+  echo "${info_text}"
+  echo "${executable} version ${UCARE_VERSION}."
+}
+
+function help_footer() {
+  executable=$(basename "${0}")
+
+  man_page="/usr/share/man/man8/${executable}.8.gz"
+  if [[ -f $man_page ]]; then
+    echo "Type 'man ${executable}' for more info."
+  fi
+}
+
+#
+# Standalone
+#
+if [[ "${FUNCNAME[0]}" != source ]]; then
+  function base_help() {
+    echo "Displays the configuration values. No options"
+  }
+
+  main_action="show_config"
+  help_action="base_help"
+  info_text="Displays configuration options for debugging."
+  command_line_options=("$@")
+
+  basic_setup
+
+  "${main_action}"
+
+fi
