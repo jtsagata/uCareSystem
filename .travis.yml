@@ -2,7 +2,7 @@ language: bash
 dist: bionic
 
 script:
-  - support/make_debian.sh --travis
+  - support/create_debian --travis
 
 branches:
   except:

@@ -1,0 +1,14 @@
+# cleanup in case ucaresystem automation was interrupted
+
+[Unit]
+Description=uCareSystem Automation Cleanup
+Documentation=man:ucaresystem-service(8)
+ConditionPathExists=|/etc/polkit-1/localauthority/90-mandatory.d/99-ucaresystem-temporary.pkla
+ConditionPathIsSymbolicLink=|/etc/polkit-1/localauthority/90-mandatory.d/99-ucaresystem-temporary.pkla
+
+[Service]
+Type=oneshot
+ExecStart=/bin/rm -f /etc/polkit-1/localauthority/90-mandatory.d/99-ucaresystem-temporary.pkla
+
+[Install]
+WantedBy=multi-user.target

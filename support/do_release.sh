@@ -40,7 +40,7 @@ release_info=$(${HUB} release show "$OLD_RELEASE_TAG")
 set -e
 
 # Make and sign the distribution packages
-./support/make_debian.sh --sign
+./support/create_debian --sign
 
 
 if [[ -z $release_info  ]]; then

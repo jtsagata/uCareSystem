@@ -8,6 +8,7 @@ Build-Depends:
     cloc,
     equivs,
     librsvg2-bin,
+    shunit2,
     sed (>= 1.0)
 Standards-Version: 4.1.4
 Homepage: https://jtsagata.github.io/uCareSystem/
@@ -23,7 +24,8 @@ Depends: apt,
          sed (>= 1.0),
          distro-info,
          ${misc:Depends}
-Suggests: timeshift
+Suggests: timeshift,
+          systemd
 Description: All-in-one System Update and maintenance tool
  This simple script will automatically refresh your packagelist,
  download and install software updates (if there are any), remove old

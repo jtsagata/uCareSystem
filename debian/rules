@@ -6,3 +6,5 @@
 override_dh_prep:
 	env DESTDIR=debian/ucaresystem ./debian/build.sh
 
+override_dh_auto_test:
+	tests/run_tests

@@ -1,0 +1,15 @@
+/ucaresystem-service(8) -- Remove inhibit service
+=======================================================
+
+This will make sure that cleanup in case ucaresystem automation was interrupted
+
+## COPYRIGHT
+
+launch-ucaresystem is Copyright (C) 2020 by Utappia http://utappia.org under GPL3 license. 
+
+On  Debian  systems,  the  complete text of the GNU General Public License can be found in
+/usr/share/common-licenses/GPL, or on the web at http://www.gnu.org/licenses/gpl.txt.
+
+## SEE ALSO
+
+launch-ucaresystem(8)

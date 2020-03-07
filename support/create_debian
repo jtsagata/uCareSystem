@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#    make_debian.sh - helper script to create the debian packages
+#    create_debian - helper script to create the debian packages
 #    Copyright:
 #       2020 Ioannis Tsagatakis <tsagatakis@protonmail.com>
 #

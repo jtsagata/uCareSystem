@@ -51,14 +51,18 @@ set -x
 ## Misc Files
 mkdir -p "$DESTDIR/usr/share/doc/ucaresystem"
 cp assets/ucaresystem.conf.sample "$DESTDIR/usr/share/doc/ucaresystem"
+cp README.md "$DESTDIR/usr/share/doc/ucaresystem"
 
 ## Manual pages
 ronn --roff --manual="ucaresystem" --organization="Utappia" --date="2020-04-01" docs/ronn/*.ronn
-#mkdir -p "$DESTDIR/usr/share/man/man1"
-#mv docs/ronn/*.1 "$DESTDIR/usr/share/man/man1"
 mkdir -p "$DESTDIR/usr/share/man/man8"
 mv docs/ronn/*.8 "$DESTDIR/usr/share/man/man8"
 
+## Systemd-inhibit
+mkdir -p "$DESTDIR/lib/systemd/system/"
+cp assets/ucaresystem-automation-cleanup.service "$DESTDIR/lib/systemd/system/"
+mkdir -p mkdir -p "$DESTDIR/usr/lib/ucaresystem/automation"
+cp assets/99-ucaresystem-temporary.pkla "$DESTDIR/usr/lib/ucaresystem/automation"
 
 ## Lines of code report
 cloc . --exclude-dir=.idea --quiet --report-file="$DESTDIR/usr/share/doc/ucaresystem/loc.txt"
