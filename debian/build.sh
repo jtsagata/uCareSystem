@@ -67,7 +67,8 @@ cp assets/ucaresystem-automation-cleanup.service "$DESTDIR/lib/systemd/system/"
 mkdir -p mkdir -p "$DESTDIR/usr/lib/ucaresystem/automation"
 cp assets/99-ucaresystem-temporary.pkla "$DESTDIR/usr/lib/ucaresystem/automation"
 
-## Banner test
+## Banner
+## https://boxes.thomasjensen.com/
 grep -v '^#' assets/banner.txt.in| boxes -d dog -a c -s 80X12 > assets/banner.txt
 mkdir -p "$DESTDIR/usr/lib/ucaresystem/support"
 mv assets/banner.txt "$DESTDIR/usr/lib/ucaresystem/support"
