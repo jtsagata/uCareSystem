@@ -26,11 +26,7 @@ basic_setup
 
 function welcome_screen() {
   clear
-  if [[ -f "${base_dir}/support/banner.txt" ]]; then
-    cat "${base_dir}/support/banner.txt"
-  else
-    cat  "${base_dir}../assets/banner.txt"
-  fi
+  ! cat "$BANNER_FILE"
 
   if [ "${ASK_CONFIRM}" == "true" ]; then
     ask_yesno "Are you sure ?" resp

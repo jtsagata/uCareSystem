@@ -63,6 +63,7 @@ DEFAULT_VALUES=(
   [CONFIG_FILE]=/etc/ucaresystem.conf
   [EXEC]=yes_opp
   [X_TERMINAL_OPTIONS]=""
+  [BANNER_FILE]="$(dirname "$0")/support/banner.txt"
 )
 
 #

@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/jtsagata/uCareSystem.svg?branch=master)](https://travis-ci.org/jtsagata/uCareSystem)
 
-Work in progress for the next major version. Only for brave testers atm.
+Work in progress for the next major version. Move away!!
 
 ## Modes of operation
 There is 3 modes of operation
