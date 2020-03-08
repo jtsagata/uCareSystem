@@ -19,6 +19,10 @@ License: GPL-2
 Comment: This was originated from byobu
  Modified by Ioannis Tsagatakis <tsagatakis@protonmail.com>.
 
+Files: scripts/shFlags
+Copyright: 2008-2018 Kate Ward. All Rights Reserved.
+License: Apache-2
+
 License: GPL-3
  The full text of the GPL is distributed in
  /usr/share/common-licenses/GPL-3 on Debian systems.
@@ -27,4 +31,6 @@ License: GPL-2
  The full text of the GPL is distributed in
  /usr/share/common-licenses/GPL-2 on Debian systems.
 
-
+License: Apache-2
+ Released under the Apache License 2.0 license.
+ http://www.apache.org/licenses/LICENSE-2.0

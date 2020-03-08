@@ -12,12 +12,12 @@ for s in "${main_scripts[@]}"; do
   cp "${dir_name}/scripts/$s" "$DESTDIR/usr/bin/"
   # Fix library path
   # shellcheck disable=SC2016
-  new_lib_dir='"${base_dir}/../lib/ucaresystem"'
+  new_lib_dir='"$(realpath "$(dirname "$_")/../lib/ucaresystem")"'
   sed -ri "s@^(lib_dir=)(.*)@\1${new_lib_dir}@g" "$DESTDIR/usr/bin/$s"
 done
 
 ## Copy Libraries
-libraries=("config" "ucaresystem-cli" "ucaresystem-xterm" "task_cleanup" "task_check_eol" "task_maintain" "task_timeshift")
+libraries=("config" "ucaresystem-cli" "ucaresystem-xterm" "task_cleanup" "task_check_eol" "task_maintain" "task_timeshift" "shflags")
 mkdir -p "$DESTDIR/usr/lib/ucaresystem"
 for s in "${libraries[@]}"; do
   cp "${dir_name}/scripts/$s" "$DESTDIR/usr/lib/ucaresystem"
