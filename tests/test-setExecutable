@@ -154,6 +154,17 @@ test_SetExecutable_Required_WithConfigValue_InValid() {
   assertFalse "Returns status NOT 0, return ${ret}" "${ret}"
 }
 
+test_SetExecutable_Empty_Optional() {
+  assertNull "Start with empty variable '$PS'" "$PS"
+
+  set_executable PS '-' optional
+  local ret=$?
+
+  assertEquals "The path is set to ${PS}" "-" "${PS}"
+  assertFalse "The have_var is set to FALSE" "${HAVE_PS}"
+  assertTrue  "Returns status IS 0, return ${ret}" "${ret}"
+}
+
 # Load shUnit2.
 # https://github.com/kward/shunit2/
 SHUNIT_COLOR='always'

@@ -16,10 +16,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-base_dir=$(dirname "$0")
 # lib_dir will change to point at /usr/lib/ucaresystem during packaging
-lib_dir=$(dirname "$0")
-# shellcheck source=base
+lib_dir=$(dirname "$(dirname "$_")")
+# shellcheck source=config
 source "${lib_dir}/config"
 
 #
@@ -93,15 +92,5 @@ for opt in "$@"; do
   esac
 done
 
-# Delegate to tool
-case "${dispatch}" in
-"cli")
-  extra_opts=""
-  ;;
-"xterm")
-  extra_opts="--wait"
-  ;;
-esac
-
-"${lib_dir}/ucaresystem-${dispatch}" "${extra_opts}" "$*"
+"${lib_dir}/ucaresystem-${dispatch}" "$*"
 exit $?

@@ -33,14 +33,20 @@ command_line_options=("$@")
 help_action="command_help"
 # shellcheck disable=SC2034
 manpage="ucaresystem"
-
 basic_setup
 
-/usr/bin/pkexec  \
+
+#
+# Possible runners
+#
+
+
+
+echo /usr/bin/pkexec  \
   "${X_TERMINAL}" \
   -title 'uCareSystem Core'  \
   "${X_TERMINAL_OPTIONS}" \
   -e "${base_dir}/ucaresystem-cli" \
-  "$*" --wait
+  "$*" --wait -hold
 
 exit $?

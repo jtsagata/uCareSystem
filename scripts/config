@@ -17,7 +17,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set +u
+lib_dir=$(dirname "$_")
+# shellcheck source=shflags
+source "${lib_dir}/shflags"
 
 ## Ensure this file can only be sourced once
 base_loaded=${base_loaded:-}
@@ -48,7 +50,8 @@ EXECUTABLES=(
   [UPDATE_TOOL]=/usr/bin/do-release-upgrade:optional
   [TIMESHIFT]=/usr/bin/timeshift:optional
   [TOPGRADE]="${HOME}/.cargo/bin/topgrade":optional
-  [X_TERMINAL]=/usr/bin/x-terminal-emulator:optional
+  [X_TERMINAL]=-:optional
+  [X_SUDO_RUNNER]=-:optional
 )
 
 # Default config_options
@@ -70,10 +73,6 @@ DEFAULT_VALUES=(
   [DISTRIBUTION_CODENAME]="$(lsb_release --codename --short)"
 
 )
-
-#DISTRIBUTION_ID=$(${LSB_RELEASE} --id --short)
-## --shellcheck disable=SC2034
-#DISTRIBUTION_CODENAME=$(${LSB_RELEASE} --codename --short)
 
 #
 # Display a header text
@@ -108,6 +107,8 @@ function ask_yesno() {
 # Check if reboot is type
 #
 function check_reboot() {
+  # TODO: boxes message, show the contents of /var/run/reboot-type
+  # Maybe make boxes a runtime depedency?
   header_text "Checking to see if a reboot is type  "
   ## Check to see if a reboot is type
   if [ -f /var/run/reboot-type ]; then
@@ -192,6 +193,7 @@ function load_config_file() {
   fi
 
   if [ -r "$CONFIG_FILE" ]; then
+    # TODO: Investigate ${parameter@operator}, operator=A
     vars_file=$(mktemp "${TMPDIR:-/tmp/}ucaresystem-vars-XXX.sh")
     /usr/bin/awk -F= '/^[A-Z_]*=/ {printf "declare -g %s=%s\n", $1, $2}' "$CONFIG_FILE" >"${vars_file}"
     # shellcheck disable=SC1090
@@ -265,38 +267,40 @@ function yes_opp() {
 # Show the configuration
 #
 function show_config() {
-  #TODO: Add an option to filter values (Priority Low)
-  help_header
+  echo "${FLAGS_HELP}"
 
-  echo
-  echo "*** Settings ***"
-  for v in "${!DEFAULT_VALUES[@]}"; do
-    echo -n "${GREEN}$v${NORMAL}=${!v}"
-    [[ ! "${!v}" == "${DEFAULT_VALUES[$v]}" ]] && echo -n " ${GREEN}--Changed--${NORMAL}"
+  if [[ $1 == a* ]] || [[ $1 == s* ]]; then
     echo
-  done
+    echo "*** Settings ***"
+    for v in "${!DEFAULT_VALUES[@]}"; do
+      echo -n "${GREEN}$v${NORMAL}=${!v}"
+      [[ ! "${!v}" == "${DEFAULT_VALUES[$v]}" ]] && echo -n " ${GREEN}--Changed--${NORMAL}"
+      echo
+    done
+  fi
 
-  echo
-  echo "*** Programs used ***"
-  for prog in "${!EXECUTABLES[@]}"; do
-    IFS=':' read -ra split <<< "${EXECUTABLES[$prog]}"
-    local default_path="${split[0]}"
-    local category="${split[1]}"
-    declare -A category_labels
-    category_labels=([fixed]='F' [required]='R' [optional]='~')
-
-    echo -n "${category_labels[$category]}:"
-    echo -n "${GREEN}$prog${NORMAL}=${!prog}"
-    ok_var="HAVE_${prog}"
-    [[ ! "${!prog}" == "${default_path}" ]] && echo -n " ${GREEN}--Changed--${NORMAL}"
-    [[ "${!ok_var}" == "false" ]] && echo -n " ${RED}--BAD EXECUTABLE--${NORMAL}"
+  if [[ $1 == a* ]] || [[ $1 == p* ]]; then
     echo
-  done
+    echo "*** Programs used ***"
+    for prog in "${!EXECUTABLES[@]}"; do
+      IFS=':' read -ra split <<<"${EXECUTABLES[$prog]}"
+      local default_path="${split[0]}"
+      local category="${split[1]}"
+      declare -A category_labels
+      category_labels=([fixed]='F' [required]='R' [optional]='~')
 
-  echo
-  echo "Please do not worry about --BAD EXECUTABLE-- if you haven't change them in your config file."
+      echo -n "${category_labels[$category]}:"
+      echo -n "${GREEN}$prog${NORMAL}=${!prog}"
+      ok_var="HAVE_${prog}"
+      [[ ! "${!prog}" == "${default_path}" ]] && echo -n " ${GREEN}--Changed--${NORMAL}"
+      [[ "${!ok_var}" == "false" && ! ${!prog} == "-" ]] && echo -n " ${RED}--BAD EXECUTABLE--${NORMAL}"
+      [[ "${!ok_var}" == "false" && ${!prog} == "-" ]] && echo -n "${GREEN}-NOT SET--${NORMAL}"
+      echo
+    done
 
-  exit 0
+    echo
+    echo "Please do not worry about --BAD EXECUTABLE-- if you haven't change them in your config file."
+  fi
 }
 
 #
@@ -304,97 +308,67 @@ function show_config() {
 #
 function show_version() {
   echo "${UCARE_VERSION}"
-  exit
 }
 
 #
 # Common cmd options
 #
-# shellcheck disable=SC2120
 function common_cmd_options() {
-  command_line_options=${command_line_options:-}
-  ARGS=$(getopt --quiet -a -o hvdc:s --long config:,help,version,dryrun,show-config -- "$command_line_options")
-  eval set -- "$ARGS"
 
-  while true; do
-    case "$1" in
-    "-h" | "--help")
-      show_help
-      shift
-      ;;
-    "-v" | "--version")
-      show_version
-      shift
-      ;;
-    "-s" | "--show-config")
-      load_config_file
-      show_config
-      shift
-      ;;
-    "-c" | "--config")
-      CONFIG_FILE="$2"
-      shift 2
-      ;;
-    "-d" | "--dryrun")
-      # shellcheck disable=SC2034
-      EXEC="no_opp"
-      shift
-      ;;
-    *) break ;;
-    esac
-  done
-}
-
-#
-# Common tasks
-#
-function basic_setup() {
-  trap trap_handler 1 2 3 6
-  setup_colors
-  common_cmd_options
-  load_config_file
-}
-
-function show_help() {
-  help_header
-  echo
-  "${help_action}"
-
-  help_footer
-  exit
-}
-
-function help_header() {
-  executable=$(basename "${0}")
-  echo "${GREEN}ucaresystem${NORMAL}:($executable) All-in-one system update and maintenance tool"
-  echo "${info_text}"
-  echo "${executable} version ${UCARE_VERSION}."
-}
-
-function help_footer() {
   # shellcheck disable=SC2154
-  the_man_page="/usr/share/man/man8/${manpage}.8.gz"
-  if [[ -f $the_man_page ]]; then
-    echo "Type 'man ${manpage}' for more info."
+  if [[ "${FLAGS_show_config}" == "${FLAGS_TRUE}" ]]; then
+    load_config_file
   fi
+
+  # shellcheck disable=SC2154
+  # shellcheck disable=SC2034
+  [[  "${FLAGS_dryrun}" == "${FLAGS_TRUE}" ]] && EXEC="no_opp"
+  # shellcheck disable=SC2154
+  [[ ! ${FLAGS_config} == "<file>" ]] && CONFIG_FILE="${FLAGS_config}"
+
+  # shellcheck disable=SC2154
+  if [[ "${FLAGS_version}" == "${FLAGS_TRUE}" ]]; then
+    show_version
+    exit 0
+  fi
+
+    # shellcheck disable=SC2154
+  if [[ "${FLAGS_show_config}" == "${FLAGS_TRUE}" ]]; then
+    show_config "${FLAGS_config_sections}"
+    exit 0
+  fi
+
 }
+
+setup_colors
+# Setup HELP SYSTEM
+# shellcheck disable=SC2034
+read -r -d '' FLAGS_HELP <<EOHELP
+${GREEN}ucaresystem${NORMAL} : (config) All-in-one system update and maintenance tool
+  Displays the configuration values. No options
+  ucaresystem version ${UCARE_VERSION}.
+EOHELP
+# shellcheck disable=SC2034
+FLAGS_FOOTER="Type 'man ucaresystem' for more info."
+
+# Common Flags
+DEFINE_boolean 'version' false 'Show program version' 'v'
+DEFINE_boolean 'dryrun' false 'Do not change anything in system' 'd'
+DEFINE_string 'config' "<file>" 'Specify a config file'
+DEFINE_boolean 'show-config' false 'Show configuration' 'c'
+DEFINE_string 'config-sections' "all" 'Configuration sections to show'
 
 #
 # Standalone
 #
 if [[ "${FUNCNAME[0]}" != source ]]; then
-  function base_help() {
-    echo "Displays the configuration values. No options"
-  }
+  trap trap_handler 1 2 3 6
 
-  main_action="show_config"
-  help_action="base_help"
-  info_text="Displays configuration options for debugging."
-  manpage="ucaresystem"
-  command_line_options=("$@")
+  # parse the command-line
+  FLAGS "$@" || exit $?
+  eval set -- "${FLAGS_ARGV}"
 
-  basic_setup
-
-  "${main_action}"
+  common_cmd_options
+  load_config_file
 
 fi

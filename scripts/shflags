@@ -1161,6 +1161,10 @@ flags_help() {
     done
   fi
 
+  if [ -n "${FLAGS_FOOTER:-}" ]; then
+    echo "${FLAGS_FOOTER}" >&2
+  fi
+
   unset flags_boolStr_ flags_default_ flags_defaultStr_ flags_emptyStr_ \
       flags_flagStr_ flags_help_ flags_helpStr flags_helpStrLen flags_name_ \
       flags_columns_ flags_short_ flags_type_ flags_usName_

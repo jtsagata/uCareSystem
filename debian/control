@@ -21,7 +21,6 @@ Depends: apt,
          deborphan,
          lsb-release,
          policykit-1,
-         util-linux (>= 2.0),
          sed (>= 1.0),
          distro-info,
          ${misc:Depends}

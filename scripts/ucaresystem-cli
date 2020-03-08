@@ -17,6 +17,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+read -rp "Does it run Yes/No? " yn
+
 set -eu
 UCARE_VERSION="4.5.0"
 base_dir=$(dirname "$0")
@@ -36,140 +39,12 @@ function welcome_screen() {
   fi
 }
 
-function action_upgrade_EOL() {
-  check_root_priv
-  curr_date=$(date +%F_%T)
-
-  new_codename=$(/usr/bin/ubuntu-distro-info --supported | tail -1)
-
-  header_text "Upgrade to EOL"
-  ${EXEC} "/etc/apt/sources.list" "/etc/apt/sources.eol_${curr_date}"
-  if [ "$EXEC" == "echo" ]; then
-    echo "...skiping updating /etc/apt/sources.list"
-  else
-    header_text "Updating /etc/apt/sources.list"
-    cat <<EOT >/etc/apt/sources.list
-deb http://old-releases.ubuntu.com/ubuntu/ $new_codename main restricted universe multiverse
-deb http://old-releases.ubuntu.com/ubuntu/ $new_codename-updates main restricted universe multiverse
-deb http://old-releases.ubuntu.com/ubuntu/ $new_codename-security main restricted universe multiverse
-
-EOT
-  fi
-
-  ${EXEC} ${SUDO} ${APT_GET} install update-manager-core
-  ${EXEC} ${SUDO} ${APT_GET} -y dist-upgrade
-  ${EXEC} ${SUDO} ${UPDATE_TOOL}
-  header_text "Done upgrade to EOL"
-}
-
-function action_upgrade() {
-  distribution_id=$(${LSB_RELEASE} --id | cut -f2)
-  codename=$(${LSB_RELEASE} --codename | cut -f2)
-
-  case "${distribution_id}" in
-  "Debian") do_debian_upgade "$1" ;;
-  "Ubuntu") do_ubuntu_upgade "$1" ;;
-  "LinuxMint")
-    echo "Linux Mint is unsupported. Please use the distro tool"
-    exit
-    ;;
-  *)
-    echo "Your distribution '${distribution_id}' is unsupported. Please do a pull request."
-    exit
-    ;;
-  esac
-
-}
-
-function do_ubuntu_upgrade() {
-  action="$1"
-  # Always ask
-  ask_yesno "Are you sure ?"
-  if [[ "${response}" == "no" ]]; then
-    exit 1
-  fi
-
-  case "$action" in
-  "next")
-    action_timeshift
-    action_upgrade_next
-    ;;
-  "development")
-    action_timeshift
-    action_upgrade_devel
-    ;;
-  "eol")
-    action_timeshift
-    action_upgrade_EOL
-    ;;
-  *)
-    echo "Error: unknown upgrade tag '$action'"
-    ;;
-  esac
-}
-
-function do_debian_upgrade() {
-  # TODO: Allow to set codename, test if given is newest
-  # TODO: Check if it is safe? (try to see if repo exist for PPAs etc.."
-
-  check_root_priv
-  curr_date=$(date +%F_%T)
-
-  codename=$(${LSB_RELEASE} --codename | cut -f2)
-  new_codename=$(debian-distro-info --supported | tail -1)
-
-  action_timeshift
-  action_maintain
-
-  header_text "Upgrade to $new_codename from $codename"
-
-  if [ "$EXEC" == "echo" ]; then
-    echo "...skiping updating /etc/apt/sources.list"
-  else
-    header_text "Backup /etc/apt/sources.list"
-    ${EXEC} cp "/etc/apt/sources.list" "/etc/apt/sources.${codename}_${curr_date}"
-    for file in /etc/apt/sources.list.d/*; do
-      ${EXEC} cp "$file" "${file}.${codename}_${curr_date}"
-    done
-
-    header_text "Updating /etc/apt/sources.list"
-    ${EXEC} ${SUDO} ${SED} -i "s/${codename}/${new_codename}/g" /etc/apt/sources.list
-    ${EXEC} ${SUDO} ${SED} -i "s/${codename}/${new_codename}/g" /etc/apt/sources.list.d/*.list
-  fi
-
-  action_maintain
-  ${EXEC} ${SUDO} apt dist-upgrade -y
-
-  header_text "Done upgrade to $new_codename from $codename"
-}
-
-function action_upgrade_next() {
-  if [ -x ${UPDATE_TOOL} ]; then
-    echo "Error missing ${UPDATE_TOOL}"
-    exit 1
-  fi
-
-  check_root_priv
-  header_text "Upgrade to next Release"
-  ${EXEC} ${UPDATE_TOOL}
-  header_text "Done upgrade to next Release"
-}
-
-function action_upgrade_devel() {
-  if [ -x ${UPDATE_TOOL} ]; then
-    echo "Error missing ${UPDATE_TOOL}"
-    exit 1
-  fi
-
-  check_root_priv
-  ${EXEC} ${UPDATE_TOOL} -d
-  header_text "Done upgrade to next Release"
-}
 
 
 ##
 ## The main process starts here
 ##
+
 
 MODE="${DEFAULT_MODE}"
 UPGRADE_MODE="next"
