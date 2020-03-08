@@ -9,8 +9,7 @@ Build-Depends:
     equivs,
     librsvg2-bin,
     shunit2,
-    boxes,
-    sed (>= 1.0)
+    boxes
 Standards-Version: 4.1.4
 Homepage: https://jtsagata.github.io/uCareSystem/
 Vcs-Browser: https://github.com/jtsagata/uCareSystem.git
@@ -20,12 +19,10 @@ Architecture: all
 Depends: apt,
          deborphan,
          lsb-release,
-         policykit-1,
-         sed (>= 1.0),
          distro-info,
          ${misc:Depends}
 Suggests: timeshift,
-          systemd
+          systemd, policykit-1
 Description: All-in-one System Update and maintenance tool
  This simple script will automatically refresh your packagelist,
  download and install software updates (if there are any), remove old
