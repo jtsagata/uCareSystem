@@ -58,7 +58,7 @@ DEFAULT_VALUES=(
   [AUTO_REBOOT]=false
   [AUTO_REBOOT_TIMEOUT]=10
   [ASK_CONFIRM]=ASK_CONFIRM
-  [ENABLE_TIMESHIFT]=ENABLE_TIMESHIFT
+  [ENABLE_TIMESHIFT]=auto
   [ENABLE_TOPGRADE]=ENABLE_TOPGRADE
   [CONFIG_FILE]=/etc/ucaresystem.conf
   [EXEC]=yes_opp
@@ -239,6 +239,7 @@ function setup_colors() {
 # Trap Handler
 #
 function trap_handler() {
+  #TODO: Remove systemd file (if there you have sudo)
   header_text "Program interrupt."
   echo "  The program have stop before finished. Your system maybe in an incomplete state."
   echo "  You may need to do:"
@@ -280,7 +281,7 @@ function show_config() {
   done
 
   echo
-  echo "Please do not worry about --BAD EXECUTABLE-- if you haven'y change them in your config file."
+  echo "Please do not worry about --BAD EXECUTABLE-- if you haven't change them in your config file."
 
   exit 0
 }
@@ -312,7 +313,8 @@ function common_cmd_options() {
       show_version
       shift
       ;;
-    "-s" | "--show_config")
+    "-s" | "--show-config")
+      load_config_file
       show_config
       shift
       ;;
