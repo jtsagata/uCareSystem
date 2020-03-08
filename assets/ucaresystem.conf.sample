@@ -1,13 +1,35 @@
 #!/bin/bash
-
 #
 # Edit and put copy of this file at
 # /etc/ucaresystem.conf
 #
 
+#
+# GUI options
+#
+#X_TERMINAL="what"
+#X_TERMINAL_OPTIONS="--empty--"
+
+#X_TERMINAL="kitty" #suggested
+#X_TERMINAL_OPTIONS="--name  ucaresystem --title uCareSystem --detach --hold "
+
+
+#X_TERMINAL="st"
+#X_TERMINAL_OPTIONS="-t uCareSystem"
+
+#X_TERMINAL="Eterm" #suggested
+#X_TERMINAL_OPTIONS="--name  uCareSystem --pause --finished-title 'uCareSystem is Done' --buttonbar 0  --scrollbar false --exec"
+
+
+#X_TERMINAL="xterm" #also uxterm (suggested)
+#X_TERMINAL_OPTIONS="-name  ucaresystem -title uCareSystem -e"
+
+#X_TERMINAL="alacritty"
+#X_TERMINAL_OPTIONS="-t uCareSystem --hold -e"
+
 # Default mode
 # valid values are: "maintain", "upgrade","cleanup"
-# DEFAULT_MODE="maintain"
+DEFAULT_MODE="cleanup"
 
 # Enable STimeshift
 ENABLE_TIMESHIFT=true
@@ -27,10 +49,6 @@ ENABLE_TIMESHIFT=true
 
 # Time to wait after each action
 # WAIT_ACTION=0
-
-# GUI options
-X_TERMINAL="/usr/bin/uxterm"
-#X_TERMINAL_OPTS=""
 
 # Disable colors
 #NO_COLOR=true

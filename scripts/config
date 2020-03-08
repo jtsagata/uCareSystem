@@ -17,7 +17,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-lib_dir=$(dirname "$_")
+lib_dir=$(dirname "$0")
 # shellcheck source=shflags
 source "${lib_dir}/shflags"
 
@@ -50,8 +50,8 @@ EXECUTABLES=(
   [UPDATE_TOOL]=/usr/bin/do-release-upgrade:optional
   [TIMESHIFT]=/usr/bin/timeshift:optional
   [TOPGRADE]="${HOME}/.cargo/bin/topgrade":optional
-  [X_TERMINAL]=-:optional
-  [X_SUDO_RUNNER]=-:optional
+  [X_TERMINAL]=/usr/bin/gnome-terminal:optional
+  [X_SUDO_RUNNER]=/usr/bin/pkexec:optional
 )
 
 # Default config_options
@@ -67,7 +67,7 @@ DEFAULT_VALUES=(
   [ENABLE_TOPGRADE]=false
   [CONFIG_FILE]=/etc/ucaresystem.conf
   [EXEC]=yes_opp
-  [X_TERMINAL_OPTIONS]=""
+  [X_TERMINAL_OPTIONS]="--hide-menubar --title='uCareSystem' --wait --"
   [BANNER_FILE]="$(dirname "$0")/support/banner.txt"
   [DISTRIBUTION_ID]="$(lsb_release --short --id)"
   [DISTRIBUTION_CODENAME]="$(lsb_release --codename --short)"
@@ -193,9 +193,8 @@ function load_config_file() {
   fi
 
   if [ -r "$CONFIG_FILE" ]; then
-    # TODO: Investigate ${parameter@operator}, operator=A
     vars_file=$(mktemp "${TMPDIR:-/tmp/}ucaresystem-vars-XXX.sh")
-    /usr/bin/awk -F= '/^[A-Z_]*=/ {printf "declare -g %s=%s\n", $1, $2}' "$CONFIG_FILE" >"${vars_file}"
+    /usr/bin/awk -F= '/^([A-Z_]*)=(.*)$/ {printf "declare -g %s\n", $0}' "$CONFIG_FILE" >"${vars_file}"
     # shellcheck disable=SC1090
     source "${vars_file}"
     rm "${vars_file}"
@@ -205,6 +204,7 @@ function load_config_file() {
   for v in "${!DEFAULT_VALUES[@]}"; do
     # shellcheck disable=SC2229
     [[ -z ${!v} ]] && IFS= read -r "${v}" <<<"${DEFAULT_VALUES[$v]}"
+    [[ ${!v} == "--empty--" ]] && eval "unset ${v}"
   done
 
   # Programs used
@@ -258,6 +258,7 @@ function no_opp() {
   echo + "$@"
 }
 function yes_opp() {
+  #TODO: propagate $?
   set -x
   "$@"
   { set +x; } 2>/dev/null
@@ -332,43 +333,56 @@ function common_cmd_options() {
     exit 0
   fi
 
-    # shellcheck disable=SC2154
+  #TODO: Hook for extension
+
+  # shellcheck disable=SC2154
   if [[ "${FLAGS_show_config}" == "${FLAGS_TRUE}" ]]; then
+    load_config_file
     show_config "${FLAGS_config_sections}"
     exit 0
   fi
 
 }
 
+function setup_common_flags() {
+  # Common Flags
+  DEFINE_boolean 'version' false 'Show program version' 'v'
+  DEFINE_boolean 'dryrun' false 'Do not change anything in system' 'd'
+  DEFINE_string 'config' "<file>" 'Specify a config file'
+  DEFINE_boolean 'show-config' false 'Show configuration' 'c'
+  DEFINE_string 'config-sections' "all" 'Configuration sections to show'
+}
+
+
 setup_colors
 # Setup HELP SYSTEM
 # shellcheck disable=SC2034
 read -r -d '' FLAGS_HELP <<EOHELP
 ${GREEN}ucaresystem${NORMAL} : (config) All-in-one system update and maintenance tool
-  Displays the configuration values. No options
   ucaresystem version ${UCARE_VERSION}.
 EOHELP
 # shellcheck disable=SC2034
 FLAGS_FOOTER="Type 'man ucaresystem' for more info."
 
-# Common Flags
-DEFINE_boolean 'version' false 'Show program version' 'v'
-DEFINE_boolean 'dryrun' false 'Do not change anything in system' 'd'
-DEFINE_string 'config' "<file>" 'Specify a config file'
-DEFINE_boolean 'show-config' false 'Show configuration' 'c'
-DEFINE_string 'config-sections' "all" 'Configuration sections to show'
-
 #
 # Standalone
 #
 if [[ "${FUNCNAME[0]}" != source ]]; then
+read -r -d '' FLAGS_HELP <<EOHELP
+${GREEN}ucaresystem${NORMAL} : (config) All-in-one system update and maintenance tool
+  Displays the configuration values. No options
+  ucaresystem version ${UCARE_VERSION}.
+EOHELP
+
   trap trap_handler 1 2 3 6
 
   # parse the command-line
+  setup_common_flags
   FLAGS "$@" || exit $?
   eval set -- "${FLAGS_ARGV}"
 
   common_cmd_options
   load_config_file
 
+  show_config "all"
 fi

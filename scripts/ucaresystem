@@ -17,80 +17,40 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # lib_dir will change to point at /usr/lib/ucaresystem during packaging
-lib_dir=$(dirname "$(dirname "$_")")
+lib_dir=$(dirname "$0")
 # shellcheck source=config
 source "${lib_dir}/config"
+trap trap_handler 1 2 3 6
 
-#
-# Show help
-#
-function ucaresystem_help() {
-  cat <<EOF
-Usage:
-  sudo ucaresystem [options]
-  ucaresystem --help|--version
-
-MODES
-   -m, --maintain
-      Do normal maintenance jobs. The default action id no option is given.
-   -c, --clean
-      reclaim some disk space
-   -u type, --upgrade=type
-          Upgrade ...
-OTHER OPTIONS
-  -n, --dyrun
-    Show only the commands, but do not modify the system
-  -y, --yes
-    Don't ask for confirmation
-  -h, --help
-    Display this help text
-  -v, --version
-    Display program version and exits
-  -s, --skip
-    Do not show the welcome header_text, and do not pause.
-  -w, --wait
-    Press ENTER to end the program. For the "gui" version
-RUNNERS
-  --cli
-    Run the cli version
-  --xterm
-    Run the xterm version
-
-#TODO: Fix
-EOF
+function dummy_runner() {
+  "$@"
+  return $?
 }
 
-#
-# Begin script
-#
+DEFINE_string 'runner' "cli" 'Specify which version (cli,gui)'
 
-# shellcheck disable=SC2034
-info_text="Delegates to cli or gui version."
-# shellcheck disable=SC2034
-command_line_options=("$@")
-# shellcheck disable=SC2034
-help_action="ucaresystem_help"
-# shellcheck disable=SC2034
-manpage="ucaresystem"
+# parse the command-line
+setup_common_flags
+FLAGS "$@" || exit $?
+eval set -- "${FLAGS_ARGV}"
 
-basic_setup
+common_cmd_options
+load_config_file
 
-dispatch="cli"
-for opt in "$@"; do
-  case "${opt}" in
-  "--cli")
-    shift
-    ;;
-  "--gui")
-    dispatch="xterm"
-    shift
-    ;;
-  "--xterm")
-    dispatch="xterm"
-    shift
-    ;;
-  esac
-done
+declare -A use_runners
+declare -A use_dispatch
 
-"${lib_dir}/ucaresystem-${dispatch}" "$*"
+use_runners=([cli]="dummy_runner" [gui]="${X_SUDO_RUNNER}" [xterm]="${X_SUDO_RUNNER}")
+use_dispatch=([cli]="cli" [gui]="xterm" [xterm]="xterm")
+
+runner=${use_runners[${FLAGS_runner}]}
+if [[ -z $runner ]]; then
+  echo "${RED}Error${NORMAL}: Bad runner option '${FLAGS_runner}'."
+  exit 2
+fi
+
+dispatch=${use_dispatch[${FLAGS_runner}]}
+executable="${lib_dir}/ucaresystem-${dispatch}"
+
+"$runner" "$executable" "$*"
 exit $?

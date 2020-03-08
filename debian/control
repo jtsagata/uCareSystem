@@ -20,9 +20,12 @@ Depends: apt,
          deborphan,
          lsb-release,
          distro-info,
+         policykit-1,
          ${misc:Depends}
 Suggests: timeshift,
-          systemd, policykit-1
+          systemd,
+          eterm,
+          kitty
 Description: All-in-one System Update and maintenance tool
  This simple script will automatically refresh your packagelist,
  download and install software updates (if there are any), remove old

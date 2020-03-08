@@ -12,7 +12,7 @@ for s in "${main_scripts[@]}"; do
   cp "${dir_name}/scripts/$s" "$DESTDIR/usr/bin/"
   # Fix library path
   # shellcheck disable=SC2016
-  new_lib_dir='"$(realpath "$(dirname "$_")/../lib/ucaresystem")"'
+  new_lib_dir='"$(realpath "$(dirname "${BASH_SOURCE[0]}")/../lib/ucaresystem")"'
   sed -ri "s@^(lib_dir=)(.*)@\1${new_lib_dir}@g" "$DESTDIR/usr/bin/$s"
 done
 
@@ -21,6 +21,10 @@ libraries=("config" "ucaresystem-cli" "ucaresystem-xterm" "task_cleanup" "task_c
 mkdir -p "$DESTDIR/usr/lib/ucaresystem"
 for s in "${libraries[@]}"; do
   cp "${dir_name}/scripts/$s" "$DESTDIR/usr/lib/ucaresystem"
+  # Fix library path
+  # shellcheck disable=SC2016
+  new_lib_dir='"$(realpath "$(dirname "${BASH_SOURCE[0]}")")"'
+  sed -ri "s@^(lib_dir=)(.*)@\1${new_lib_dir}@g" "$DESTDIR/usr/lib/ucaresystem/$s"
 done
 
 ## Update VERSION NUMBER

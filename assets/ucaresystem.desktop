@@ -4,7 +4,7 @@ Type=Application
 Comment=All in one system maintenance
 Comment[el]=Αναβάθμιση όλα σε ένα
 Icon=ucaresystem
-Exec=ucaresystem --xterm
+Exec=ucaresystem --runner=xterm
 Terminal=false
 Categories=GNOME;GTK;System;
 Keywords==package;apt;dpkg;install;clean

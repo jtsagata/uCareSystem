@@ -15,8 +15,8 @@
       <allow_inactive>no</allow_inactive>
       <allow_active>auth_admin_keep</allow_active>
     </defaults>
-    <!-- This policy is missing so allow to run x-terminal-emulator -->
-    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/x-terminal-emulator</annotate>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/lib/ucaresystem/ucaresystem-xterm</annotate>
+    <!-- Give access to X11/Wayland -->
     <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
     </action>
 </policyconfig>

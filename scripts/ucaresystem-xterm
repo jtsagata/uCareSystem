@@ -17,36 +17,22 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-base_dir=$(dirname "$0")
-# shellcheck source=base
-source "${base_dir}"/config
+# lib_dir will change to point at /usr/lib/ucaresystem during packaging
+lib_dir=$(dirname "$0")
+# shellcheck source=config
+source "${lib_dir}/config"
+trap trap_handler 1 2 3 6
 
-function command_help() {
-   echo "The pseudo-gui version of the ucaresystem"
-}
+# parse the command-line
+setup_common_flags
+FLAGS "$@" || exit $?
+eval set -- "${FLAGS_ARGV}"
 
-# shellcheck disable=SC2034
-info_text="ucaresystem: pseudo-gui version."
-# shellcheck disable=SC2034
-command_line_options=("$@")
-# shellcheck disable=SC2034
-help_action="command_help"
-# shellcheck disable=SC2034
-manpage="ucaresystem"
-basic_setup
+common_cmd_options
+load_config_file
 
+executable="${lib_dir}/ucaresystem-cli"
 
-#
-# Possible runners
-#
-
-
-
-echo /usr/bin/pkexec  \
-  "${X_TERMINAL}" \
-  -title 'uCareSystem Core'  \
-  "${X_TERMINAL_OPTIONS}" \
-  -e "${base_dir}/ucaresystem-cli" \
-  "$*" --wait -hold
-
-exit $?
+# shellcheck disable=SC2086
+"${X_TERMINAL}" ${X_TERMINAL_OPTIONS} "${executable}"  $* --wait-gui &
+exit

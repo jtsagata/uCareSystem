@@ -16,6 +16,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+set -e
+
 param=$1
 SIGN_BY="tsagatakis@protonmail.com"
 
@@ -33,10 +35,12 @@ fi
 #
 # Make Debian package
 #
+# shellcheck disable=SC2034
+DEBUILD_DPKG_BUILDPACKAGE_OPTS="--build=full"
 if [[ $param == "--sign" ]]; then
-  debuild -F -k${SIGN_BY} --force-sign
+  debuild -k${SIGN_BY} --force-sign
 else
-  debuild -F
+  debuild
 fi
 
 ## move source artifacts
@@ -50,7 +54,8 @@ mk-build-deps "${top_dir}/debian/control"
 mv "ucaresystem-build-deps_${VERSION}_all.deb" ${ARTIFACTS}
 
 if [[ ! $param == "--travis" ]]; then
-  read -rp "Install package? Yes/No " yn
+  read -t 10 -n 1 -rp "Install package? Yes/No " yn
+  echo "Give me give me give me your root"
   case $yn in
     [Yy]* )
       sudo dpkg -i "dist/ucaresystem_${VERSION}_all.deb"
