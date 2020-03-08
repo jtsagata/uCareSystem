@@ -57,6 +57,12 @@ mv "../ucaresystem_${VERSION}"*.* ${ARTIFACTS}
 mv "ucaresystem-build-deps_${VERSION}_all.deb" ${ARTIFACTS}
 
 
-#echo "Enter root password to install package"
-#sudo dpkg -i dist/ucaresystem_4.5.0_all.deb
-
+if [[ ! $param == "--travis" ]]; then
+  read -rp "Install package? Yes/No " yn
+  case $yn in
+    [Yy]* )
+      sudo dpkg -i "dist/ucaresystem_${VERSION}_all.deb"
+      ucaresystem --version
+    ;;
+  esac
+fi

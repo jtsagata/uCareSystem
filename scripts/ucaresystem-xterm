@@ -17,22 +17,30 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-set -eu
-UCARE_VERSION="4.5.0"
 base_dir=$(dirname "$0")
 # shellcheck source=base
 source "${base_dir}"/config
+
+function command_help() {
+   echo "The pseudo-gui version of the ucaresystem"
+}
+
+# shellcheck disable=SC2034
+info_text="ucaresystem: pseudo-gui version."
+# shellcheck disable=SC2034
+command_line_options=("$@")
+# shellcheck disable=SC2034
+help_action="command_help"
+# shellcheck disable=SC2034
+manpage="ucaresystem"
+
 basic_setup
 
-terms=(x-terminal-emulator gnome-terminal konsole  i3-sensible-terminal uxterm xterm rxvt)
-for t in ${terms[*]}
-do
-    if [ $(command -v "$t") ]
-    then
-        detected_term=$t
-        break
-    fi
-done
+/usr/bin/pkexec  \
+  "${X_TERMINAL}" \
+  -title 'uCareSystem Core'  \
+  "${X_TERMINAL_OPTIONS}" \
+  -e "${base_dir}/ucaresystem-cli" \
+  "$*" --wait
 
-
-/usr/bin/pkexec  $(which "${detected_term}") -title 'uCareSystem Core'  -e ucaresystem --wait
+exit $?

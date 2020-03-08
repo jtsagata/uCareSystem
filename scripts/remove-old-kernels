@@ -18,11 +18,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-UCARE_VERSION="4.5.0"
-
 base_dir=$(dirname "$0")
+# lib_dir will change to point at /usr/lib/ucaresystem during packaging
+lib_dir=$(dirname "$0")
 # shellcheck source=base
-source "${base_dir}"/config
+source "${lib_dir}"/config
+
 basic_setup
 
 # NOTE: This script will ALWAYS keep the currently running kernel

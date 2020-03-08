@@ -16,25 +16,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set -e
-UCARE_VERSION="4.5.0"
 base_dir=$(dirname "$0")
+# lib_dir will change to point at /usr/lib/ucaresystem during packaging
+lib_dir=$(dirname "$0")
 # shellcheck source=base
-source "${base_dir}"/config
-basic_setup
-
-show_help=false
-dispach="cli"
-
-
+source "${lib_dir}/config"
 
 #
 # Show help
 #
-function show_help() {
+function ucaresystem_help() {
   cat <<EOF
-uCareSystem Core $UCARE_VERSION : All-in-one system update and maintenance tool
-
 Usage:
   sudo ucaresystem [options]
   ucaresystem --help|--version
@@ -65,50 +57,51 @@ RUNNERS
   --xterm
     Run the xterm version
 
-See man page for more info
+#TODO: Fix
 EOF
-  exit
 }
 
-# Store options
-opts=$@
+#
+# Begin script
+#
 
+# shellcheck disable=SC2034
+info_text="Delegates to cli or gui version."
+# shellcheck disable=SC2034
+command_line_options=("$@")
+# shellcheck disable=SC2034
+help_action="ucaresystem_help"
+# shellcheck disable=SC2034
+manpage="ucaresystem"
+
+basic_setup
+
+dispatch="cli"
 for opt in "$@"; do
   case "${opt}" in
   "--cli")
     shift
     ;;
+  "--gui")
+    dispatch="xterm"
+    shift
+    ;;
   "--xterm")
-    dispach="xterm"
-    shift
-    ;;
-  "-h" | "--help" )
-    show_help
-    shift
-    ;;
-  "-v" | "--version" )
-    show_version
+    dispatch="xterm"
     shift
     ;;
   esac
 done
 
-# Remove options that already have been handled
-delete_options=("--help" "--version" "--cli" "--xterm")
-for del in "${delete_options[@]}"; do
-   opts=("${opts[@]/${del}}")
-done
-
 # Delegate to tool
-case "${dispach}" in
+case "${dispatch}" in
 "cli")
-  "${base_dir}/${lib_dir}"/ucaresystem-cli ${opts[@]}
-  exit $?
+  extra_opts=""
   ;;
 "xterm")
-  "${base_dir}/${lib_dir}"/ucaresystem-xterm --wait ${opts[@]}
-  exit $?
+  extra_opts="--wait"
   ;;
 esac
 
-exit 1
+"${lib_dir}/ucaresystem-${dispatch}" "${extra_opts}" "$*"
+exit $?

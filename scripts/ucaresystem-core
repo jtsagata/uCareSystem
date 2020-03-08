@@ -17,11 +17,16 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set -eu
-
 if [[ "$(basename "$0")" == *"core"* ]]; then
   echo "Warning: command name is now just 'ucaresystem' ucaresystem-core will be removed in next release."
 fi
+
+wait=10
+while [[ $wait != 0 ]]; do
+  echo "Wait ${wait} secs, or cancel and type the new command ..."
+  sleep 1
+  wait="$(( wait - 1 ))"
+done
 
 $(dirname "$0")/ucaresystem "$@"
 

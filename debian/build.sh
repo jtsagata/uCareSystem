@@ -10,7 +10,9 @@ main_scripts=("remove-old-kernels" "ucaresystem" "ucaresystem-core")
 mkdir -p "$DESTDIR/usr/bin"
 for s in "${main_scripts[@]}"; do
   cp "${dir_name}/scripts/$s" "$DESTDIR/usr/bin/"
-  new_lib_dir='"../lib/ucaresystem"'
+  # Fix library path
+  # shellcheck disable=SC2016
+  new_lib_dir='"${base_dir}/../lib/ucaresystem"'
   sed -ri "s@^(lib_dir=)(.*)@\1${new_lib_dir}@g" "$DESTDIR/usr/bin/$s"
 done
 

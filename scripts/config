@@ -17,6 +17,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+set +u
+
 ## Ensure this file can only be sourced once
 base_loaded=${base_loaded:-}
 if [[ -n ${base_loaded} ]]; then
@@ -60,6 +62,7 @@ DEFAULT_VALUES=(
   [ENABLE_TOPGRADE]=ENABLE_TOPGRADE
   [CONFIG_FILE]=/etc/ucaresystem.conf
   [EXEC]=yes_opp
+  [X_TERMINAL_OPTIONS]=""
 )
 
 #
@@ -295,7 +298,8 @@ function show_version() {
 #
 # shellcheck disable=SC2120
 function common_cmd_options() {
-  ARGS=$(getopt -a -o hvdc:s --long config:,help,version,dryrun,show-config -- "$command_line_options")
+  command_line_options=${command_line_options:-}
+  ARGS=$(getopt --quiet -a -o hvdc:s --long config:,help,version,dryrun,show-config -- "$command_line_options")
   eval set -- "$ARGS"
 
   while true; do
@@ -353,11 +357,10 @@ function help_header() {
 }
 
 function help_footer() {
-  executable=$(basename "${0}")
-
-  man_page="/usr/share/man/man8/${executable}.8.gz"
-  if [[ -f $man_page ]]; then
-    echo "Type 'man ${executable}' for more info."
+  # shellcheck disable=SC2154
+  the_man_page="/usr/share/man/man8/${manpage}.8.gz"
+  if [[ -f $the_man_page ]]; then
+    echo "Type 'man ${manpage}' for more info."
   fi
 }
 
@@ -372,6 +375,7 @@ if [[ "${FUNCNAME[0]}" != source ]]; then
   main_action="show_config"
   help_action="base_help"
   info_text="Displays configuration options for debugging."
+  manpage="ucaresystem"
   command_line_options=("$@")
 
   basic_setup
