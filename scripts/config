@@ -40,6 +40,7 @@ EXECUTABLES=(
   [SUDO]=/usr/bin/sudo:fixed
   [PS]=/bin/ps:fixed
   [XARGS]=/usr/bin/xargs:fixed
+  [DATE]=/bin/date:fixed
   [APT_GET]=/usr/bin/apt-get:required
   [DEBORPHAN]=/usr/bin/deborphan:required
   [LSB_RELEASE]=/usr/bin/lsb_release:required
@@ -65,7 +66,14 @@ DEFAULT_VALUES=(
   [EXEC]=yes_opp
   [X_TERMINAL_OPTIONS]=""
   [BANNER_FILE]="$(dirname "$0")/support/banner.txt"
+  [DISTRIBUTION_ID]="$(lsb_release --short --id)"
+  [DISTRIBUTION_CODENAME]="$(lsb_release --codename --short)"
+
 )
+
+#DISTRIBUTION_ID=$(${LSB_RELEASE} --id --short)
+## --shellcheck disable=SC2034
+#DISTRIBUTION_CODENAME=$(${LSB_RELEASE} --codename --short)
 
 #
 # Display a header text
@@ -207,12 +215,6 @@ function load_config_file() {
       exit 2
     fi
   done
-
-  # Get basic distribution information
-  # shellcheck disable=SC2034
-  DISTRIBUTION_ID=$(${LSB_RELEASE} --id | cut -f2)
-  # shellcheck disable=SC2034
-  DISTRIBUTION_CODENAME=$(${LSB_RELEASE} --codename | cut -f2)
 }
 
 #
@@ -263,6 +265,7 @@ function yes_opp() {
 # Show the configuration
 #
 function show_config() {
+  #TODO: Add an option to filter values (Priority Low)
   help_header
 
   echo
@@ -276,10 +279,18 @@ function show_config() {
   echo
   echo "*** Programs used ***"
   for prog in "${!EXECUTABLES[@]}"; do
+    IFS=':' read -ra split <<< "${EXECUTABLES[$prog]}"
+    local default_path="${split[0]}"
+    local category="${split[1]}"
+    declare -A category_labels
+    category_labels=([fixed]='F' [required]='R' [optional]='~')
+
+    echo -n "${category_labels[$category]}:"
     echo -n "${GREEN}$prog${NORMAL}=${!prog}"
     ok_var="HAVE_${prog}"
-    [[ "${!ok_var}" == "true" ]] && echo " ${GREEN}--OK--${NORMAL}"
-    [[ "${!ok_var}" == "false" ]] && echo " ${RED}--BAD EXECUTABLE--${NORMAL}"
+    [[ ! "${!prog}" == "${default_path}" ]] && echo -n " ${GREEN}--Changed--${NORMAL}"
+    [[ "${!ok_var}" == "false" ]] && echo -n " ${RED}--BAD EXECUTABLE--${NORMAL}"
+    echo
   done
 
   echo
