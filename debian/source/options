@@ -1,7 +1,12 @@
+# Bzip2 compression for debian.tar
+compression = "bzip2"
+compression-level = 7
+
 # Exclude some files from source build
 tar-ignore = ".travis.yml"
 tar-ignore = ".git"
 tar-ignore = ".idea"
+tar-ignore = ".github"
 tar-ignore = ".gitignore"
 tar-ignore = "README.md"
 tar-ignore = "dist"

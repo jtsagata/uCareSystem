@@ -59,7 +59,7 @@ message4="If you have install the package from PPA download and install both deb
 ${HUB} release create --prerelease \
       --attach "dist/ucaresystem_${DEB_VERSION}_all.deb" \
       --attach "dist/ucaresystem-core_${DEB_VERSION}_all.deb" \
-      --attach "dist/ucaresystem_${DEB_VERSION}.tar.xz" \
+      --attach "dist/ucaresystem_${DEB_VERSION}.tar.bz2" \
       --attach "dist/ucaresystem_${DEB_VERSION}.dsc" \
       --attach "dist/ucaresystem_${DEB_VERSION}_amd64.buildinfo" \
       --attach "dist/ucaresystem_${DEB_VERSION}_amd64.changes" \

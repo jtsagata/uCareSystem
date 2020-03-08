@@ -19,11 +19,8 @@
 param=$1
 SIGN_BY="tsagatakis@protonmail.com"
 
-ARTIFACTS="dist"
 top_dir="$(git rev-parse --show-toplevel)"
 cd "$top_dir" || exit
-
-VERSION=$(grep "Standards-Version" "${top_dir}/debian/control" | awk '{print $2}')
 
 # hack for travis
 if [[ $param == "--travis" ]]; then
@@ -31,8 +28,6 @@ if [[ $param == "--travis" ]]; then
   sudo apt-get update
   sudo apt-get install -y devscripts equivs lintian
   sudo mk-build-deps --install "${top_dir}/debian/control"
-else
-  mk-build-deps "${top_dir}/debian/control"
 fi
 
 #
@@ -44,18 +39,15 @@ else
   debuild -F
 fi
 
-# Parse changelog to get latest version
+## move source artifacts
 VERSION=$(dpkg-parsechangelog -S Version)
-
-#
-# move source artifacts
-#
+ARTIFACTS="dist"
 mkdir -p ${ARTIFACTS}
 rm -f ${ARTIFACTS}/*
 mv ../ucare*.deb ${ARTIFACTS}
 mv "../ucaresystem_${VERSION}"*.* ${ARTIFACTS}
+mk-build-deps "${top_dir}/debian/control"
 mv "ucaresystem-build-deps_${VERSION}_all.deb" ${ARTIFACTS}
-
 
 if [[ ! $param == "--travis" ]]; then
   read -rp "Install package? Yes/No " yn

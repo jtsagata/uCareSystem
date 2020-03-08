@@ -66,7 +66,7 @@ mv docs/ronn/*.8 "$DESTDIR/usr/share/man/man8"
 ## Systemd-inhibit
 mkdir -p "$DESTDIR/lib/systemd/system/"
 cp assets/ucaresystem-automation-cleanup.service "$DESTDIR/lib/systemd/system/"
-mkdir -p mkdir -p "$DESTDIR/usr/lib/ucaresystem/automation"
+mkdir -p "$DESTDIR/usr/lib/ucaresystem/automation"
 cp assets/99-ucaresystem-temporary.pkla "$DESTDIR/usr/lib/ucaresystem/automation"
 
 ## Banner

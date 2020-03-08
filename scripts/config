@@ -28,7 +28,8 @@ fi
 base_loaded=true
 
 # Set the version from Debian changelog
-UCARE_VERSION="4.5.0"
+# The build system will replace this with the actual version
+UCARE_VERSION="$(dpkg-parsechangelog -S Version)"
 
 # Default program paths
 declare -A EXECUTABLES
@@ -57,9 +58,9 @@ DEFAULT_VALUES=(
   [DEFAULT_MODE]=maintain
   [AUTO_REBOOT]=false
   [AUTO_REBOOT_TIMEOUT]=10
-  [ASK_CONFIRM]=ASK_CONFIRM
+  [ASK_CONFIRM]=true
   [ENABLE_TIMESHIFT]=auto
-  [ENABLE_TOPGRADE]=ENABLE_TOPGRADE
+  [ENABLE_TOPGRADE]=false
   [CONFIG_FILE]=/etc/ucaresystem.conf
   [EXEC]=yes_opp
   [X_TERMINAL_OPTIONS]=""
