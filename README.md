@@ -83,6 +83,17 @@ and operates in `btrfs` mode. We recommend to install and enable timeshift.
 
 To enable timeshift in `rsync` mode set the option `ENABLE_TIMESHIFT=yes`  
   
+## Reboots 
+Can configure automatic reboots (more...)
+
+During sensitive operation ucaresystem will try to prevent you from rebooting. 
+The reboot lock will hide the reboot and shutdown action from your graphical environment.
+This is not perfect and you can override this.   
+
+To restore the reboot functionality in case of an error remove the file 
+`'/etc/polkit-1/localauthority/90-mandatory.d/99-ucaresystem-temporary.pkla'`.
+A systemd service is provided to delete this file on reboot.
+  
 ## Topgrade integration
 
 ## Cleanup kernels

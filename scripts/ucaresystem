@@ -24,11 +24,6 @@ share_dir="$(dirname "$0")/../assets"
 source "${lib_dir}/config"
 trap trap_handler 1 2 3 6
 
-function dummy_runner() {
-  "$@"
-  return $?
-}
-
 DEFINE_string 'runner' "cli" 'Specify which version (cli,gui)'
 
 # parse the command-line
@@ -42,7 +37,7 @@ load_config_file
 declare -A use_runners
 declare -A use_dispatch
 
-use_runners=([cli]="dummy_runner" [gui]="${X_SUDO_RUNNER}" [xterm]="${X_SUDO_RUNNER}")
+use_runners=([cli]="run_opp" [gui]="${X_SUDO_RUNNER}" [xterm]="${X_SUDO_RUNNER}")
 use_dispatch=([cli]="cli" [gui]="xterm" [xterm]="xterm")
 
 runner=${use_runners[${FLAGS_runner}]}

@@ -148,6 +148,20 @@ function check_root_priv() {
 }
 
 #
+# Disallow/allow power management and reboots
+#
+function disable_reboot() {
+  local pkla_file="${share_dir}/99-ucaresystem-temporary.pkla"
+  local dest="/etc/polkit-1/localauthority/90-mandatory.d/99-ucaresystem-temporary.pkla"
+  sudo cp "$pkla_file" "$dest"
+}
+
+function enable_reboot() {
+  local dest="/etc/polkit-1/localauthority/90-mandatory.d/99-ucaresystem-temporary.pkla"
+  sudo rm "$dest"
+}
+
+#
 # Set executable
 # usage set_executable VAR path type required|optional|fixed
 #
@@ -250,7 +264,10 @@ function setup_colors() {
 # Trap Handler
 #
 function trap_handler() {
-  #TODO: Remove systemd file (if there you have sudo)
+  #Remove systemd file (if its there you can sudo)
+  local dest="/etc/polkit-1/localauthority/90-mandatory.d/99-ucaresystem-temporary.pkla"
+  [[ -f "${dest}" ]] && sudo rm "$dest"
+
   header_text "Program interrupt."
   echo "  The program have stop before finished. Your system maybe in an incomplete state."
   echo "  You may need to do:"
@@ -258,7 +275,10 @@ function trap_handler() {
   exit 1
 }
 
-# hack for  EXEC=
+
+#
+# Runner to support dry run
+#
 function no_opp() {
   echo + "$@"
 }
@@ -267,6 +287,12 @@ function yes_opp() {
   set -x
   "$@"
   { set +x; } 2>/dev/null
+}
+
+function run_opp() {
+  #TODO: propagate $?
+  "$@"
+  return $?
 }
 
 #
@@ -334,6 +360,7 @@ function common_cmd_options() {
   [[ ! ${FLAGS_config} == "<file>" ]] && CONFIG_FILE="${FLAGS_config}"
 
   # shellcheck disable=SC2154
+  # shellcheck disable=SC2034
   [[  "${FLAGS_disable_timeshift}" == "${FLAGS_TRUE}" ]] && ENABLE_TIMESHIFT="false"
 
   # shellcheck disable=SC2154
