@@ -10,10 +10,16 @@ main_scripts=("remove-old-kernels" "ucaresystem" "ucaresystem-core")
 mkdir -p "$DESTDIR/usr/bin"
 for s in "${main_scripts[@]}"; do
   cp "${dir_name}/scripts/$s" "$DESTDIR/usr/bin/"
-  # Fix library path
+
+  # Fix library paths
+
   # shellcheck disable=SC2016
   new_lib_dir='"$(realpath "$(dirname "${BASH_SOURCE[0]}")/../lib/ucaresystem")"'
   sed -ri "s@^(lib_dir=)(.*)@\1${new_lib_dir}@g" "$DESTDIR/usr/bin/$s"
+
+  # shellcheck disable=SC2016
+  new_share_dir='"$(realpath "$(dirname "${BASH_SOURCE[0]}")/../share/ucaresystem")"'
+  sed -ri "s@^(share_dir=)(.*)@\1${new_share_dir}@g" "$DESTDIR/usr/bin/$s"
 done
 
 ## Copy Libraries
@@ -21,10 +27,16 @@ libraries=("config" "ucaresystem-cli" "ucaresystem-xterm" "task_cleanup" "task_c
 mkdir -p "$DESTDIR/usr/lib/ucaresystem"
 for s in "${libraries[@]}"; do
   cp "${dir_name}/scripts/$s" "$DESTDIR/usr/lib/ucaresystem"
-  # Fix library path
+
+  # Fix library paths
+
   # shellcheck disable=SC2016
   new_lib_dir='"$(realpath "$(dirname "${BASH_SOURCE[0]}")")"'
   sed -ri "s@^(lib_dir=)(.*)@\1${new_lib_dir}@g" "$DESTDIR/usr/lib/ucaresystem/$s"
+
+  # shellcheck disable=SC2016
+  new_share_dir='"$(realpath "$(dirname "${BASH_SOURCE[0]}")/../../share/ucaresystem")"'
+  sed -ri "s@^(share_dir=)(.*)@\1${new_share_dir}@g" "$DESTDIR/usr/lib/ucaresystem/$s"
 done
 
 ## Update VERSION NUMBER
@@ -69,15 +81,21 @@ mv docs/ronn/*.8 "$DESTDIR/usr/share/man/man8"
 
 ## Systemd-inhibit
 mkdir -p "$DESTDIR/lib/systemd/system/"
+mkdir -p "$DESTDIR/usr/share/ucaresystem/"
 cp assets/ucaresystem-automation-cleanup.service "$DESTDIR/lib/systemd/system/"
-mkdir -p "$DESTDIR/usr/lib/ucaresystem/automation"
-cp assets/99-ucaresystem-temporary.pkla "$DESTDIR/usr/lib/ucaresystem/automation"
+cp assets/99-ucaresystem-temporary.pkla "$DESTDIR//usr/share/ucaresystem/"
+
+## Misc Files at /usr/share/ucaresystem/
+mkdir -p "$DESTDIR/usr/share/ucaresystem/"
+share_files=("eterm-background.png" "xterm-launcher")
+for s in "${share_files[@]}"; do
+  cp "assets/$s" "$DESTDIR/usr/share/ucaresystem/"
+done
 
 ## Banner
 ## https://boxes.thomasjensen.com/
 grep -v '^#' assets/banner.txt.in| boxes -d dog -a c -s 80X12 > assets/banner.txt
-mkdir -p "$DESTDIR/usr/lib/ucaresystem/support"
-mv assets/banner.txt "$DESTDIR/usr/lib/ucaresystem/support"
+cp assets/banner.txt "$DESTDIR/usr/share/ucaresystem/"
 
 ## Lines of code report
 cloc . --exclude-dir=.idea --quiet --report-file="$DESTDIR/usr/share/doc/ucaresystem/loc.txt"

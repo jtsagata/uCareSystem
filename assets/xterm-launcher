@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Eterm is ugly and still use the prehistoric X11 font system
+# But its the only that can do the job now.
+#
+# Kitty will have support for background image from version 0.17
+# But it is not released yet
+#
+# If you know an alternative drop a merge request
+# The ideal must:
+#   a) hide menubars etc...
+#   b) change the program icon,
+#   c) support background image
+#   d) No profiles, but controlled from command line
+#   e) use the GPU
+#   f) Package available from official repositories
+#   g) keep contents after ^C
+
+set -x
+if [[ -x  "$(command -v Eterm)" ]]; then
+
+  Eterm --name uCareSystem --pause --buttonbar 0 --scrollbar false \
+       -F -*-fixed-*-*-*-*-14-*-*-*-*-*-iso8859-1 \
+       --foreground-color 'Alice Blue' \
+       --font-fx none \
+       --background-pixmap /usr/share/ucaresystem/eterm-background.png \
+       --exec $*
+
+elif [[ -x "$(command -v kitty)" ]]; then
+
+  kitty --name=ucaresystem --title=uCareSystem -o font_size=11 \
+  -1 --instance-group=ucaresystem \
+  --wait-for-single-instance-window-close \
+  -o background='#112233' --hold --detach $*
+
+elif [[ -x "$(command -v gnome-terminal)" ]]; then
+  gnome-terminal --hide-menubar --title=uCareSystem --wait -- $*
+
+else
+  x-terminal-emulator -- $*
+fi
+
+exit
+

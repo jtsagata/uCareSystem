@@ -18,6 +18,8 @@
 
 # lib_dir will change to point at /usr/lib/ucaresystem during packaging
 lib_dir=$(dirname "$0")
+# shellcheck disable=SC2034
+share_dir="$(dirname "$0")/../assets"
 # shellcheck source=config
 source "${lib_dir}/config"
 trap trap_handler 1 2 3 6

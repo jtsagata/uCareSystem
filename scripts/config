@@ -17,7 +17,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#TODO: Write config file
+
+
 lib_dir=$(dirname "$0")
+share_dir="$(dirname "$0")/../assets"
+
 # shellcheck source=shflags
 source "${lib_dir}/shflags"
 
@@ -50,7 +55,7 @@ EXECUTABLES=(
   [UPDATE_TOOL]=/usr/bin/do-release-upgrade:optional
   [TIMESHIFT]=/usr/bin/timeshift:optional
   [TOPGRADE]="${HOME}/.cargo/bin/topgrade":optional
-  [X_TERMINAL]=/usr/bin/gnome-terminal:optional
+  [X_TERMINAL]=/usr/share/ucaresystem/xterm-launcher:optional
   [X_SUDO_RUNNER]=/usr/bin/pkexec:optional
 )
 
@@ -67,11 +72,11 @@ DEFAULT_VALUES=(
   [ENABLE_TOPGRADE]=false
   [CONFIG_FILE]=/etc/ucaresystem.conf
   [EXEC]=yes_opp
-  [X_TERMINAL_OPTIONS]="--hide-menubar --title='uCareSystem' --wait --"
-  [BANNER_FILE]="$(dirname "$0")/support/banner.txt"
+  [X_TERMINAL_OPTIONS]=""
+  [BANNER_FILE]="${share_dir}/banner.txt"
+  [BANNER_WAIT]=30
   [DISTRIBUTION_ID]="$(lsb_release --short --id)"
   [DISTRIBUTION_CODENAME]="$(lsb_release --codename --short)"
-
 )
 
 #
@@ -324,8 +329,12 @@ function common_cmd_options() {
   # shellcheck disable=SC2154
   # shellcheck disable=SC2034
   [[  "${FLAGS_dryrun}" == "${FLAGS_TRUE}" ]] && EXEC="no_opp"
+
   # shellcheck disable=SC2154
   [[ ! ${FLAGS_config} == "<file>" ]] && CONFIG_FILE="${FLAGS_config}"
+
+  # shellcheck disable=SC2154
+  [[  "${FLAGS_disable_timeshift}" == "${FLAGS_TRUE}" ]] && ENABLE_TIMESHIFT="false"
 
   # shellcheck disable=SC2154
   if [[ "${FLAGS_version}" == "${FLAGS_TRUE}" ]]; then
@@ -346,11 +355,14 @@ function common_cmd_options() {
 
 function setup_common_flags() {
   # Common Flags
-  DEFINE_boolean 'version' false 'Show program version' 'v'
   DEFINE_boolean 'dryrun' false 'Do not change anything in system' 'd'
+  DEFINE_boolean 'disable-timeshift' false 'Disable timeshift'
+
   DEFINE_string 'config' "<file>" 'Specify a config file'
-  DEFINE_boolean 'show-config' false 'Show configuration' 'c'
+  DEFINE_boolean 'show-config' false 'Show configuration'
   DEFINE_string 'config-sections' "all" 'Configuration sections to show'
+
+  DEFINE_boolean 'version' false 'Show program version' 'v'
 }
 
 

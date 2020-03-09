@@ -25,7 +25,7 @@ Depends: apt,
 Suggests: timeshift,
           systemd,
           eterm,
-          kitty
+          xfonts-100dpi
 Description: All-in-one System Update and maintenance tool
  This simple script will automatically refresh your packagelist,
  download and install software updates (if there are any), remove old

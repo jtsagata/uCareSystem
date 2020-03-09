@@ -17,19 +17,46 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# lib_dir will change to point at /usr/lib/ucaresystem during packaging
+lib_dir=$(dirname "$0")
+# shellcheck disable=SC2034
+share_dir="$(dirname "$0")/../assets"
+# shellcheck source=config
+source "${lib_dir}/config"
+trap trap_handler 1 2 3 6
 
-read -rp "Does it run Yes/No? " yn
+# shellcheck disable=SC2145
+function overwrite() { echo -e "\r\033[1A\033[0K$@"; }
 
-set -eu
-UCARE_VERSION="4.5.0"
-base_dir=$(dirname "$0")
-# shellcheck source=base
-source "${base_dir}"/config
-basic_setup
-
-function welcome_screen() {
-  clear
+function show_banner() {
   ! cat "$BANNER_FILE"
+
+  echo
+  echo
+  wait="${BANNER_WAIT}"
+  while [[ $wait != 0 ]]; do
+    overwrite "Press 'N' to cancel, press 'Y' or wait ${wait} secs to continue ..."
+    read -t 1 -n 1 -r yn
+    case $yn in
+    [Yy]* )
+      break
+    ;;
+    [nN]* )
+      clear
+      echo "Cancelled. Press any key to close window..."
+      exit
+    ;;
+    esac
+
+    wait="$((wait - 1))"
+  done
+
+  scrolines=900
+  while [[ scrolines != 0 ]]; do
+    echo "${GREEN}green${RED}redScrolline${NORMAL} ll adkjal d${scrolines}"
+    sleep 0.5
+    scrolines="$((scrolines - 1))"
+  done
 
   if [ "${ASK_CONFIRM}" == "true" ]; then
     ask_yesno "Are you sure ?" resp
@@ -39,12 +66,39 @@ function welcome_screen() {
   fi
 }
 
+DEFINE_string 'mode' "" 'Specify mode of operation (maintain,clean,info,dist-upgrade, timeshift)'
+DEFINE_boolean 'maintain' false 'Maintain system' 'm'
+DEFINE_boolean 'clean' false 'Reclaim some disk space' 'c'
+DEFINE_boolean 'sysinfo' false 'Get information about eol status' 's'
+DEFINE_boolean 'timeshift' false 'Make a snapshot with timeshift' 't'
+DEFINE_boolean 'dist-upgrade' false 'Update distribution'
+DEFINE_boolean 'banner' true 'Show banner'
+DEFINE_boolean 'ask-confirm' true 'Ask confirm'
+DEFINE_boolean 'wait-gui' false 'Wait to close the window'
 
+setup_common_flags
+FLAGS "$@" || exit $?
+eval set -- "${FLAGS_ARGV}"
 
-##
-## The main process starts here
-##
+common_cmd_options
+load_config_file
 
+declare extra_flags
+[[ -z $FLAGS_mode ]] && FLAGS_mode=$DEFAULT_MODE
+
+# shellcheck disable=SC2154
+[[ "${FLAGS_dryrun}" == "${FLAGS_TRUE}" ]] && extra_flags="${extra_flags} --dryrun"
+
+# shellcheck disable=SC2154
+[[ "${FLAGS_disable_timeshift}" == "${FLAGS_TRUE}" ]] && extra_flags="${extra_flags} --disable-timeshift"
+
+# Show the banner
+# shellcheck disable=SC2154
+[[ "${FLAGS_banner}" == "${FLAGS_TRUE}" ]] && show_banner
+
+echo "Request mode=${FLAGS_mode}, extra_flags=${extra_flags}"
+
+exit
 
 MODE="${DEFAULT_MODE}"
 UPGRADE_MODE="next"
@@ -52,49 +106,9 @@ SHOW_BANNER=true
 EXEC=""
 DO_WAIT=false
 
-ARGS=$(getopt -o hvdysmcwu: --long help,version,dryrun,yes,skip,maintain,clean,wait,upgrade: -- "$@")
-eval set -- "$ARGS"
-
-while true; do
-  case "$1" in
-  -d | --dryrun)
-    EXEC="echo"
-    shift
-    ;;
-  -y | --yes)
-    ASK_CONFIRM=false
-    shift
-    ;;
-  -s | --skip)
-    SHOW_BANNER=false
-    shift
-    ;;
-  -w | --wait)
-    DO_WAIT=true
-    shift
-    ;;
-  -m | --maintain)
-    MODE=maintain
-    shift
-    ;;
-  -c | --clean)
-    MODE=clean
-    shift
-    ;;
-  -u | --upgrade)
-    MODE=upgrade
-    UPGRADE_MODE="$2"
-    shift
-    shift
-    ;;
-  *) break ;;
-  esac
-done
-
 # --help and --version is not our worries
 # So must always check root privileges.
 check_root_priv
-
 
 if [ "$SHOW_BANNER" == true ]; then
   welcome_screen

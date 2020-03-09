@@ -9,21 +9,16 @@
 #
 #X_TERMINAL="what"
 #X_TERMINAL_OPTIONS="--empty--"
-
 #X_TERMINAL="kitty" #suggested
 #X_TERMINAL_OPTIONS="--name  ucaresystem --title uCareSystem --detach --hold "
-
-
 #X_TERMINAL="st"
 #X_TERMINAL_OPTIONS="-t uCareSystem"
-
 #X_TERMINAL="Eterm" #suggested
-#X_TERMINAL_OPTIONS="--name  uCareSystem --pause --finished-title 'uCareSystem is Done' --buttonbar 0  --scrollbar false --exec"
-
-
-#X_TERMINAL="xterm" #also uxterm (suggested)
+#X_TERMINAL_OPTIONS="--name uCareSystem --pause --buttonbar 0 --scrollbar false --background-pixmap assets/background.png --exec"
+#X_TERMINAL="terminology" #suggested
+#X_TERMINAL_OPTIONS="--title=uCareSystem  --icon-name=ucaresystem --background=assets/background-dark.png --exec"
+#X_TERMINAL="uxterm" #also uxterm
 #X_TERMINAL_OPTIONS="-name  ucaresystem -title uCareSystem -e"
-
 #X_TERMINAL="alacritty"
 #X_TERMINAL_OPTIONS="-t uCareSystem --hold -e"
 

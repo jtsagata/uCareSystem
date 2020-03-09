@@ -17,6 +17,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
+# This will just call the X/Wayland terminal
+# Why a separate program, you may ask
+# It's because this will be executed under pkexec and its authorized
+# Better authorize this to use the Graphics system that each terminal
+# This will help with WSL also.
+
 # lib_dir will change to point at /usr/lib/ucaresystem during packaging
 lib_dir=$(dirname "$0")
 # shellcheck source=config
@@ -34,5 +40,6 @@ load_config_file
 executable="${lib_dir}/ucaresystem-cli"
 
 # shellcheck disable=SC2086
-"${X_TERMINAL}" ${X_TERMINAL_OPTIONS} "${executable}"  $* --wait-gui &
+# shellcheck disable=SC2048
+"${X_TERMINAL}" ${X_TERMINAL_OPTIONS} "${executable}" $* --wait-gui
 exit
