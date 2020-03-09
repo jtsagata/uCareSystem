@@ -92,7 +92,8 @@ This is not perfect and you can override this.
 
 To restore the reboot functionality in case of an error remove the file 
 `'/etc/polkit-1/localauthority/90-mandatory.d/99-ucaresystem-temporary.pkla'`.
-A systemd service is provided to delete this file on reboot.
+
+A systemd service is provided to delete this file on reboot, but systemd is not a hard dependency. 
   
 ## Topgrade integration
 

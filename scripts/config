@@ -139,6 +139,10 @@ function check_reboot() {
 # Check if you can sudo
 #
 function check_root_priv() {
+  # Don't ask for root in dry run
+  # shellcheck disable=SC2154
+  [[ "${FLAGS_dryrun}" == "${FLAGS_TRUE}" ]] && return
+
   # Checking if the user has run the script with "sudo" or not
   if [[ $EUID -ne 0 ]]; then
     echo "${RED}${BOLD}Error: ${BOLDOFF} Application needs admin access.${BOLDOFF}" 1>&2
@@ -158,7 +162,7 @@ function disable_reboot() {
 
 function enable_reboot() {
   local dest="/etc/polkit-1/localauthority/90-mandatory.d/99-ucaresystem-temporary.pkla"
-  sudo rm "$dest"
+  [[ -f "${dest}" ]] &&  "${EXEC}" sudo rm "$dest"
 }
 
 #
@@ -277,7 +281,7 @@ function trap_handler() {
 
 
 #
-# Runner to support dry run
+# Runner(s) to support dry run
 #
 function no_opp() {
   echo + "$@"
@@ -288,11 +292,23 @@ function yes_opp() {
   "$@"
   { set +x; } 2>/dev/null
 }
-
 function run_opp() {
   #TODO: propagate $?
   "$@"
   return $?
+}
+
+#
+# Simulation message
+#
+function simulation_message {
+  # shellcheck disable=SC2154
+  # shellcheck disable=SC2034
+  if [[  "${FLAGS_dryrun}" == "${FLAGS_TRUE}" ]]; then
+    echo "${RED}NOTE${NORMAL}: This is only a simulation!"
+    echo "Nothing will changed in your system."
+    echo "ucaresystem may needs root privileges for real execution."
+  fi
 }
 
 #
