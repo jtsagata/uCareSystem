@@ -30,9 +30,6 @@ The command is copy the info to clipboard if you have `xclip` installed
 2. [Second Step]
 3. [and so on...]
 
-### Versions
-
-You can get this information from executing `ucaresystem --version`.
 
 ### Features:
 
