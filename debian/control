@@ -24,6 +24,7 @@ Depends: apt,
          ${misc:Depends}
 Suggests: timeshift,
           systemd,
+          xclip,
           eterm,
           xfonts-100dpi
 Description: All-in-one System Update and maintenance tool

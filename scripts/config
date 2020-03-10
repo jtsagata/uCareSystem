@@ -354,6 +354,8 @@ function close_window() {
 function show_config() {
   echo "${FLAGS_HELP}"
 
+  [[ $1 == a* ]]  && echo && "${LSB_RELEASE}" -a
+
   if [[ $1 == a* ]] || [[ $1 == s* ]]; then
     echo
     echo "*** Settings ***"
@@ -422,12 +424,20 @@ function common_cmd_options() {
     exit 0
   fi
 
-  #TODO: Hook for extension
-
   # shellcheck disable=SC2154
   if [[ "${FLAGS_show_config}" == "${FLAGS_TRUE}" ]]; then
     load_config_file
     show_config "${FLAGS_config_sections}"
+    exit 0
+  fi
+
+  # shellcheck disable=SC2154
+  if [[ "${FLAGS_copy_config}" == "${FLAGS_TRUE}" ]]; then
+    load_config_file
+    show_config "all"
+    if [[ -x "$(command -v clip)" ]]; then
+      (NO_COLOR=1 "$0" --show-config | xclip)
+    fi
     exit 0
   fi
 
@@ -443,6 +453,7 @@ function setup_common_flags() {
 
   DEFINE_string 'config' "<file>" 'Specify a config file'
   DEFINE_boolean 'show-config' false 'Show configuration'
+  DEFINE_boolean 'copy-config' false 'Copy config to clipboard'
   DEFINE_string 'config-sections' "all" 'Configuration sections to show'
 
   DEFINE_boolean 'version' false 'Show program version' 'v'

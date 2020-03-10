@@ -11,7 +11,9 @@ Put an `x` in all the boxes that apply:
 For more information, see the `CONTRIBUTING` guide.
 
 ### Linux Distribution
-[Please provide the output of the command: `lsb_release --all`]
+[Please provide the output of the command: `ucaresystem --copy-config`]
+
+The command is copy the info to clipboard if you have `xclip` installed
 
 ### Description
 [Description of the bug or feature]
