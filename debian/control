@@ -25,6 +25,7 @@ Depends: apt,
 Suggests: timeshift,
           systemd,
           xclip,
+          lolcat,
           eterm,
           xfonts-100dpi
 Description: All-in-one System Update and maintenance tool

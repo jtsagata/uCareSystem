@@ -26,7 +26,13 @@ source "${lib_dir}/config"
 trap trap_handler SIGHUP SIGINT SIGQUIT SIGABRT
 
 function show_banner() {
-  cat "$BANNER_FILE"
+  if [[ -z "$NO_COLOR" &&  -x "$(command -v lolcat)" && "${FLAGS_wait_gui}" == "0" ]]; then
+    # local rand=$RANDOM
+    lolcat --seed=19831 "$BANNER_FILE"
+    # echo "nice seed $RANDOM"
+  else
+    cat "$BANNER_FILE"
+  fi
   echo
   simulation_message
 
@@ -49,10 +55,7 @@ load_config_file
 
 declare extra_flags
 [[ -z $FLAGS_mode ]] && FLAGS_mode=$DEFAULT_MODE
-
-# shellcheck disable=SC2154
 [[ "${FLAGS_dryrun}" == "${FLAGS_TRUE}" ]] && extra_flags="${extra_flags} --dryrun"
-
 [[ "${FLAGS_disable_timeshift}" == "${FLAGS_TRUE}" ]] && extra_flags="${extra_flags} --disable-timeshift"
 
 # Show the banner

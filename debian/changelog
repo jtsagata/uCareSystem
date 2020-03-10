@@ -8,6 +8,7 @@ ucaresystem (4.5.0ubuntu1) UNRELEASED; urgency=medium
   * A nicer banner
   * Nicer "gui" experience
   * A neat configuration (with a background image) with Eterm if it's available
+  * lolcat integration (lol), not configurable atm
   * Test suite
 
  -- Ioannis Tsagatakis <tsagatakis@protonmail.com>  Sat, 07 Mar 2020 23:21:56 +0200
