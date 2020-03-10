@@ -1,6 +1,13 @@
 ucaresystem (4.5.0ubuntu1) UNRELEASED; urgency=medium
 
   * Flexible configuration system
+  * Smart command line option handling with shFlags
+  * Copy configuration to clipboard
+  * Add ability to inhibit reboot/shutdown
+  * A new HiDPI icon set
+  * A nicer banner
+  * Nicer "gui" experience
+  * A neat configuration (with a background image) with Eterm if it's available
   * Test suite
 
  -- Ioannis Tsagatakis <tsagatakis@protonmail.com>  Sat, 07 Mar 2020 23:21:56 +0200
