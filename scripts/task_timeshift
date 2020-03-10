@@ -17,7 +17,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>./>.
 
-set -eu
+# shellcheck disable=SC2154,SC2034
+
 ## Ensure this file can only be sourced once
 task_timeshift_loaded=${task_timeshift_loaded:-}
 if [[ -n ${task_timeshift_loaded} ]]; then
@@ -87,7 +88,6 @@ function enable_timesfit_q() {
       echo "Error: Bad Configuration timeshift is missing. Configuration key TIMESHIFT='$TIMESHIFT'"
       return
     fi
-    # shellcheck disable=SC2034
     _ret="yes"
     ;;
   *)

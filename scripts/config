@@ -17,9 +17,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# shellcheck disable=SC2154,SC2034
+# lib_dir will change to point at /usr/lib/ucaresystem during packaging
 lib_dir=$(dirname "$0")
 share_dir="$(dirname "$0")/../assets"
-
 # shellcheck source=shflags
 source "${lib_dir}/shflags"
 
@@ -101,7 +102,6 @@ function ask_yesno() {
     esac
   done
 
-  # shellcheck disable=SC2034
   _ret="$response"
 }
 
@@ -159,7 +159,7 @@ function disable_reboot() {
 
 function enable_reboot() {
   local dest="/etc/polkit-1/localauthority/90-mandatory.d/99-ucaresystem-temporary.pkla"
-  [[ -f "${dest}" ]] &&  "${EXEC}" sudo rm "$dest"
+  [[ -f "${dest}" ]] && "${EXEC}" sudo rm "$dest"
 }
 
 #
@@ -278,7 +278,6 @@ function trap_handler() {
   close_window "Trapped!" 1
 }
 
-
 #
 # Runner(s) to support dry run
 #
@@ -300,10 +299,8 @@ function run_opp() {
 #
 # Simulation message
 #
-function simulation_message {
-  # shellcheck disable=SC2154
-  # shellcheck disable=SC2034
-  if [[  "${FLAGS_dryrun}" == "${FLAGS_TRUE}" ]]; then
+function simulation_message() {
+  if [[ "${FLAGS_dryrun}" == "${FLAGS_TRUE}" ]]; then
     echo "${RED}NOTE${NORMAL}: This is only a simulation!"
     echo "    Nothing will changed in your system."
     echo "    ${GREEN}ucaresystem${NORMAL} may needs root privileges for real execution."
@@ -315,7 +312,7 @@ function simulation_message {
 # Timed messages
 # repeat_message var_name "The gun is loaded. Fire! in " 3
 function repeat_message() {
-  local -n  __resultvar=$1
+  local -n __resultvar=$1
   local message=${2:-}
   local timer=${3:-10}
   function overwrite() { echo -e "\r\033[1A\033[0K$*"; }
@@ -323,7 +320,6 @@ function repeat_message() {
   echo
   while [[ $timer != 0 ]]; do
     overwrite "$message ${timer} ..."
-    # shellcheck disable=SC2034
     read -t 1 -n 1 -r -s __resultvar
     [[ ! $? == 142 ]] && return
     timer="$((timer - 1))"
@@ -351,7 +347,7 @@ function close_window() {
 function show_config() {
   echo "${FLAGS_HELP}"
 
-  [[ $1 == a* ]]  && echo && "${LSB_RELEASE}" -a
+  [[ $1 == a* ]] && echo && "${LSB_RELEASE}" -a
 
   if [[ $1 == a* ]] || [[ $1 == s* ]]; then
     echo
@@ -399,36 +395,25 @@ function show_version() {
 #
 function common_cmd_options() {
 
-  # shellcheck disable=SC2154
   if [[ "${FLAGS_show_config}" == "${FLAGS_TRUE}" ]]; then
     load_config_file
   fi
 
-  # shellcheck disable=SC2154
-  # shellcheck disable=SC2034
-  [[  "${FLAGS_dryrun}" == "${FLAGS_TRUE}" ]] && EXEC="no_opp"
-
-  # shellcheck disable=SC2154
+  [[ "${FLAGS_dryrun}" == "${FLAGS_TRUE}" ]] && EXEC="no_opp"
   [[ ! ${FLAGS_config} == "<file>" ]] && CONFIG_FILE="${FLAGS_config}"
+  [[ "${FLAGS_disable_timeshift}" == "${FLAGS_TRUE}" ]] && ENABLE_TIMESHIFT="false"
 
-  # shellcheck disable=SC2154
-  # shellcheck disable=SC2034
-  [[  "${FLAGS_disable_timeshift}" == "${FLAGS_TRUE}" ]] && ENABLE_TIMESHIFT="false"
-
-  # shellcheck disable=SC2154
   if [[ "${FLAGS_version}" == "${FLAGS_TRUE}" ]]; then
     show_version
     exit 0
   fi
 
-  # shellcheck disable=SC2154
   if [[ "${FLAGS_show_config}" == "${FLAGS_TRUE}" ]]; then
     load_config_file
     show_config "${FLAGS_config_sections}"
     exit 0
   fi
 
-  # shellcheck disable=SC2154
   if [[ "${FLAGS_copy_config}" == "${FLAGS_TRUE}" ]]; then
     load_config_file
     show_config "all"
@@ -478,22 +463,19 @@ function setup_ucaresystem_flags() {
   setup_ucaresystem_cli_flags
 }
 
-
 setup_colors
 # Setup HELP SYSTEM
-# shellcheck disable=SC2034
 read -r -d '' FLAGS_HELP <<EOHELP
 ${GREEN}ucaresystem${NORMAL} : (config) All-in-one system update and maintenance tool
   ucaresystem version ${UCARE_VERSION}.
 EOHELP
-# shellcheck disable=SC2034
 FLAGS_FOOTER="Type 'man ucaresystem' for more info."
 
 #
 # Standalone
 #
 if [[ "${FUNCNAME[0]}" != source ]]; then
-read -r -d '' FLAGS_HELP <<EOHELP
+  read -r -d '' FLAGS_HELP <<EOHELP
 ${GREEN}ucaresystem${NORMAL} : (config) All-in-one system update and maintenance tool
   Displays the configuration values. No options
   ucaresystem version ${UCARE_VERSION}.

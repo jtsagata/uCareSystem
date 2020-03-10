@@ -17,6 +17,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# shellcheck disable=SC2154,SC2034
+
 # TODO: Check return status of all commands
 # TODO: Use linux mint tool
 # TODO: Use topgrade
@@ -33,7 +35,6 @@
 
 # TODO: never use apt
 
-set -eu
 ## Ensure this file can only be sourced once
 maintain_loaded=${maintain_loaded:-}
 if [[ -n ${maintain_loaded} ]]; then

@@ -17,7 +17,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set -eu
+# shellcheck disable=SC2154,SC2034
+
 ## Ensure this file can only be sourced once
 cleanup_loaded=${cleanup_loaded:-}
 if [[ -n ${cleanup_loaded} ]]; then

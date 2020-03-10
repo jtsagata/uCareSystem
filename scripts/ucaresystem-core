@@ -17,6 +17,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# shellcheck disable=SC2154,SC2034
+
 if [[ "$(basename "$0")" == *"core"* ]]; then
   echo "Warning: command name is now just 'ucaresystem' ucaresystem-core will be removed in next release."
 fi
@@ -28,5 +30,5 @@ while [[ $wait != 0 ]]; do
   wait="$(( wait - 1 ))"
 done
 
-$(dirname "$0")/ucaresystem "$@"
+"$(dirname "$0")/ucaresystem" "$@"
 

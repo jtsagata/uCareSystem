@@ -17,9 +17,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# shellcheck disable=SC2154,SC2034
 # lib_dir will change to point at /usr/lib/ucaresystem during packaging
 lib_dir=$(dirname "$0")
-# shellcheck disable=SC2034
 share_dir="$(dirname "$0")/../assets"
 # shellcheck source=config
 source "${lib_dir}/config"
@@ -29,12 +29,14 @@ function show_banner() {
   cat "$BANNER_FILE"
   echo
   simulation_message
-  repeat_message keypres "Press 'Y' to accept, or any key to cancel. Fire! in " "${BANNER_WAIT}"
-  # shellcheck disable=SC2154
-  case $keypres in
-    yY ) return ;;
-  esac
-  close_window "Canceled!" 1
+
+  if [[ "${FLAGS_ask_confirm}" == "${FLAGS_TRUE}" ]]; then
+    repeat_message keypres "Press 'Y' to accept, or any key to cancel. Fire! in " "${BANNER_WAIT}"
+    case $keypres in
+    yY) return ;;
+    esac
+    close_window "Canceled!" 1
+  fi
 }
 
 setup_ucaresystem_cli_flags
@@ -51,7 +53,6 @@ declare extra_flags
 # shellcheck disable=SC2154
 [[ "${FLAGS_dryrun}" == "${FLAGS_TRUE}" ]] && extra_flags="${extra_flags} --dryrun"
 
-# shellcheck disable=SC2154
 [[ "${FLAGS_disable_timeshift}" == "${FLAGS_TRUE}" ]] && extra_flags="${extra_flags} --disable-timeshift"
 
 # Show the banner
