@@ -9,6 +9,7 @@ cd "$(git rev-parse --show-toplevel)" || exit
   cloc . --vcs=git --quiet --md  --by-percent c . | tail --lines +4
   printf "## Relative to total lines\n"
   cloc . --vcs=git --quiet --md  --by-percent cmb . | tail --lines +4
+  printf "\n **Note**: Comments include also shelllcheck directives. "
 } > docs/LOC.md
 
 git add docs/LOC.md
