@@ -19,16 +19,35 @@
 
 # shellcheck disable=SC2154,SC2034
 
-if [[ "$(basename "$0")" == *"core"* ]]; then
-  echo "Warning: command name is now just 'ucaresystem' ucaresystem-core will be removed in next release."
+if [[ ! "$1" == "--cron" ]]; then
+   echo "Warning: command name is now just 'ucaresystem' ucaresystem-core will be removed in next release."
+   echo
+
+  function overwrite() { echo -e "\r\033[1A\033[0K$*"; }
+  timer=60
+  echo
+  while [[ $timer != 0 ]]; do
+    overwrite "Wait ${timer} secs, or cancel and type the new command ..."
+    sleep 1
+    timer="$((timer - 1))"
+  done
+  overwrite " "
+
+  "$(dirname "$0")/ucaresystem" "$@"
+  exit
 fi
 
-wait=10
-while [[ $wait != 0 ]]; do
-  echo "Wait ${wait} secs, or cancel and type the new command ..."
-  sleep 1
-  wait="$(( wait - 1 ))"
-done
+if [[ $EUID -ne 0 ]] ; then
+    echo "ucaresystem-core must be run as root or with sudo. Now I will just exit..." 1>&2
+    exit 1
+fi
 
-"$(dirname "$0")/ucaresystem" "$@"
-
+set -x
+# TODO: Logging framework
+{
+  sudo apt update
+  sudo apt full-upgrade -y
+  sudo apt-get -y --purge autoremove
+  sudo deborphan -n --find-config | xargs sudo apt-get -y --purge autoremove;
+  sudo apt-get -y autoclean; sudo apt-get -y clean
+} > ucaresystem.log

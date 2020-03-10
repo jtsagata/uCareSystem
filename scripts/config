@@ -321,9 +321,10 @@ function repeat_message() {
   while [[ $timer != 0 ]]; do
     overwrite "$message ${timer} ..."
     read -t 1 -n 1 -r -s __resultvar
-    [[ ! $? == 142 ]] && return
+    [[ ! $? == 142 ]] && overwrite " " && return
     timer="$((timer - 1))"
   done
+  overwrite " "
 }
 
 function close_window() {
