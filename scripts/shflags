@@ -1165,6 +1165,10 @@ flags_help() {
     echo "${FLAGS_FOOTER}" >&2
   fi
 
+  # Hack to show help
+  FLAGS_wait_gui=0
+  close_window
+
   unset flags_boolStr_ flags_default_ flags_defaultStr_ flags_emptyStr_ \
       flags_flagStr_ flags_help_ flags_helpStr flags_helpStrLen flags_name_ \
       flags_columns_ flags_short_ flags_type_ flags_usName_

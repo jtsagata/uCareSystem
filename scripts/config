@@ -273,10 +273,12 @@ function trap_handler() {
   [[ -f "${dest}" ]] && sudo rm "$dest"
 
   header_text "Program interrupt."
-  echo "  The program have stop before finished. Your system maybe in an incomplete state."
+  echo "  The program have stop before finished."
+  echo "  Your system maybe in an incomplete state."
   echo "  You may need to do:"
   echo "     sudo apt update && sudo apt install -f"
-  exit 1
+
+  close_window "Trapped!" 1
 }
 
 
@@ -306,9 +308,44 @@ function simulation_message {
   # shellcheck disable=SC2034
   if [[  "${FLAGS_dryrun}" == "${FLAGS_TRUE}" ]]; then
     echo "${RED}NOTE${NORMAL}: This is only a simulation!"
-    echo "Nothing will changed in your system."
-    echo "ucaresystem may needs root privileges for real execution."
+    echo "    Nothing will changed in your system."
+    echo "    ${GREEN}ucaresystem${NORMAL} may needs root privileges for real execution."
+    echo
   fi
+}
+
+#
+# Timed messages
+# repeat_message var_name "The gun is loaded. Fire! in " 3
+function repeat_message() {
+  local -n  __resultvar=$1
+  local message=${2:-}
+  local timer=${3:-10}
+  function overwrite() { echo -e "\r\033[1A\033[0K$*"; }
+
+  echo
+  while [[ $timer != 0 ]]; do
+    overwrite "$message ${timer} ..."
+    # shellcheck disable=SC2034
+    read -t 1 -n 1 -r -s __resultvar
+    [[ ! $? == 142 ]] && return
+    timer="$((timer - 1))"
+  done
+}
+
+function close_window() {
+  reason=${1:-Done}
+  status=${2:0}
+  header_text "$reason"
+
+  # Eterm have a nice hold logic
+  # shellcheck disable=SC2086
+  [[ "$TERM" == "Eterm" ]] && exit $status
+
+  # shellcheck disable=SC2154
+  [[ "${FLAGS_wait_gui}" == "${FLAGS_TRUE}" ]] && repeat_message dummy "Press any key to close window. Auto close in " 120
+  # shellcheck disable=SC2086
+  exit $status
 }
 
 #
@@ -396,6 +433,9 @@ function common_cmd_options() {
 
 }
 
+#
+# Flags for all suite
+#
 function setup_common_flags() {
   # Common Flags
   DEFINE_boolean 'dryrun' false 'Do not change anything in system' 'd'
@@ -406,6 +446,28 @@ function setup_common_flags() {
   DEFINE_string 'config-sections' "all" 'Configuration sections to show'
 
   DEFINE_boolean 'version' false 'Show program version' 'v'
+}
+#
+# Flags for 'ucaresystem-cli'
+#
+function setup_ucaresystem_cli_flags() {
+  DEFINE_string 'mode' "" 'Specify mode of operation (maintain,clean,info,dist-upgrade, timeshift)'
+  DEFINE_boolean 'maintain' false 'Maintain system' 'm'
+  DEFINE_boolean 'clean' false 'Reclaim some disk space' 'c'
+  DEFINE_boolean 'sysinfo' false 'Get information about eol status' 's'
+  DEFINE_boolean 'timeshift' false 'Make a snapshot with timeshift' 't'
+  DEFINE_boolean 'dist-upgrade' false 'Update distribution'
+  DEFINE_boolean 'banner' true 'Show banner'
+  DEFINE_boolean 'ask-confirm' true 'Ask confirm'
+  DEFINE_boolean 'wait-gui' false 'Wait to close the window'
+}
+
+#
+# Flags for 'ucaresystem'
+#
+function setup_ucaresystem_flags() {
+  DEFINE_string 'runner' "cli" 'Specify which version (cli,gui)'
+  setup_ucaresystem_cli_flags
 }
 
 

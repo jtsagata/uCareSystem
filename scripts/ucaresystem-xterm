@@ -27,19 +27,10 @@
 lib_dir=$(dirname "$0")
 # shellcheck source=config
 source "${lib_dir}/config"
-trap trap_handler 1 2 3 6
 
-# parse the command-line
-setup_common_flags
-FLAGS "$@" || exit $?
-eval set -- "${FLAGS_ARGV}"
-
-common_cmd_options
 load_config_file
 
 executable="${lib_dir}/ucaresystem-cli"
 
-# shellcheck disable=SC2086
-# shellcheck disable=SC2048
-"${X_TERMINAL}" ${X_TERMINAL_OPTIONS} "${executable}" $* --wait-gui
+"${X_TERMINAL}" "${X_TERMINAL_OPTIONS}" "${executable}" "$@" --wait-gui
 exit

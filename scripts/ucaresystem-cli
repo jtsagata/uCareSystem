@@ -23,59 +23,21 @@ lib_dir=$(dirname "$0")
 share_dir="$(dirname "$0")/../assets"
 # shellcheck source=config
 source "${lib_dir}/config"
-trap trap_handler 1 2 3 6
-
-# shellcheck disable=SC2145
-function overwrite() { echo -e "\r\033[1A\033[0K$@"; }
+trap trap_handler SIGHUP SIGINT SIGQUIT SIGABRT
 
 function show_banner() {
-  ! cat "$BANNER_FILE"
-
+  cat "$BANNER_FILE"
   echo
-  echo
-  wait="${BANNER_WAIT}"
-  while [[ $wait != 0 ]]; do
-    overwrite "Press 'N' to cancel, press 'Y' or wait ${wait} secs to continue ..."
-    read -t 1 -n 1 -r yn
-    case $yn in
-    [Yy]* )
-      break
-    ;;
-    [nN]* )
-      clear
-      echo "Cancelled. Press any key to close window..."
-      exit
-    ;;
-    esac
-
-    wait="$((wait - 1))"
-  done
-
-  scrolines=900
-  while [[ scrolines != 0 ]]; do
-    echo "${GREEN}green${RED}redScrolline${NORMAL} ll adkjal d${scrolines}"
-    sleep 0.5
-    scrolines="$((scrolines - 1))"
-  done
-
-  if [ "${ASK_CONFIRM}" == "true" ]; then
-    ask_yesno "Are you sure ?" resp
-    if [[ "${resp}" == "no" ]]; then
-      exit 1
-    fi
-  fi
+  simulation_message
+  repeat_message keypres "Press 'Y' to accept, or any key to cancel. Fire! in " "${BANNER_WAIT}"
+  # shellcheck disable=SC2154
+  case $keypres in
+    yY ) return ;;
+  esac
+  close_window "Canceled!" 1
 }
 
-DEFINE_string 'mode' "" 'Specify mode of operation (maintain,clean,info,dist-upgrade, timeshift)'
-DEFINE_boolean 'maintain' false 'Maintain system' 'm'
-DEFINE_boolean 'clean' false 'Reclaim some disk space' 'c'
-DEFINE_boolean 'sysinfo' false 'Get information about eol status' 's'
-DEFINE_boolean 'timeshift' false 'Make a snapshot with timeshift' 't'
-DEFINE_boolean 'dist-upgrade' false 'Update distribution'
-DEFINE_boolean 'banner' true 'Show banner'
-DEFINE_boolean 'ask-confirm' true 'Ask confirm'
-DEFINE_boolean 'wait-gui' false 'Wait to close the window'
-
+setup_ucaresystem_cli_flags
 setup_common_flags
 FLAGS "$@" || exit $?
 eval set -- "${FLAGS_ARGV}"

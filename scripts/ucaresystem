@@ -22,11 +22,23 @@ lib_dir=$(dirname "$0")
 share_dir="$(dirname "$0")/../assets"
 # shellcheck source=config
 source "${lib_dir}/config"
-trap trap_handler 1 2 3 6
 
-DEFINE_string 'runner' "cli" 'Specify which version (cli,gui)'
+# Flags the already proceed and must be removed from the runner (include short versions also)
+own_flags=("--runner=")
+# Keep a copy of the arguments,
+OLD_ARGS=("$@")
+# ... and remove those flags
+# https://stackoverflow.com/questions/16860877/remove-an-element-from-a-bash-array
+for target in "${own_flags[@]}"; do
+  for i in "${!OLD_ARGS[@]}"; do
+    if [[ ${OLD_ARGS[i]} =~ $target ]]; then
+      unset 'OLD_ARGS[i]'
+    fi
+  done
+done
 
 # parse the command-line
+setup_ucaresystem_flags
 setup_common_flags
 FLAGS "$@" || exit $?
 eval set -- "${FLAGS_ARGV}"
@@ -34,20 +46,18 @@ eval set -- "${FLAGS_ARGV}"
 common_cmd_options
 load_config_file
 
+# Decide if you have to use some special runner
+# gui versions needs one
 declare -A use_runners
-declare -A use_dispatch
-
 use_runners=([cli]="run_opp" [gui]="${X_SUDO_RUNNER}" [xterm]="${X_SUDO_RUNNER}")
+
+# Map options to executables
+declare -A use_dispatch
 use_dispatch=([cli]="cli" [gui]="xterm" [xterm]="xterm")
 
 runner=${use_runners[${FLAGS_runner}]}
-if [[ -z $runner ]]; then
-  echo "${RED}Error${NORMAL}: Bad runner option '${FLAGS_runner}'."
-  exit 2
-fi
-
 dispatch=${use_dispatch[${FLAGS_runner}]}
 executable="${lib_dir}/ucaresystem-${dispatch}"
 
-"$runner" "$executable" "$*"
+"$runner" "$executable" "${OLD_ARGS[@]}"
 exit $?

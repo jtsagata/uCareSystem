@@ -16,6 +16,7 @@
 #   f) Package available from official repositories
 #   g) keep contents after ^C
 
+# TODO: remove holds (not need it anymore...)
 set -x
 if [[ -x  "$(command -v Eterm)" ]]; then
 
