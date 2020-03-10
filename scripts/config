@@ -17,9 +17,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#TODO: Write config file
-
-
 lib_dir=$(dirname "$0")
 share_dir="$(dirname "$0")/../assets"
 

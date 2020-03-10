@@ -1,6 +1,6 @@
 #!/bin/bash
 set -ex
-dir_name="$(dirname "$0")/.."
+top_dir="$(git rev-parse --show-toplevel)"
 
 DESTDIR=${DESTDIR:=debian/ucaresystem}
 rm -rf "$DESTDIR"
@@ -9,14 +9,12 @@ rm -rf "$DESTDIR"
 main_scripts=("remove-old-kernels" "ucaresystem" "ucaresystem-core")
 mkdir -p "$DESTDIR/usr/bin"
 for s in "${main_scripts[@]}"; do
-  cp "${dir_name}/scripts/$s" "$DESTDIR/usr/bin/"
+  cp "${top_dir}/scripts/$s" "$DESTDIR/usr/bin/"
 
   # Fix library paths
-
   # shellcheck disable=SC2016
   new_lib_dir='"$(realpath "$(dirname "${BASH_SOURCE[0]}")/../lib/ucaresystem")"'
   sed -ri "s@^(lib_dir=)(.*)@\1${new_lib_dir}@g" "$DESTDIR/usr/bin/$s"
-
   # shellcheck disable=SC2016
   new_share_dir='"$(realpath "$(dirname "${BASH_SOURCE[0]}")/../share/ucaresystem")"'
   sed -ri "s@^(share_dir=)(.*)@\1${new_share_dir}@g" "$DESTDIR/usr/bin/$s"
@@ -26,14 +24,12 @@ done
 libraries=("config" "ucaresystem-cli" "ucaresystem-xterm" "task_cleanup" "task_check_eol" "task_maintain" "task_timeshift" "shflags")
 mkdir -p "$DESTDIR/usr/lib/ucaresystem"
 for s in "${libraries[@]}"; do
-  cp "${dir_name}/scripts/$s" "$DESTDIR/usr/lib/ucaresystem"
+  cp "${top_dir}/scripts/$s" "$DESTDIR/usr/lib/ucaresystem"
 
   # Fix library paths
-
   # shellcheck disable=SC2016
   new_lib_dir='"$(realpath "$(dirname "${BASH_SOURCE[0]}")")"'
   sed -ri "s@^(lib_dir=)(.*)@\1${new_lib_dir}@g" "$DESTDIR/usr/lib/ucaresystem/$s"
-
   # shellcheck disable=SC2016
   new_share_dir='"$(realpath "$(dirname "${BASH_SOURCE[0]}")/../../share/ucaresystem")"'
   sed -ri "s@^(share_dir=)(.*)@\1${new_share_dir}@g" "$DESTDIR/usr/lib/ucaresystem/$s"
@@ -98,5 +94,5 @@ grep -v '^#' assets/banner.txt.in| boxes -d dog -a c -s 80X12 > assets/banner.tx
 cp assets/banner.txt "$DESTDIR/usr/share/ucaresystem/"
 
 ## Lines of code report
-cloc . --exclude-dir=.idea --quiet --report-file="$DESTDIR/usr/share/doc/ucaresystem/loc.txt"
+cloc . --vcs=git --quiet --report-file="$DESTDIR/usr/share/doc/ucaresystem/loc.txt"
 sed -i '1d' "$DESTDIR/usr/share/doc/ucaresystem/loc.txt"
